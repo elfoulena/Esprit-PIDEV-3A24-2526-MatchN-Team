@@ -1,0 +1,438 @@
+{# templates/security/login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body_class %}no-nav{% endblock %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block stylesheets %}
+<style>
+    * { box-sizing: border-box; }
+
+    .login-page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* ---- Panneau gauche ---- */
+    .login-left {
+        background: #1a1a1a;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .login-left::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        left: -80px;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: rgba(29,158,117,0.12);
+    }
+    .login-left::after {
+        content: '';
+        position: absolute;
+        bottom: -60px;
+        right: -60px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: rgba(29,158,117,0.08);
+    }
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }
+    .brand-logo {
+        width: 36px;
+        height: 36px;
+        background: #1d9e75;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        font-family: Georgia, serif;
+    }
+    .brand-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: #fff;
+        letter-spacing: 0.3px;
+    }
+    .left-content {
+        position: relative;
+        z-index: 1;
+    }
+    .left-title {
+        font-size: 36px;
+        font-weight: 500;
+        color: #fff;
+        font-family: Georgia, serif;
+        line-height: 1.3;
+        margin: 0 0 1rem;
+    }
+    .left-title span { color: #1d9e75; }
+    .left-sub {
+        font-size: 14px;
+        color: #888;
+        line-height: 1.7;
+        margin: 0 0 2.5rem;
+    }
+    .left-features { list-style: none; padding: 0; margin: 0; }
+    .left-features li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #aaa;
+        margin-bottom: 12px;
+    }
+    .feature-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #1d9e75;
+        flex-shrink: 0;
+    }
+    .left-footer {
+        position: relative;
+        z-index: 1;
+        font-size: 12px;
+        color: #555;
+    }
+
+    /* ---- Panneau droit ---- */
+    .login-right {
+        background: #f5f4f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+    }
+    .login-form-wrap {
+        width: 100%;
+        max-width: 380px;
+    }
+    .form-header { margin-bottom: 2rem; }
+    .form-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #1a1a1a;
+        font-family: Georgia, serif;
+        margin: 0 0 6px;
+    }
+    .form-sub {
+        font-size: 13px;
+        color: #888;
+        margin: 0;
+    }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #444;
+        margin-bottom: 5px;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 0.5px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #1a1a1a;
+        background: #fff;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        font-family: inherit;
+    }
+    .form-group input:focus {
+        outline: none;
+        border-color: #1d9e75;
+        box-shadow: 0 0 0 3px rgba(29,158,117,0.1);
+    }
+
+    .form-options {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        font-size: 13px;
+    }
+    .remember-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #555;
+        cursor: pointer;
+    }
+    .remember-label input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        accent-color: #1d9e75;
+        cursor: pointer;
+    }
+    .forgot-link {
+        color: #1d9e75;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: #1a1a1a;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+        font-family: inherit;
+        letter-spacing: 0.2px;
+    }
+    .btn-login:hover { background: #333; }
+    .btn-login:active { transform: scale(0.99); }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 1.5rem 0;
+        font-size: 12px;
+        color: #bbb;
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 0.5px;
+        background: #ddd;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 11px;
+        background: #fff;
+        color: #1a1a1a;
+        border: 0.5px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        transition: background 0.15s, border-color 0.15s;
+        font-family: inherit;
+    }
+    .btn-register:hover {
+        background: #f0f0f0;
+        border-color: #bbb;
+    }
+
+    .alert-error {
+        background: #fcebeb;
+        border: 0.5px solid #f09595;
+        color: #791f1f;
+        border-radius: 8px;
+        padding: 11px 14px;
+        font-size: 13px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .alert-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #a32d2d;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .alert-success {
+        background: #eaf3de;
+        border: 0.5px solid #c0dd97;
+        color: #3b6d11;
+        border-radius: 8px;
+        padding: 11px 14px;
+        font-size: 13px;
+        margin-bottom: 1.5rem;
+    }
+
+    .role-badges {
+        display: flex;
+        gap: 6px;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    .role-badge {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 0.5px solid #ddd;
+        color: #888;
+        background: #fff;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+        .login-page { grid-template-columns: 1fr; }
+        .login-left { display: none; }
+        .login-right { padding: 2rem 1.25rem; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="login-page">
+
+    {# ---- Panneau gauche : branding ---- #}
+    <div class="login-left">
+        <div class="brand">
+            <div class="brand-logo">RH</div>
+            <span class="brand-name">MatchNTeam</span>
+        </div>
+
+        <div class="left-content">
+            <h1 class="left-title">
+                Gérez vos équipes<br>
+                avec <span>efficacité</span>
+            </h1>
+            <p class="left-sub">
+                Plateforme complète de gestion des ressources humaines.<br>
+                Employés, freelancers et administrateurs réunis.
+            </p>
+            <ul class="left-features">
+                <li>
+                    <span class="feature-dot"></span>
+                    Gestion des employés et contrats
+                </li>
+                <li>
+                    <span class="feature-dot"></span>
+                    Espace freelancer avec profil de compétences
+                </li>
+                <li>
+                    <span class="feature-dot"></span>
+                    Tableau de bord administrateur complet
+                </li>
+                <li>
+                    <span class="feature-dot"></span>
+                    Sécurité et vérification par email
+                </li>
+            </ul>
+        </div>
+
+        <div class="left-footer">
+            &copy; {{ "now"|date("Y") }} MatchNTeam — Esprit PIDEV
+        </div>
+    </div>
+
+    {# ---- Panneau droit : formulaire ---- #}
+    <div class="login-right">
+        <div class="login-form-wrap">
+
+            <div class="form-header">
+                <h2 class="form-title">Bon retour</h2>
+                <p class="form-sub">Connectez-vous à votre espace</p>
+            </div>
+
+            {# Message d'erreur #}
+            {% if error %}
+                <div class="alert-error">
+                    <span class="alert-icon">!</span>
+                    <span>{{ error.messageKey | trans(error.messageData, 'security') }}</span>
+                </div>
+            {% endif %}
+
+            {# Flash messages #}
+            {% for msg in app.flashes('success') %}
+                <div class="alert-success">{{ msg }}</div>
+            {% endfor %}
+
+            {# Formulaire — les noms _username, _password et _csrf_token
+               sont obligatoires pour Symfony Security #}
+            <form method="post" action="{{ path('app_login') }}">
+
+                <div class="form-group">
+                    <label for="email">Adresse email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="_username"
+                        value="{{ last_username }}"
+                        placeholder="votre@email.com"
+                        autocomplete="email"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="_password"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-label">
+                        <input type="checkbox" name="_remember_me">
+                        Se souvenir de moi
+                    </label>
+                    <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+                </div>
+
+                {# Token CSRF — protection contre les attaques #}
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button type="submit" class="btn-login">
+                    Se connecter
+                </button>
+
+            </form>
+
+            <div class="divider">ou</div>
+
+            <a href="{{ path('app_register') }}" class="btn-register">
+                Créer un compte freelancer
+            </a>
+
+            <div class="role-badges">
+                <span class="role-badge">Admin RH</span>
+                <span class="role-badge">Employé</span>
+                <span class="role-badge">Freelancer</span>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

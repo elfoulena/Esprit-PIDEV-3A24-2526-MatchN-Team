@@ -1,0 +1,393 @@
+{# employee/partials/_sidebar.html.twig #}
+
+{# Define current route for active state: set app.request.attributes.get('_route') #}
+{% set current_route = app.request.attributes.get('_route') %}
+
+<aside class="sidebar">
+
+    {# ─── LOGO / USER IDENTITY ─── #}
+    <div class="sidebar-top">
+        <div class="sidebar-brand">
+            <div class="brand-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-role">EMPLOYÉ</div>
+                <div class="brand-subtitle">Espace Employé</div>
+            </div>
+        </div>
+
+        {# User card #}
+        {% if app.user %}
+        <div class="sidebar-user-card">
+            <div class="user-avatar-wrap">
+                <div class="user-avatar">
+                    {{ app.user.prenom[0]|upper }}{{ app.user.nom[0]|upper }}
+                </div>
+                <span class="user-status-dot"></span>
+            </div>
+            <div class="user-info">
+                <div class="user-name">{{ app.user.prenom }} {{ app.user.nom }}</div>
+                <div class="user-role">{{ app.user.poste ?? 'Développeur' }}</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="sidebar-user-card">
+            <div class="user-avatar-wrap">
+                <div class="user-avatar">?</div>
+                <span class="user-status-dot" style="background: #64748b;"></span>
+            </div>
+            <div class="user-info">
+                <div class="user-name">Invité</div>
+                <div class="user-role">Non connecté</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ─── NAVIGATION ─── #}
+    <nav class="sidebar-nav">
+
+        {# PRINCIPAL #}
+        <div class="nav-section">
+            <span class="nav-section-label">PRINCIPAL</span>
+            <a href="{{ path('app_dashboard') }}"
+               class="nav-link {{ app.request.get('_route') == 'app_dashboard' ? 'active' : '' }}">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                </span>
+                <span>Tableau de Bord</span>
+            </a>
+        </div>
+
+        {# MON TRAVAIL #}
+        <div class="nav-section">
+            <span class="nav-section-label">MON TRAVAIL</span>
+            <a href="#"
+               class="nav-link">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </span>
+                <span>Mes Tâches</span>
+                {% if taskCount is defined and taskCount > 0 %}
+                    <span class="nav-badge">{{ taskCount }}</span>
+                {% endif %}
+            </a>
+            <a href="#"
+               class="nav-link">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </span>
+                <span>Mes Projets</span>
+            </a>
+        </div>
+
+        {# ÉQUIPES #}
+        <div class="nav-section">
+            <span class="nav-section-label">ÉQUIPES</span>
+            <a href="#"
+               class="nav-link">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <span>Mon Équipe</span>
+            </a>
+            <a href="#"
+               class="nav-link nav-link-heart">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </span>
+                <span>Rejoindre une équipe</span>
+            </a>
+        </div>
+
+        {# COMMUNICATION #}
+        <div class="nav-section">
+            <span class="nav-section-label">COMMUNICATION</span>
+            <a href="#"
+               class="nav-link">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </span>
+                <span>Mes Demandes</span>
+                {% if pendingCount is defined and pendingCount > 0 %}
+                    <span class="nav-badge nav-badge-warning">{{ pendingCount }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ path('app_evenement_index') }}"
+               class="nav-link {{ app.request.get('_route') starts with 'app_evenement' ? 'active' : '' }}">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </span>
+                <span>Événements</span>
+            </a>
+            <a href="#"
+               class="nav-link">
+                <span class="nav-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </span>
+                <span>Chat équipe</span>
+            </a>
+        </div>
+
+    </nav>
+
+    {# ─── FOOTER ─── #}
+    <div class="sidebar-footer">
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            <span>Connecté</span>
+        </div>
+        <a href="#" class="logout-btn" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </a>
+    </div>
+
+</aside>
+
+<style>
+/* ===== SIDEBAR STYLES ===== */
+.sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+/* Top brand area */
+.sidebar-top {
+    padding: 24px 16px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.brand-avatar {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+.brand-role {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1.5px;
+}
+.brand-subtitle {
+    font-size: 11px;
+    color: var(--text-sidebar);
+    margin-top: 1px;
+}
+
+/* User card */
+.sidebar-user-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.07);
+}
+.user-avatar-wrap { position: relative; flex-shrink: 0; }
+.user-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent-blue), #60a5fa);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+}
+.user-status-dot {
+    position: absolute; bottom: 0; right: 0;
+    width: 9px; height: 9px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    border: 2px solid var(--sidebar-bg);
+}
+.user-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.user-role {
+    font-size: 11px;
+    color: var(--text-sidebar);
+    margin-top: 1px;
+}
+
+/* Navigation */
+.sidebar-nav {
+    flex: 1;
+    padding: 12px 0;
+}
+.nav-section {
+    margin-bottom: 4px;
+}
+.nav-section-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: rgba(148,163,184,0.5);
+    padding: 12px 20px 4px;
+    text-transform: uppercase;
+}
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px 9px 20px;
+    margin: 1px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-sidebar);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all var(--transition);
+    position: relative;
+}
+.nav-link:hover {
+    background: var(--sidebar-hover);
+    color: #e2e8f0;
+}
+.nav-link.active {
+    background: var(--sidebar-active-bg);
+    color: #60a5fa;
+}
+.nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 60%;
+    background: var(--accent-blue);
+    border-radius: 0 3px 3px 0;
+}
+.nav-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 20px;
+}
+.nav-link-heart.active { color: #f472b6; }
+.nav-link-heart.active::before { background: #f472b6; }
+
+/* Badge */
+.nav-badge {
+    margin-left: auto;
+    background: var(--accent-blue);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    min-width: 20px;
+    text-align: center;
+}
+.nav-badge-warning { background: var(--accent-orange); }
+
+/* Footer */
+.sidebar-footer {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.footer-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text-sidebar);
+}
+.status-dot {
+    width: 8px; height: 8px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+.logout-btn {
+    color: var(--text-sidebar);
+    display: flex;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all var(--transition);
+}
+.logout-btn:hover {
+    background: rgba(239,68,68,0.15);
+    color: var(--accent-red);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .sidebar { 
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease; 
+    }
+    .sidebar.open { transform: translateX(0); }
+}
+</style>

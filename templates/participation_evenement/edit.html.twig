@@ -1,0 +1,13 @@
+{% extends 'back/base_employee.html.twig' %}
+
+{% block title %}Edit ParticipationEvenement{% endblock %}
+
+{% block employee_content %}
+    <h1>Edit ParticipationEvenement</h1>
+
+    {{ include('participation_evenement/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_participation_evenement_index') }}">back to list</a>
+
+    {{ include('participation_evenement/_delete_form.html.twig') }}
+{% endblock %}

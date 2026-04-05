@@ -1,0 +1,103 @@
+{% extends 'back/base_employee.html.twig' %}
+
+{% block title %}{{ evenement.titre }}{% endblock %}
+
+{% block employee_content %}
+
+{# ─── PAGE HEADER ─── #}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <h3 style="font-size: 13px; font-weight: 700; margin: 0; text-transform: uppercase;">DÉTAIL DE L'ÉVÉNEMENT</h3>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ path('app_evenement_edit', {'id_evenement': evenement.id_evenement}) }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #e0f2fe; color: #0284c7; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier
+        </a>
+        <form method="post" action="{{ path('app_evenement_delete', {'id_evenement': evenement.id_evenement}) }}" onsubmit="return confirm('Confirmer la suppression de cet événement ?');" style="margin:0;">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id_evenement) }}">
+            <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(239,68,68,0.1); color: #ef4444; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Supprimer
+            </button>
+        </form>
+        <a href="{{ path('app_evenement_index') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f1f5f9; color: #334155; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Retour
+        </a>
+    </div>
+</div>
+
+{# ─── MAIN CARD ─── #}
+<div style="background:#fff; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden;">
+
+    {# Banner top with title + statut #}
+    <div style="padding: 28px 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">{{ evenement.typeEvenement }}</div>
+            <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0;">{{ evenement.titre }}</h2>
+            <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ evenement.lieu }}
+            </div>
+        </div>
+        <div>
+            {% if evenement.statut == 'en_cours' %}
+                <span style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: rgba(59,130,246,0.12); color: #3b82f6;">● En cours</span>
+            {% elseif evenement.statut == 'termine' %}
+                <span style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: rgba(239,68,68,0.12); color: #ef4444;">● Terminé</span>
+            {% else %}
+                <span style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: rgba(16,185,129,0.12); color: #10b981;">● Prévu</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Stats row #}
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--border-color);">
+        <div style="padding: 20px 24px; border-right: 1px solid var(--border-color);">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Date Début</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">
+                {{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y') : '-' }}
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">{{ evenement.dateDebut ? evenement.dateDebut|date('H:i') : '' }}</div>
+        </div>
+        <div style="padding: 20px 24px; border-right: 1px solid var(--border-color);">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Date Fin</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">
+                {{ evenement.dateFin ? evenement.dateFin|date('d/m/Y') : '-' }}
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">{{ evenement.dateFin ? evenement.dateFin|date('H:i') : '' }}</div>
+        </div>
+        <div style="padding: 20px 24px; border-right: 1px solid var(--border-color);">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Deadline Inscription</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">
+                {{ evenement.dateDeadline ? evenement.dateDeadline|date('d/m/Y') : '-' }}
+            </div>
+        </div>
+        <div style="padding: 20px 24px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Participants</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--accent-blue);">{{ evenement.nombreActuel }} / {{ evenement.capaciteMax }}</div>
+            <div style="margin-top: 6px; background: #e2e8f0; border-radius: 4px; height: 4px;">
+                {% set pct = evenement.capaciteMax > 0 ? ((evenement.nombreActuel / evenement.capaciteMax) * 100)|round : 0 %}
+                <div style="background: var(--accent-blue); height: 4px; border-radius: 4px; width: {{ pct }}%;"></div>
+            </div>
+        </div>
+    </div>
+
+    {# Description #}
+    {% if evenement.description %}
+    <div style="padding: 24px 32px;">
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Description</div>
+        <p style="font-size: 14px; color: var(--text-primary); line-height: 1.7; margin: 0;">{{ evenement.description }}</p>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+

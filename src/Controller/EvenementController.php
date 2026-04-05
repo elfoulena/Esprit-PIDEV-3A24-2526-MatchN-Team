@@ -15,10 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class EvenementController extends AbstractController
 {
     #[Route(name: 'app_evenement_index', methods: ['GET'])]
-    public function index(EvenementRepository $evenementRepository): Response
+    public function index(EvenementRepository $evenementRepository, Request $request): Response
     {
+        $q = $request->query->get('q');
         return $this->render('evenement/index.html.twig', [
-            'evenements' => $evenementRepository->findAll(),
+            'evenements' => $evenementRepository->findBySearch($q),
+            'q' => $q,
         ]);
     }
 

@@ -20,6 +20,14 @@ class Evenement
     #[ORM\Column(type: 'integer')]
     private ?int $id_evenement = null;
 
+    #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'evenement', orphanRemoval: true)]
+    private Collection $participations;
+
+    public function __construct()
+    {
+        $this->participations = new ArrayCollection();
+    }
+
     public function getId_evenement(): ?int
     {
         return $this->id_evenement;
@@ -200,17 +208,33 @@ class Evenement
         return $this;
     }
 
-    #[ORM\OneToOne(targetEntity: ParticipationEvenement::class, mappedBy: 'evenement')]
-    private ?ParticipationEvenement $participationEvenement = null;
-
-    public function getParticipationEvenement(): ?ParticipationEvenement
+    /**
+     * @return Collection<int, ParticipationEvenement>
+     */
+    public function getParticipations(): Collection
     {
-        return $this->participationEvenement;
+        return $this->participations;
     }
 
-    public function setParticipationEvenement(?ParticipationEvenement $participationEvenement): self
+    public function addParticipation(ParticipationEvenement $participation): static
     {
-        $this->participationEvenement = $participationEvenement;
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setEvenement($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipation(ParticipationEvenement $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            // set the owning side to null (unless already changed)
+            if ($participation->getEvenement() === $this) {
+                $participation->setEvenement(null);
+            }
+        }
+
         return $this;
     }
 

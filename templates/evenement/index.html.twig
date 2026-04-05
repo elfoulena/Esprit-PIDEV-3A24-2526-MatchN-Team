@@ -14,13 +14,24 @@
             </svg>
             <h3 style="font-size: 13px; font-weight: 700; margin: 0; text-transform: uppercase;">LISTE DES ÉVÉNEMENTS</h3>
         </div>
-        <a href="{{ path('app_evenement_new') }}" class="btn-primary-custom" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--accent-blue); color: #fff; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Nouvel Événement
-        </a>
+        
+        <div class="header-actions" style="display: flex; gap: 16px; align-items: center;">
+            <form action="{{ path('app_evenement_index') }}" method="GET" style="display: flex; gap: 8px;">
+                <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un événement..." 
+                    style="padding: 10px 15px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; min-width: 250px; outline: none;">
+                <button type="submit" class="btn-primary-custom" style="padding: 10px 15px; background: #64748b; color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px;">
+                    Rechercher
+                </button>
+            </form>
+
+            <a href="{{ path('app_evenement_new') }}" class="btn-primary-custom" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--accent-blue); color: #fff; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nouvel Événement
+            </a>
+        </div>
     </div>
 
     <div class="data-card" style="background: var(--card-bg); border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden;">
@@ -46,10 +57,10 @@
                 <td style="padding: 16px 20px;">{{ evenement.lieu }}</td>
                 <td style="padding: 16px 20px; font-weight: 600; color: var(--accent-blue);">{{ evenement.nombreActuel }} / {{ evenement.capaciteMax }}</td>
                 <td style="padding: 16px 20px;">
-                    {% if evenement.statut == 'en_cours' %}
-                        <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(59,130,246,0.12); color: #3b82f6;">en cours</span>
-                    {% elseif evenement.statut == 'termine' %}
+                    {% if evenement.dateFin < date() %}
                         <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(239,68,68,0.12); color: #ef4444;">terminé</span>
+                    {% elseif evenement.statut == 'en_cours' %}
+                        <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(59,130,246,0.12); color: #3b82f6;">en cours</span>
                     {% else %}
                         <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(16,185,129,0.12); color: #10b981;">prévu</span>
                     {% endif %}

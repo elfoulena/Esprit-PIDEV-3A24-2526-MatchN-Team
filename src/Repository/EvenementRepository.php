@@ -16,28 +16,54 @@ class EvenementRepository extends ServiceEntityRepository
         parent::__construct($registry, Evenement::class);
     }
 
-//    /**
-//     * @return Evenement[] Returns an array of Evenement objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findByFilters(?string $q, ?string $type, ?string $sort): array
+    {
+        $qb = $this->createQueryBuilder('e');
+        $now = new \DateTime();
 
-//    public function findOneBySomeField($value): ?Evenement
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $qb->andWhere('e.date_fin > :now')
+           ->setParameter('now', $now);
+
+        if ($q) {
+            $qb->andWhere('e.titre LIKE :q OR e.lieu LIKE :q')
+               ->setParameter('q', '%'.$q.'%');
+        }
+
+        if ($type && $type !== 'ALL') {
+            $qb->andWhere('e.type_evenement = :type')
+               ->setParameter('type', $type);
+        }
+
+        switch ($sort) {
+            case 'date_asc':
+                $qb->orderBy('e.date_debut', 'ASC');
+                break;
+            case 'date_desc':
+                $qb->orderBy('e.date_debut', 'DESC');
+                break;
+            case 'titre_asc':
+                $qb->orderBy('e.titre', 'ASC');
+                break;
+            default:
+                $qb->orderBy('e.date_debut', 'ASC');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findBySearch(?string $q): array
+    {
+        $qb = $this->createQueryBuilder('e');
+        if ($q) {
+            $qb->andWhere('e.titre LIKE :q OR e.lieu LIKE :q')
+               ->setParameter('q', '%'.$q.'%');
+        } else {
+            // Hide finished events by default in back-office
+            $now = new \DateTime();
+            $qb->andWhere('e.date_fin > :now')
+               ->setParameter('now', $now);
+        }
+        $qb->orderBy('e.date_debut', 'ASC');
+        return $qb->getQuery()->getResult();
+    }
 }

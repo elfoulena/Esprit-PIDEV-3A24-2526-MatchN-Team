@@ -28,8 +28,8 @@ class ParticipationEvenement
         return $this;
     }
 
-    #[ORM\OneToOne(targetEntity: Evenement::class, inversedBy: 'participationEvenement')]
-    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id_evenement', unique: true)]
+    #[ORM\ManyToOne(targetEntity: Evenement::class, inversedBy: 'participations')]
+    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id_evenement', nullable: false)]
     private ?Evenement $evenement = null;
 
     public function getEvenement(): ?Evenement
@@ -43,8 +43,8 @@ class ParticipationEvenement
         return $this;
     }
 
-    #[ORM\OneToOne(targetEntity: Utilisateur::class, inversedBy: 'participationEvenement')]
-    #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id', unique: true)]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'participations')]
+    #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id', nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
     public function getUtilisateur(): ?Utilisateur

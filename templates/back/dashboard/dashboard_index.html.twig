@@ -1,5 +1,5 @@
 {# employee/dashboard/index.html.twig #}
-{% extends 'base_employee.html.twig' %}
+{% extends 'back/base_employee.html.twig' %}
 
 {% block page_title %}<h1>Tableau de Bord</h1>{% endblock %}
 
@@ -104,7 +104,7 @@
         {% endfor %}
     </div>
 
-    <a href="{{ path('employee_team') }}" class="team-detail-btn">
+    <a href="#" class="team-detail-btn">
         Voir les détails de l'équipe
     </a>
 </div>
@@ -119,7 +119,7 @@
         </svg>
     </div>
     <p>Vous n'êtes pas encore membre d'une équipe.</p>
-    <a href="{{ path('employee_join_team') }}" class="btn-join-team">Rejoindre une équipe</a>
+    <a href="#" class="btn-join-team">Rejoindre une équipe</a>
 </div>
 {% endif %}
 
@@ -133,14 +133,14 @@
 </div>
 
 <div class="quick-actions">
-    <a href="{{ path('employee_tasks_new') }}" class="action-btn action-blue">
+    <a href="#" class="action-btn action-blue">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         Nouvelle Tâche
     </a>
-    <a href="{{ path('employee_requests_new') }}" class="action-btn action-purple">
+    <a href="#" class="action-btn action-purple">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -150,14 +150,14 @@
         </svg>
         Nouvelle Demande
     </a>
-    <a href="{{ path('employee_chat') }}" class="action-btn action-green">
+    <a href="#" class="action-btn action-green">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
         Chat Équipe
     </a>
-    <a href="{{ path('employee_events') }}" class="action-btn action-orange">
+    <a href="{{ path('app_evenement_index') }}" class="action-btn action-orange">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>

@@ -18,6 +18,9 @@ class Utilisateur
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur')]
+    private Collection $participations;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -555,6 +558,7 @@ class Utilisateur
         $this->equipes = new ArrayCollection();
         $this->repoAccesss = new ArrayCollection();
         $this->competenceFs = new ArrayCollection();
+        $this->participations = new ArrayCollection();
     }
 
     /**
@@ -682,6 +686,36 @@ class Utilisateur
             // set the owning side to null (unless already changed)
             if ($repoAccesss->getUtilisateur() === $this) {
                 $repoAccesss->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ParticipationEvenement>
+     */
+    public function getParticipations(): Collection
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(ParticipationEvenement $participation): static
+    {
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipation(ParticipationEvenement $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            // set the owning side to null (unless already changed)
+            if ($participation->getUtilisateur() === $this) {
+                $participation->setUtilisateur(null);
             }
         }
 

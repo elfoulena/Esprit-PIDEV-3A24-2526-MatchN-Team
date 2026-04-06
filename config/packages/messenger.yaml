@@ -16,8 +16,6 @@ framework:
 
         buses:
             messenger.bus.default: []
-
     
-
             # Route your messages to the transports
             # 'App\Message\YourMessage': async

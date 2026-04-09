@@ -1,0 +1,324 @@
+{# templates/registration/pending.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body_class %}no-nav{% endblock %}
+
+{% block title %}Vérifiez votre email{% endblock %}
+
+{% block stylesheets %}
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+        --bg-main:        #f0f2f5;
+        --card-bg:        #ffffff;
+        --border-color:   rgba(0,0,0,0.08);
+        --text-primary:   #1e293b;
+        --text-secondary: #64748b;
+        --accent-blue:    #3b82f6;
+        --accent-purple:  #8b5cf6;
+        --accent-green:   #10b981;
+        --radius-sm:      8px;
+        --radius-md:      12px;
+        --radius-lg:      16px;
+        --shadow-md:      0 4px 20px rgba(0,0,0,0.10);
+        --transition:     0.18s ease;
+    }
+
+    body {
+        background: var(--bg-main);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .verify-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    .verify-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 440px;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+    }
+
+    /* ── Icône (style avatar du dashboard) ── */
+    .verify-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.25);
+    }
+    .verify-icon svg { color: #fff; }
+
+    .verify-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem;
+    }
+
+    .verify-sub {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin: 0 0 1.25rem;
+        line-height: 1.6;
+    }
+
+    /* ── Badge email (style team-badge du dashboard) ── */
+    .verify-email-badge {
+        display: inline-block;
+        background: rgba(59,130,246,0.08);
+        color: var(--accent-blue);
+        border: 1px solid rgba(59,130,246,0.18);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 2rem;
+    }
+
+    /* ── Section header ── */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        color: var(--text-secondary);
+        text-align: left;
+    }
+    .section-header h3 {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+
+    /* ── Champ code ── */
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 8px;
+    }
+
+    .code-input {
+        width: 100%;
+        padding: 14px;
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        font-size: 26px;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 10px;
+        color: var(--text-primary);
+        transition: border-color var(--transition), box-shadow var(--transition);
+        font-family: 'Courier New', monospace;
+    }
+    .code-input::placeholder {
+        color: #cbd5e1;
+        letter-spacing: 8px;
+    }
+    .code-input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        background: var(--card-bg);
+    }
+
+    /* ── Bouton vérifier ── */
+    .btn-verify {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+        font-family: inherit;
+        letter-spacing: 0.3px;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.25);
+        margin-top: 0.5rem;
+    }
+    .btn-verify:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.35);
+    }
+    .btn-verify:active { transform: scale(0.99); }
+
+    /* ── Divider ── */
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 1.5rem 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-color);
+    }
+
+    /* ── Renvoyer ── */
+    .resend-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+    .resend-link {
+        color: var(--accent-blue);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color var(--transition);
+    }
+    .resend-link:hover { color: #2563eb; }
+
+    /* ── Conseils (style feature-item du login) ── */
+    .tips-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 1.5rem;
+        text-align: left;
+    }
+    .tip-item {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+    .tip-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--accent-green);
+        flex-shrink: 0;
+    }
+
+    /* ── Alerte erreur ── */
+    .flash-error {
+        background: rgba(239,68,68,0.06);
+        border: 1px solid rgba(239,68,68,0.18);
+        color: #dc2626;
+        border-radius: var(--radius-sm);
+        padding: 11px 14px;
+        font-size: 13px;
+        margin-bottom: 1.4rem;
+        text-align: left;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="verify-wrapper">
+    <div class="verify-card">
+
+        <div class="verify-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+        </div>
+
+        <h1 class="verify-title">Vérifiez votre email</h1>
+        <p class="verify-sub">
+            Un code de vérification à 6 chiffres a été envoyé à
+        </p>
+
+        <span class="verify-email-badge">{{ email }}</span>
+
+        {% for msg in app.flashes('error') %}
+            <div class="flash-error">⚠ {{ msg }}</div>
+        {% endfor %}
+
+        <div class="section-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <h3>Code de vérification</h3>
+        </div>
+
+        <form method="post" action="{{ path('app_verify_email') }}">
+            <input type="hidden" name="email" value="{{ email }}">
+
+            <div class="form-group">
+                <input
+                    type="text"
+                    id="code"
+                    name="code"
+                    class="code-input"
+                    maxlength="6"
+                    placeholder="000000"
+                    autocomplete="one-time-code"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="btn-verify">Vérifier mon compte →</button>
+        </form>
+
+        <div class="divider">ou</div>
+
+        <p class="resend-text">
+            Vous n'avez pas reçu le code ?
+            <a href="#" class="resend-link">Renvoyer un code</a>
+        </p>
+
+        <div class="tips-list">
+            <div class="tip-item">
+                <span class="tip-dot"></span>
+                Vérifiez votre dossier spam ou courrier indésirable
+            </div>
+            <div class="tip-item">
+                <span class="tip-dot"></span>
+                Le code expire dans 10 minutes
+            </div>
+            <div class="tip-item">
+                <span class="tip-dot"></span>
+                Assurez-vous que l'adresse email est correcte
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -7,12 +6,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
-class DashboardController extends AbstractController
+#[IsGranted('ROLE_EMPLOYE')]
+class EmployeController extends AbstractController
 {
-    #[Route('/admin/dashboard', name: 'admin_dashboard')] 
-    public function index(): Response
+    #[Route('/employe/dashboard', name: 'employe_dashboard')]
+    public function dashboard(): Response
     {
-        return $this->render('back/dashboard/dashboard_index.html.twig');
+        return $this->render('employe/dashboard.html.twig');
     }
 }

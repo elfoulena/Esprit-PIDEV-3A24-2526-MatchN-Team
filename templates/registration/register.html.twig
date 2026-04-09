@@ -1,236 +1,489 @@
 {# templates/registration/register.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Inscription Freelancer{% endblock %}
+{% block body_class %}no-nav{% endblock %}
+
+{% block title %}Inscription Freelancer — MatchNTeam{% endblock %}
 
 {% block stylesheets %}
 <style>
-    .auth-wrapper {
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Design tokens (identique à login) ── */
+    :root {
+        --bg-main:        #f0f2f5;
+        --bg-surface:     #e8eaf0;
+        --card-bg:        #ffffff;
+        --border-color:   rgba(0,0,0,0.08);
+        --text-primary:   #1e293b;
+        --text-secondary: #64748b;
+        --accent-blue:    #3b82f6;
+        --accent-purple:  #8b5cf6;
+        --accent-green:   #10b981;
+        --accent-orange:  #f59e0b;
+        --radius-sm:      8px;
+        --radius-md:      12px;
+        --radius-lg:      16px;
+        --shadow-sm:      0 1px 4px rgba(0,0,0,0.08);
+        --shadow-md:      0 4px 20px rgba(0,0,0,0.10);
+        --transition:     0.18s ease;
+    }
+
+    body {
+        background: var(--bg-main);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--text-primary);
+    }
+
+    /* ── Layout centré (style panneau droit du login) ── */
+    .register-page {
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f5f4f0;
         padding: 2rem 1rem;
+        position: relative;
+        background: var(--bg-main);  /* Même fond que login-right */
     }
-    .auth-card {
-        background: #fff;
-        border: 0.5px solid #ddd;
-        border-radius: 16px;
+
+    /* Orbe décoratif (identique à login-right::before) */
+    .register-page::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* Carte formulaire (style login-form-wrap) */
+    .register-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
         padding: 2.5rem;
         width: 100%;
-        max-width: 540px;
+        max-width: 560px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        z-index: 1;
     }
-    .auth-header {
-        margin-bottom: 2rem;
+
+    /* En-tête formulaire (identique login) */
+    .form-header { margin-bottom: 2rem; }
+    .form-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 6px;
     }
-    .auth-badge {
-        display: inline-block;
-        background: #e1f5ee;
-        color: #0f6e56;
-        font-size: 12px;
-        font-weight: 500;
-        padding: 4px 12px;
-        border-radius: 20px;
-        margin-bottom: 0.75rem;
-        letter-spacing: 0.5px;
+    .form-title .gradient-word {
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .form-sub {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    /* Section header (identique login) */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 1.75rem 0 1rem;
+        color: var(--text-secondary);
+    }
+    .section-header h3 {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: var(--text-secondary);
         text-transform: uppercase;
     }
-    .auth-title {
-        font-size: 26px;
-        font-weight: 500;
-        color: #1a1a1a;
-        margin: 0 0 0.4rem;
-        font-family: Georgia, serif;
+    .section-header-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border-color);
     }
-    .auth-sub {
-        font-size: 14px;
-        color: #888;
-        margin: 0;
-    }
+
+    /* Champs (identique login) */
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
     }
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
+
+    .form-group { margin-bottom: 1rem; }
+
     .form-group label {
         display: block;
-        font-size: 13px;
-        font-weight: 500;
-        color: #444;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
         margin-bottom: 6px;
     }
+
     .form-group input,
     .form-group textarea {
         width: 100%;
-        padding: 10px 14px;
-        border: 0.5px solid #ccc;
-        border-radius: 8px;
+        padding: 11px 14px;
+        background: var(--card-bg);  /* Fond blanc comme login */
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
         font-size: 14px;
-        color: #1a1a1a;
-        background: #fff;
-        box-sizing: border-box;
-        transition: border-color 0.15s;
+        color: var(--text-primary);
+        transition: border-color var(--transition), box-shadow var(--transition);
         font-family: inherit;
     }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: #94a3b8; }
+
     .form-group input:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #1d9e75;
-        box-shadow: 0 0 0 3px rgba(29,158,117,0.1);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
     }
+
     .form-group textarea {
         resize: vertical;
         min-height: 90px;
     }
+
     .form-hint {
         font-size: 12px;
-        color: #aaa;
-        margin-top: 4px;
+        color: var(--text-secondary);
+        margin-top: 5px;
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
     }
-    .form-error {
-        font-size: 12px;
-        color: #a32d2d;
-        margin-top: 4px;
-    }
-    .section-label {
+    .form-hint::before {
+        content: '💡';
         font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #aaa;
-        margin: 1.75rem 0 1rem;
-        padding-bottom: 6px;
-        border-bottom: 0.5px solid #eee;
+        flex-shrink: 0;
+        margin-top: 1px;
     }
+
+    /* Bouton submit (identique btn-login) */
     .btn-submit {
         width: 100%;
-        padding: 12px;
-        background: #1d9e75;
+        padding: 13px;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
         color: #fff;
         border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 700;
         cursor: pointer;
         margin-top: 0.5rem;
-        transition: background 0.15s, transform 0.1s;
+        transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+        font-family: inherit;
+        letter-spacing: 0.3px;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.25);
+    }
+    .btn-submit:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.35);
+    }
+    .btn-submit:active { transform: scale(0.99); }
+
+    /* Divider (identique login) */
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 1.4rem 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-color);
+    }
+
+    /* Lien login (style btn-register du login) */
+    .btn-login-link {
+        width: 100%;
+        padding: 12px;
+        background: rgba(139,92,246,0.08);
+        color: var(--accent-purple);
+        border: 1px solid rgba(139,92,246,0.2);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        transition: background var(--transition), transform var(--transition);
         font-family: inherit;
     }
-    .btn-submit:hover { background: #0f6e56; }
-    .btn-submit:active { transform: scale(0.99); }
-    .auth-footer {
-        text-align: center;
+    .btn-login-link:hover {
+        background: rgba(139,92,246,0.15);
+        transform: translateY(-1px);
+    }
+
+    /* Role badges (identique login) */
+    .role-badges {
+        display: flex;
+        gap: 6px;
         margin-top: 1.5rem;
-        font-size: 13px;
-        color: #888;
+        flex-wrap: wrap;
+        justify-content: center;
     }
-    .auth-footer a {
-        color: #1d9e75;
-        text-decoration: none;
+    .role-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        background: var(--card-bg);
+    }
+
+    /* ── TOASTS ── */
+    .toast-container {
+        position: fixed;
+        top: 1.25rem;
+        right: 1.25rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        pointer-events: none;
+    }
+
+    .toast {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
         font-weight: 500;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        animation: toastIn 0.3s ease forwards;
+        pointer-events: auto;
+        max-width: 340px;
     }
-    .flash-error {
-        background: #fcebeb;
-        border: 0.5px solid #f09595;
-        color: #791f1f;
-        border-radius: 8px;
-        padding: 10px 14px;
-        font-size: 13px;
-        margin-bottom: 1.5rem;
+    .toast.hide {
+        animation: toastOut 0.35s ease forwards;
     }
+
+    .toast-error {
+        background: #fff5f5;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+        border: 1px solid rgba(239,68,68,0.2);
+        border-left: 4px solid #ef4444;
+    }
+    .toast-success {
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid rgba(34,197,94,0.2);
+        border-left: 4px solid #22c55e;
+    }
+
+    .toast-icon { font-size: 15px; flex-shrink: 0; }
+    .toast-msg  { flex: 1; line-height: 1.4; }
+
+    .toast-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: inherit;
+        opacity: 0.5;
+        font-size: 16px;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+    .toast-close:hover { opacity: 1; }
+
+    @keyframes toastIn  { from { opacity:0; transform:translateX(60px) } to { opacity:1; transform:none } }
+    @keyframes toastOut { from { opacity:1; transform:none } to { opacity:0; transform:translateX(60px) } }
+
+    /* ── Responsive ── */
     @media (max-width: 520px) {
+        .register-card { padding: 1.5rem; }
         .form-row { grid-template-columns: 1fr; }
-        .auth-card { padding: 1.5rem; }
+        .toast-container { right: 0.75rem; left: 0.75rem; }
+        .toast { max-width: 100%; }
     }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="auth-wrapper">
-    <div class="auth-card">
 
-        <div class="auth-header">
-            <span class="auth-badge">Freelancer</span>
-            <h1 class="auth-title">Créer un compte</h1>
-            <p class="auth-sub">Rejoignez la plateforme et trouvez des missions</p>
+{# ── Conteneur des toasts ── #}
+<div class="toast-container" id="toastContainer">
+    {% for message in app.flashes('error') %}
+        <div class="toast toast-error" role="alert">
+            <span class="toast-icon">⚠</span>
+            <span class="toast-msg">{{ message }}</span>
+            <button class="toast-close" onclick="dismissToast(this)" aria-label="Fermer">✕</button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="toast toast-success" role="alert">
+            <span class="toast-icon">✓</span>
+            <span class="toast-msg">{{ message }}</span>
+            <button class="toast-close" onclick="dismissToast(this)" aria-label="Fermer">✕</button>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="register-page">
+    <div class="register-card">
+
+        <div class="form-header">
+            <h1 class="form-title">Créer un <span class="gradient-word">compte</span> ✨</h1>
+            <p class="form-sub">Devenez freelance et trouvez des missions</p>
         </div>
 
-        {# Affichage des erreurs globales du formulaire #}
-        {% for error in app.flashes('error') %}
-            <div class="flash-error">{{ error }}</div>
-        {% endfor %}
+        <form method="POST" action="{{ path('app_register') }}" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token('register') }}">
 
-        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-
-            <div class="section-label">Informations personnelles</div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    {{ form_label(form.nom) }}
-                    {{ form_widget(form.nom, {'attr': {'placeholder': 'Test'}}) }}
-                    {{ form_errors(form.nom) }}
-                </div>
-                <div class="form-group">
-                    {{ form_label(form.prenom) }}
-                    {{ form_widget(form.prenom, {'attr': {'placeholder': 'Test'}}) }}
-                    {{ form_errors(form.prenom) }}
-                </div>
-            </div>
-
-            <div class="form-group">
-                {{ form_label(form.email) }}
-                {{ form_widget(form.email, {'attr': {'placeholder': 'test@exemple.com'}}) }}
-                {{ form_errors(form.email) }}
+            {# ── Section : Informations personnelles ── #}
+            <div class="section-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <h3>Informations personnelles</h3>
+                <div class="section-header-line"></div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    {{ form_label(form.telephone) }}
-                    {{ form_widget(form.telephone, {'attr': {'placeholder': '+216 XX XXX XXX'}}) }}
-                    {{ form_errors(form.telephone) }}
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom"
+                           placeholder="Dupont"
+                           value="{{ app.request.request.get('nom') ?? '' }}">
                 </div>
                 <div class="form-group">
-                    {{ form_label(form.adresse) }}
-                    {{ form_widget(form.adresse, {'attr': {'placeholder': 'Tunis, Tunisie'}}) }}
-                    {{ form_errors(form.adresse) }}
+                    <label for="prenom">Prénom</label>
+                    <input type="text" id="prenom" name="prenom"
+                           placeholder="Jean"
+                           value="{{ app.request.request.get('prenom') ?? '' }}">
                 </div>
             </div>
 
-            <div class="section-label">Profil professionnel</div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email"
+                       placeholder="votre@email.com"
+                       value="{{ app.request.request.get('email') ?? '' }}">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="telephone">Téléphone</label>
+                    <input type="text" id="telephone" name="telephone"
+                           placeholder="+216 XX XXX XXX"
+                           value="{{ app.request.request.get('telephone') ?? '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="adresse">Adresse</label>
+                    <input type="text" id="adresse" name="adresse"
+                           placeholder="Tunis, Tunisie"
+                           value="{{ app.request.request.get('adresse') ?? '' }}">
+                </div>
+            </div>
+
+            {# ── Section : Profil professionnel ── #}
+            <div class="section-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                <h3>Profil professionnel</h3>
+                <div class="section-header-line"></div>
+            </div>
 
             <div class="form-group">
-                {{ form_label(form.description) }}
-                {{ form_widget(form.description, {'attr': {'placeholder': 'Ex: Développeur full-stack expert React, Node.js et Python avec 5 ans d\'expérience...'}}) }}
+                <label for="description">Description / Compétences</label>
+                <textarea id="description" name="description"
+                          placeholder="Ex: Développeur full-stack expert React, Node.js et Python avec 5 ans d'expérience...">{{ app.request.request.get('description') ?? '' }}</textarea>
                 <p class="form-hint">Mentionnez vos technologies pour que vos compétences soient détectées automatiquement.</p>
-                {{ form_errors(form.description) }}
             </div>
 
-            <div class="section-label">Sécurité</div>
+            {# ── Section : Sécurité ── #}
+            <div class="section-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <h3>Sécurité</h3>
+                <div class="section-header-line"></div>
+            </div>
 
             <div class="form-group">
-                {{ form_label(form.plainPassword.first) }}
-                {{ form_widget(form.plainPassword.first, {'attr': {'placeholder': '••••••••'}}) }}
-                {{ form_errors(form.plainPassword.first) }}
+                <label for="plainPassword">Mot de passe</label>
+                <input type="password" id="plainPassword" name="plainPassword"
+                       placeholder="••••••••">
             </div>
             <div class="form-group">
-                {{ form_label(form.plainPassword.second) }}
-                {{ form_widget(form.plainPassword.second, {'attr': {'placeholder': '••••••••'}}) }}
+                <label for="confirmPassword">Confirmer le mot de passe</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       placeholder="••••••••">
                 <p class="form-hint">Minimum 8 caractères, une majuscule et un chiffre.</p>
-                {{ form_errors(form.plainPassword) }}
             </div>
 
-            <button type="submit" class="btn-submit">Créer mon compte</button>
+            <button type="submit" class="btn-submit">Créer mon compte →</button>
 
-        {{ form_end(form) }}
+        </form>
 
-        <div class="auth-footer">
-            Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a>
+        <div class="divider">ou</div>
+
+        <a href="{{ path('app_login') }}" class="btn-login-link">
+            Déjà inscrit ? Se connecter
+        </a>
+
+        <div class="role-badges">
+            <span class="role-badge">Freelancer</span>
+            <span class="role-badge">Employé</span>
+            <span class="role-badge">Admin RH</span>
         </div>
 
     </div>
 </div>
+
+<script>
+    function dismissToast(btn) {
+        const toast = btn.closest('.toast');
+        if (!toast) return;
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400); // ← supprime après l'animation
+    }
+
+    // Attendre que la page soit complètement chargée
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.toast').forEach(toast => {
+            const closeBtn = toast.querySelector('.toast-close');
+            if (!closeBtn) return;
+
+            setTimeout(() => dismissToast(closeBtn), 4000);
+        });
+    });
+</script>
+
 {% endblock %}

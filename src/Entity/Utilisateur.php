@@ -480,34 +480,6 @@ class Utilisateur
         return $this;
     }
 
-    #[ORM\OneToOne(targetEntity: MembreEquipe::class, mappedBy: 'utilisateur')]
-    private ?MembreEquipe $membreEquipe = null;
-
-    public function getMembreEquipe(): ?MembreEquipe
-    {
-        return $this->membreEquipe;
-    }
-
-    public function setMembreEquipe(?MembreEquipe $membreEquipe): self
-    {
-        $this->membreEquipe = $membreEquipe;
-        return $this;
-    }
-
-    #[ORM\OneToOne(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur')]
-    private ?ParticipationEvenement $participationEvenement = null;
-
-    public function getParticipationEvenement(): ?ParticipationEvenement
-    {
-        return $this->participationEvenement;
-    }
-
-    public function setParticipationEvenement(?ParticipationEvenement $participationEvenement): self
-    {
-        $this->participationEvenement = $participationEvenement;
-        return $this;
-    }
-
     #[ORM\OneToMany(targetEntity: RepoAccess::class, mappedBy: 'utilisateur')]
     private Collection $repoAccesss;
 
@@ -594,7 +566,6 @@ class Utilisateur
     public function setGithubUsername(?string $github_username): static
     {
         $this->github_username = $github_username;
-
         return $this;
     }
 
@@ -606,7 +577,6 @@ class Utilisateur
     public function setVerificationToken(?string $verification_token): static
     {
         $this->verification_token = $verification_token;
-
         return $this;
     }
 
@@ -618,7 +588,6 @@ class Utilisateur
     public function setCreatedAt(?\DateTime $created_at): static
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
@@ -630,7 +599,6 @@ class Utilisateur
     public function setUpdatedAt(?\DateTime $updated_at): static
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
 
@@ -642,7 +610,6 @@ class Utilisateur
     public function setVerificationExpiry(\DateTime $verification_expiry): static
     {
         $this->verification_expiry = $verification_expiry;
-
         return $this;
     }
 
@@ -654,7 +621,6 @@ class Utilisateur
     public function setResetToken(?string $reset_token): static
     {
         $this->reset_token = $reset_token;
-
         return $this;
     }
 
@@ -666,7 +632,6 @@ class Utilisateur
     public function setResetExpiry(?\DateTime $reset_expiry): static
     {
         $this->reset_expiry = $reset_expiry;
-
         return $this;
     }
 
@@ -676,19 +641,16 @@ class Utilisateur
             $this->repoAccesss->add($repoAccesss);
             $repoAccesss->setUtilisateur($this);
         }
-
         return $this;
     }
 
     public function removeRepoAccesss(RepoAccess $repoAccesss): static
     {
         if ($this->repoAccesss->removeElement($repoAccesss)) {
-            // set the owning side to null (unless already changed)
             if ($repoAccesss->getUtilisateur() === $this) {
                 $repoAccesss->setUtilisateur(null);
             }
         }
-
         return $this;
     }
 
@@ -706,20 +668,16 @@ class Utilisateur
             $this->participations->add($participation);
             $participation->setUtilisateur($this);
         }
-
         return $this;
     }
 
     public function removeParticipation(ParticipationEvenement $participation): static
     {
         if ($this->participations->removeElement($participation)) {
-            // set the owning side to null (unless already changed)
             if ($participation->getUtilisateur() === $this) {
                 $participation->setUtilisateur(null);
             }
         }
-
         return $this;
     }
-
 }

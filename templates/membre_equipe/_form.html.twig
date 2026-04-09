@@ -1,0 +1,152 @@
+<style>
+.custom-form-container {
+    background: #ffffff; border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    padding: 30px; max-width: 620px; margin: 0 auto 30px auto;
+}
+.custom-form-header {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.form-group { margin-bottom: 20px; }
+.form-row { display: flex; gap: 20px; }
+.form-col { flex: 1; }
+.form-label { display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 8px; }
+.form-control {
+    width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1;
+    border-radius: 6px; font-size: 14px; color: #1e293b;
+    transition: all 0.2s; background: #fff; font-family: inherit; box-sizing: border-box;
+}
+.form-control:focus { outline: none; border-color: #3ba3e8; box-shadow: 0 0 0 3px rgba(59,163,232,0.1); }
+textarea.form-control { min-height: 90px; resize: vertical; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; }
+.btn-reset { padding: 10px 24px; background: #f1f5f9; color: #334155; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.btn-reset:hover { background: #e2e8f0; }
+.btn-submit { padding: 10px 24px; background: #3ba3e8; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.btn-submit:hover { background: #2980b9; }
+.form-control.is-invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+.form-control.is-valid   { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+.field-error { color: #ef4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: block; }
+</style>
+
+<div class="custom-form-container">
+    <div class="custom-form-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        </svg>
+        INFORMATIONS DU MEMBRE
+    </div>
+
+    {{ form_start(form, {'attr': {'id': 'membre_form', 'novalidate': 'novalidate'}}) }}
+
+        <div class="form-row">
+    <div class="form-group form-col">
+        {{ form_label(form.idUser, 'Employé *', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.idUser, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.idUser) }}
+    </div>
+    <div class="form-group form-col">
+        {{ form_label(form.roleEquipe, 'Rôle', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.roleEquipe, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.roleEquipe) }}
+    </div>
+</div>
+
+        <div class="form-row">
+            <div class="form-group form-col">
+                {{ form_label(form.dateAffectation, 'Date d\'affectation *', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.dateAffectation, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateAffectation) }}
+            </div>
+            <div class="form-group form-col">
+                {{ form_label(form.dateFin, 'Date de fin', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateFin) }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group form-col">
+                {{ form_label(form.tauxParticipation, 'Taux de participation (%)', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.tauxParticipation, {'attr': {'class': 'form-control', 'min': '0', 'max': '100', 'step': '0.01'}}) }}
+                {{ form_errors(form.tauxParticipation) }}
+            </div>
+            <div class="form-group form-col">
+                {{ form_label(form.statutMembre, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.statutMembre, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.statutMembre) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.competencesPrincipales, 'Compétences principales', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.competencesPrincipales, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Java, SQL, Communication'}}) }}
+            {{ form_errors(form.competencesPrincipales) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.notes, 'Notes', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'placeholder': 'Remarques sur ce membre...'}}) }}
+            {{ form_errors(form.notes) }}
+        </div>
+
+        <div class="form-actions">
+            <button type="reset" class="btn-reset" onclick="resetErrors()">Réinitialiser</button>
+            <button type="submit" class="btn-submit">{{ button_label|default('Enregistrer') }}</button>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('membre_form');
+    if (!form) return;
+
+    function showError(field, msg) {
+        field.classList.add('is-invalid'); field.classList.remove('is-valid');
+        let err = field.parentNode.querySelector('.field-error');
+        if (!err) { err = document.createElement('span'); err.className = 'field-error'; field.parentNode.appendChild(err); }
+        err.textContent = msg;
+    }
+    function clearError(field) {
+        field.classList.remove('is-invalid'); field.classList.add('is-valid');
+        const err = field.parentNode.querySelector('.field-error');
+        if (err) err.remove();
+    }
+    function validateField(field) {
+        if (!field) return true;
+        const val = field.value.trim();
+        const id = field.id || '';
+        if (id.includes('id_user') || id.includes('idUser')) {
+            if (!val || parseInt(val) < 1) { showError(field, 'L\'ID utilisateur est obligatoire.'); return false; }
+        }
+        if (id.includes('taux_participation') || id.includes('tauxParticipation')) {
+            const n = parseFloat(val);
+            if (isNaN(n) || n < 0 || n > 100) { showError(field, 'Le taux doit être entre 0 et 100.'); return false; }
+        }
+        if (id.includes('date_affectation') || id.includes('dateAffectation')) {
+            if (!val) { showError(field, 'La date d\'affectation est obligatoire.'); return false; }
+        }
+        clearError(field); return true;
+    }
+
+    form.querySelectorAll('.form-control').forEach(function(field) {
+        field.addEventListener('blur', function() { validateField(field); });
+        field.addEventListener('input', function() { if (field.classList.contains('is-invalid')) validateField(field); });
+    });
+
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+        form.querySelectorAll('.form-control').forEach(function(f) { if (!validateField(f)) valid = false; });
+        if (!valid) e.preventDefault();
+    });
+});
+function resetErrors() {
+    document.querySelectorAll('.form-control').forEach(function(f) { f.classList.remove('is-invalid','is-valid'); });
+    document.querySelectorAll('.field-error').forEach(function(e) { e.remove(); });
+}
+</script>

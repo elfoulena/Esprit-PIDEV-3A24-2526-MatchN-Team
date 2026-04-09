@@ -1,0 +1,31 @@
+{% extends 'back/base_employee.html.twig' %}
+
+{% block title %}Ajouter un Membre{% endblock %}
+
+{% block employee_content %}
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <h3 style="font-size: 13px; font-weight: 700; margin: 0; text-transform: uppercase;">Ajouter un membre — {{ equipe.nomEquipe }}</h3>
+        </div>
+        <a href="{{ path('app_membre_equipe_index', {'id_equipe': equipe.idEquipe}) }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f1f5f9; color: #334155; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Retour aux membres
+        </a>
+    </div>
+
+    {# capacity warning #}
+    {% if equipe.nbMembresActuel >= equipe.nbMembresMax %}
+    <div style="padding: 14px 18px; margin-bottom: 20px; border-radius: 8px; font-size: 13px; font-weight: 600; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);">
+        ⚠ Cette équipe a atteint sa capacité maximale ({{ equipe.nbMembresMax }} membres). Vous ne pouvez pas ajouter de nouveaux membres.
+    </div>
+    {% else %}
+    <div style="padding: 14px 18px; margin-bottom: 20px; border-radius: 8px; font-size: 13px; font-weight: 600; background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2);">
+        Places disponibles : {{ equipe.nbMembresMax - equipe.nbMembresActuel }} / {{ equipe.nbMembresMax }}
+    </div>
+    {% endif %}
+
+    {{ include('membre_equipe/_form.html.twig') }}
+{% endblock %}

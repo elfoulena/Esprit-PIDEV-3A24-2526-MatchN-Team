@@ -6,9 +6,6 @@ use App\Entity\Equipe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Equipe>
- */
 class EquipeRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +13,76 @@ class EquipeRepository extends ServiceEntityRepository
         parent::__construct($registry, Equipe::class);
     }
 
-//    /**
-//     * @return Equipe[] Returns an array of Equipe objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Recherche + tri + filtrage avancé
+     */
+    public function findWithFilters(
+        string $q = '',
+        string $statut = '',
+        string $departement = '',
+        string $sortBy = 'dateCreation',
+        string $sortDir = 'DESC'
+    ): array {
+        $qb = $this->createQueryBuilder('e');
 
-//    public function findOneBySomeField($value): ?Equipe
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($q) {
+            $qb->andWhere('e.nomEquipe LIKE :q OR e.description LIKE :q OR e.departement LIKE :q')
+               ->setParameter('q', '%' . $q . '%');
+        }
+
+        if ($statut) {
+            $qb->andWhere('e.statut = :statut')
+               ->setParameter('statut', $statut);
+        }
+
+        if ($departement) {
+            $qb->andWhere('e.departement = :departement')
+               ->setParameter('departement', $departement);
+        }
+
+        $allowedSorts = ['nomEquipe', 'dateCreation', 'statut', 'nbMembresActuel', 'budget', 'departement'];
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'dateCreation';
+        $sortDir = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
+
+        $qb->orderBy('e.' . $sortBy, $sortDir);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Statistiques globales
+     */
+    public function getStats(): array
+    {
+        $total = $this->count([]);
+        $active = $this->count(['statut' => 'Active']);
+        $inactive = $this->count(['statut' => 'Inactive']);
+        $pause = $this->count(['statut' => 'En pause']);
+
+        $totalMembres = (int) $this->createQueryBuilder('e')
+            ->select('SUM(e.nbMembresActuel)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return [
+            'total' => $total,
+            'active' => $active,
+            'inactive' => $inactive,
+            'pause' => $pause,
+            'totalMembres' => $totalMembres,
+        ];
+    }
+
+    /**
+     * Liste de tous les départements distincts
+     */
+    public function findDistinctDepartements(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('DISTINCT e.departement')
+            ->where('e.departement IS NOT NULL')
+            ->orderBy('e.departement', 'ASC')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
 }

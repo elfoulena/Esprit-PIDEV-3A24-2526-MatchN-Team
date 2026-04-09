@@ -2,12 +2,10 @@
 
 namespace App\Entity;
 
+use App\Repository\MembreEquipeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
-use App\Repository\MembreEquipeRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MembreEquipeRepository::class)]
 #[ORM\Table(name: 'membre_equipe')]
@@ -15,275 +13,75 @@ class MembreEquipe
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id_membre = null;
+    #[ORM\Column(name: 'id_membre', type: Types::INTEGER)]
+    private ?int $idMembre = null;
 
-    public function getId_membre(): ?int
-    {
-        return $this->id_membre;
-    }
-
-    public function setId_membre(int $id_membre): self
-    {
-        $this->id_membre = $id_membre;
-        return $this;
-    }
-
-    #[ORM\OneToOne(targetEntity: Equipe::class, inversedBy: 'membreEquipe')]
-    #[ORM\JoinColumn(name: 'id_equipe', referencedColumnName: 'id_equipe', unique: true)]
+    #[ORM\ManyToOne(targetEntity: Equipe::class)]
+    #[ORM\JoinColumn(name: 'id_equipe', referencedColumnName: 'id_equipe', nullable: false)]
     private ?Equipe $equipe = null;
 
-    public function getEquipe(): ?Equipe
-    {
-        return $this->equipe;
-    }
+    #[ORM\Column(name: 'id_user', type: Types::INTEGER)]
+    #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
+    private ?int $idUser = null;
 
-    public function setEquipe(?Equipe $equipe): self
-    {
-        $this->equipe = $equipe;
-        return $this;
-    }
+    #[ORM\Column(name: 'role_equipe', type: Types::STRING, length: 30)]
+    private ?string $roleEquipe = 'Membre';
 
-    #[ORM\OneToOne(targetEntity: Utilisateur::class, inversedBy: 'membreEquipe')]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', unique: true)]
-    private ?Utilisateur $utilisateur = null;
+    #[ORM\Column(name: 'date_affectation', type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: 'La date d\'affectation est obligatoire.')]
+    private ?\DateTimeInterface $dateAffectation = null;
 
-    public function getUtilisateur(): ?Utilisateur
-    {
-        return $this->utilisateur;
-    }
+    #[ORM\Column(name: 'date_fin', type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateFin = null;
 
-    public function setUtilisateur(?Utilisateur $utilisateur): self
-    {
-        $this->utilisateur = $utilisateur;
-        return $this;
-    }
+    #[ORM\Column(name: 'taux_participation', type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[Assert\Range(min: 0, max: 100)]
+    private string $tauxParticipation = '100.00';
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $role_equipe = null;
+    #[ORM\Column(name: 'statut_membre', type: Types::STRING, length: 20)]
+    private ?string $statutMembre = 'Actif';
 
-    public function getRole_equipe(): ?string
-    {
-        return $this->role_equipe;
-    }
+    #[ORM\Column(name: 'competences_principales', type: Types::STRING, length: 255, nullable: true)]
+    private ?string $competencesPrincipales = null;
 
-    public function setRole_equipe(?string $role_equipe): self
-    {
-        $this->role_equipe = $role_equipe;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'date', nullable: false)]
-    private ?\DateTimeInterface $date_affectation = null;
-
-    public function getDate_affectation(): ?\DateTimeInterface
-    {
-        return $this->date_affectation;
-    }
-
-    public function setDate_affectation(\DateTimeInterface $date_affectation): self
-    {
-        $this->date_affectation = $date_affectation;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $date_fin = null;
-
-    public function getDate_fin(): ?\DateTimeInterface
-    {
-        return $this->date_fin;
-    }
-
-    public function setDate_fin(?\DateTimeInterface $date_fin): self
-    {
-        $this->date_fin = $date_fin;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'decimal', nullable: true)]
-    private ?float $taux_participation = null;
-
-    public function getTaux_participation(): ?float
-    {
-        return $this->taux_participation;
-    }
-
-    public function setTaux_participation(?float $taux_participation): self
-    {
-        $this->taux_participation = $taux_participation;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $statut_membre = null;
-
-    public function getStatut_membre(): ?string
-    {
-        return $this->statut_membre;
-    }
-
-    public function setStatut_membre(?string $statut_membre): self
-    {
-        $this->statut_membre = $statut_membre;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $competences_principales = null;
-
-    public function getCompetences_principales(): ?string
-    {
-        return $this->competences_principales;
-    }
-
-    public function setCompetences_principales(?string $competences_principales): self
-    {
-        $this->competences_principales = $competences_principales;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
-    public function getNotes(): ?string
+    #[ORM\Column(name: 'created_at', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(name: 'updated_at', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    public function __construct()
     {
-        return $this->notes;
+        $this->dateAffectation = new \DateTime();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
     }
 
-    public function setNotes(?string $notes): self
-    {
-        $this->notes = $notes;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $created_at = null;
-
-    public function getCreated_at(): ?\DateTimeInterface
-    {
-        return $this->created_at;
-    }
-
-    public function setCreated_at(\DateTimeInterface $created_at): self
-    {
-        $this->created_at = $created_at;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $updated_at = null;
-
-    public function getUpdated_at(): ?\DateTimeInterface
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdated_at(\DateTimeInterface $updated_at): self
-    {
-        $this->updated_at = $updated_at;
-        return $this;
-    }
-
-    public function getIdMembre(): ?int
-    {
-        return $this->id_membre;
-    }
-
-    public function getRoleEquipe(): ?string
-    {
-        return $this->role_equipe;
-    }
-
-    public function setRoleEquipe(?string $role_equipe): static
-    {
-        $this->role_equipe = $role_equipe;
-
-        return $this;
-    }
-
-    public function getDateAffectation(): ?\DateTime
-    {
-        return $this->date_affectation;
-    }
-
-    public function setDateAffectation(\DateTime $date_affectation): static
-    {
-        $this->date_affectation = $date_affectation;
-
-        return $this;
-    }
-
-    public function getDateFin(): ?\DateTime
-    {
-        return $this->date_fin;
-    }
-
-    public function setDateFin(?\DateTime $date_fin): static
-    {
-        $this->date_fin = $date_fin;
-
-        return $this;
-    }
-
-    public function getTauxParticipation(): ?string
-    {
-        return $this->taux_participation;
-    }
-
-    public function setTauxParticipation(?string $taux_participation): static
-    {
-        $this->taux_participation = $taux_participation;
-
-        return $this;
-    }
-
-    public function getStatutMembre(): ?string
-    {
-        return $this->statut_membre;
-    }
-
-    public function setStatutMembre(?string $statut_membre): static
-    {
-        $this->statut_membre = $statut_membre;
-
-        return $this;
-    }
-
-    public function getCompetencesPrincipales(): ?string
-    {
-        return $this->competences_principales;
-    }
-
-    public function setCompetencesPrincipales(?string $competences_principales): static
-    {
-        $this->competences_principales = $competences_principales;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTime
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTime $created_at): static
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTime
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt(\DateTime $updated_at): static
-    {
-        $this->updated_at = $updated_at;
-
-        return $this;
-    }
-
+    // Getters and setters
+    public function getIdMembre(): ?int { return $this->idMembre; }
+    public function getEquipe(): ?Equipe { return $this->equipe; }
+    public function setEquipe(?Equipe $equipe): self { $this->equipe = $equipe; return $this; }
+    public function getIdUser(): ?int { return $this->idUser; }
+    public function setIdUser(?int $idUser): self { $this->idUser = $idUser; return $this; }
+    public function getRoleEquipe(): ?string { return $this->roleEquipe; }
+    public function setRoleEquipe(?string $roleEquipe): self { $this->roleEquipe = $roleEquipe; return $this; }
+    public function getDateAffectation(): ?\DateTimeInterface { return $this->dateAffectation; }
+    public function setDateAffectation(?\DateTimeInterface $dateAffectation): self { $this->dateAffectation = $dateAffectation; return $this; }
+    public function getDateFin(): ?\DateTimeInterface { return $this->dateFin; }
+    public function setDateFin(?\DateTimeInterface $dateFin): self { $this->dateFin = $dateFin; return $this; }
+    public function getTauxParticipation(): string { return $this->tauxParticipation; }
+    public function setTauxParticipation(string $tauxParticipation): self { $this->tauxParticipation = $tauxParticipation; return $this; }
+    public function getStatutMembre(): ?string { return $this->statutMembre; }
+    public function setStatutMembre(?string $statutMembre): self { $this->statutMembre = $statutMembre; return $this; }
+    public function getCompetencesPrincipales(): ?string { return $this->competencesPrincipales; }
+    public function setCompetencesPrincipales(?string $competencesPrincipales): self { $this->competencesPrincipales = $competencesPrincipales; return $this; }
+    public function getNotes(): ?string { return $this->notes; }
+    public function setNotes(?string $notes): self { $this->notes = $notes; return $this; }
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeInterface $createdAt): self { $this->createdAt = $createdAt; return $this; }
+    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self { $this->updatedAt = $updatedAt; return $this; }
 }

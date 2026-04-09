@@ -43,18 +43,18 @@ class ParticipationEvenement
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'participations')]
-    #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id', nullable: false)]
-    private ?Utilisateur $utilisateur = null;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'participations')]
+    #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id', nullable: false)]
+    private ?User $User = null;
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getUser(): ?User
     {
-        return $this->utilisateur;
+        return $this->User;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): self
+    public function setUser(?User $User): self
     {
-        $this->utilisateur = $utilisateur;
+        $this->User = $User;
         return $this;
     }
 

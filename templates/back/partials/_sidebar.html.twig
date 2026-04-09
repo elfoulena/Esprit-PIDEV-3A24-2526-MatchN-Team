@@ -21,17 +21,19 @@
             </div>
         </div>
 
-        {# User card #}
+        {# User card - FIXED: removed [0] access #}
         {% if app.user %}
         <div class="sidebar-user-card">
             <div class="user-avatar-wrap">
                 <div class="user-avatar">
-                    {{ app.user.prenom[0]|upper }}{{ app.user.nom[0]|upper }}
+                    {% set prenomFirst = app.user.prenom|default('')|first|upper %}
+                    {% set nomFirst = app.user.nom|default('')|first|upper %}
+                    {{ prenomFirst ~ nomFirst|default('?') }}
                 </div>
                 <span class="user-status-dot"></span>
             </div>
             <div class="user-info">
-                <div class="user-name">{{ app.user.prenom }} {{ app.user.nom }}</div>
+                <div class="user-name">{{ app.user.prenom|default('') }} {{ app.user.nom|default('') }}</div>
                 <div class="user-role">{{ app.user.poste ?? 'Développeur' }}</div>
             </div>
         </div>
@@ -55,8 +57,9 @@
         {# PRINCIPAL #}
         <div class="nav-section">
             <span class="nav-section-label">PRINCIPAL</span>
-            <a href="{{ path('app_dashboard') }}"
-               class="nav-link {{ app.request.get('_route') == 'app_dashboard' ? 'active' : '' }}">
+            {# FIXED: Changed app_dashboard to app_home (existing route) #}
+            <a href="{{ path('app_home') }}"
+               class="nav-link {{ app.request.get('_route') == 'app_home' ? 'active' : '' }}">
                 <span class="nav-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -99,8 +102,8 @@
         {# ÉQUIPES #}
         <div class="nav-section">
             <span class="nav-section-label">ÉQUIPES</span>
-            <a href="#"
-               class="nav-link">
+            <a href="{{ path('app_equipe_index') }}"
+               class="nav-link {{ app.request.get('_route') starts with 'app_equipe' ? 'active' : '' }}">
                 <span class="nav-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -141,8 +144,8 @@
                     <span class="nav-badge nav-badge-warning">{{ pendingCount }}</span>
                 {% endif %}
             </a>
-            <a href="{{ path('app_evenement_index') }}"
-               class="nav-link {{ app.request.get('_route') starts with 'app_evenement' ? 'active' : '' }}">
+            <a href="{{ path('app_front_evenement_index') }}"
+               class="nav-link {{ app.request.get('_route') starts with 'app_front_evenement' ? 'active' : '' }}">
                 <span class="nav-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -173,7 +176,7 @@
             <span class="status-dot"></span>
             <span>Connecté</span>
         </div>
-        <a href="#" class="logout-btn" title="Déconnexion">
+        <a href="{{ path('app_logout') }}" class="logout-btn" title="Déconnexion">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>

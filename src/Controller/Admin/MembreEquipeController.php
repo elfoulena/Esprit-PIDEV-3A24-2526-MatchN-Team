@@ -35,7 +35,7 @@ class MembreEquipeController extends AbstractController
         $membres = $membreRepo->findByEquipeWithFilters($id_equipe, $q, $role, $statut, $sortBy, $sortDir);
         
         // Fetch user data for each member
-        $userRepo = $em->getRepository(\App\Entity\Utilisateur::class);
+        $userRepo = $em->getRepository(\App\Entity\User::class);
         $userData = [];
         foreach ($membres as $membre) {
             $user = $userRepo->find($membre->getIdUser());
@@ -78,7 +78,7 @@ class MembreEquipeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Check if user is already in the team
             if ($membreRepo->isUserInEquipe($membre->getIdUser(), $id_equipe)) {
-                $this->addFlash('danger', 'Cet utilisateur est déjà membre de cette équipe.');
+                $this->addFlash('danger', 'Cet User est déjà membre de cette équipe.');
                 return $this->redirectToRoute('app_membre_equipe_new', ['id_equipe' => $id_equipe]);
             }
 

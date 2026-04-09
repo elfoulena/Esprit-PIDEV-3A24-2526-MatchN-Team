@@ -44,18 +44,18 @@ class DemandeEquipe
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'demandeEquipes')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'demandeEquipes')]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id')]
-    private ?Utilisateur $utilisateur = null;
+    private ?User $User = null;
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getUser(): ?User
     {
-        return $this->utilisateur;
+        return $this->User;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): self
+    public function setUser(?User $User): self
     {
-        $this->utilisateur = $utilisateur;
+        $this->User = $User;
         return $this;
     }
 
@@ -115,16 +115,16 @@ class DemandeEquipe
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'demandesTraitees')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'demandesTraitees')]
     #[ORM\JoinColumn(name: 'traite_par', referencedColumnName: 'id')]
-    private ?Utilisateur $traitePar = null;
+    private ?User $traitePar = null;
 
-    public function getTraitePar(): ?Utilisateur
+    public function getTraitePar(): ?User
     {
         return $this->traitePar;
     }
 
-    public function setTraitePar(?Utilisateur $traitePar): self
+    public function setTraitePar(?User $traitePar): self
     {
         $this->traitePar = $traitePar;
         return $this;

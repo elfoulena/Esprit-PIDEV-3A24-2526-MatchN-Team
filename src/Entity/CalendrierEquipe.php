@@ -198,18 +198,18 @@ class CalendrierEquipe
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'calendrierEquipes')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'calendrierEquipes')]
     #[ORM\JoinColumn(name: 'createur_id', referencedColumnName: 'id')]
-    private ?Utilisateur $utilisateur = null;
+    private ?User $User = null;
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getUser(): ?User
     {
-        return $this->utilisateur;
+        return $this->User;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): self
+    public function setUser(?User $User): self
     {
-        $this->utilisateur = $utilisateur;
+        $this->User = $User;
         return $this;
     }
 

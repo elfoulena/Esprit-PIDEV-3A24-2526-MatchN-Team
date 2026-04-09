@@ -113,9 +113,8 @@ class Projet
         return $this;
     }
 
-    #[ORM\Column(type: 'decimal', nullable: true)]
-    private ?float $budget_total = null;
-
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $budget_total = null;
     public function getBudget_total(): ?float
     {
         return $this->budget_total;
@@ -127,7 +126,7 @@ class Projet
         return $this;
     }
 
-    #[ORM\Column(type: 'decimal', nullable: true)]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?float $budget_interne = null;
 
     public function getBudget_interne(): ?float
@@ -141,7 +140,7 @@ class Projet
         return $this;
     }
 
-    #[ORM\Column(type: 'decimal', nullable: true)]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?float $budget_freelance = null;
 
     public function getBudget_freelance(): ?float
@@ -239,16 +238,6 @@ class Projet
         return $this;
     }
 
-    #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'projets')]
-    #[ORM\JoinTable(
-        name: 'projet_competence',
-        joinColumns: [
-            new ORM\JoinColumn(name: 'id_projet', referencedColumnName: 'id_projet')
-        ],
-        inverseJoinColumns: [
-            new ORM\JoinColumn(name: 'id_competence', referencedColumnName: 'id_competence')
-        ]
-    )]
     private Collection $competences;
 
     public function __construct()

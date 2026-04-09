@@ -44,16 +44,16 @@ class ReponseReclamation
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $id_utilisateur = null;
+    private ?int $id_User = null;
 
-    public function getId_utilisateur(): ?int
+    public function getId_User(): ?int
     {
-        return $this->id_utilisateur;
+        return $this->id_User;
     }
 
-    public function setId_utilisateur(int $id_utilisateur): self
+    public function setId_User(int $id_User): self
     {
-        $this->id_utilisateur = $id_utilisateur;
+        $this->id_User = $id_User;
         return $this;
     }
 
@@ -102,14 +102,14 @@ class ReponseReclamation
         return $this;
     }
 
-    public function getIdUtilisateur(): ?int
+    public function getIdUser(): ?int
     {
-        return $this->id_utilisateur;
+        return $this->id_User;
     }
 
-    public function setIdUtilisateur(int $id_utilisateur): static
+    public function setIdUser(int $id_User): static
     {
-        $this->id_utilisateur = $id_utilisateur;
+        $this->id_User = $id_User;
 
         return $this;
     }

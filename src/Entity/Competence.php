@@ -71,16 +71,6 @@ class Competence
         return $this;
     }
 
-    #[ORM\ManyToMany(targetEntity: Projet::class, inversedBy: 'competences')]
-    #[ORM\JoinTable(
-        name: 'projet_competence',
-        joinColumns: [
-            new ORM\JoinColumn(name: 'id_competence', referencedColumnName: 'id_competence')
-        ],
-        inverseJoinColumns: [
-            new ORM\JoinColumn(name: 'id_projet', referencedColumnName: 'id_projet')
-        ]
-    )]
     private Collection $projets;
 
     public function __construct()

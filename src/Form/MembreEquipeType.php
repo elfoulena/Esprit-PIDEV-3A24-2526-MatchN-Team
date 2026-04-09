@@ -19,7 +19,7 @@ class MembreEquipeType extends AbstractType
     {
         $builder
             ->add('idUser', IntegerType::class, [
-                'label' => 'ID Utilisateur *',
+                'label' => 'ID User *',
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Entrez l\'ID de l\'employé',

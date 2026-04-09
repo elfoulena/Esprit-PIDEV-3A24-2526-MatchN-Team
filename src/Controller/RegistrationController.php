@@ -134,7 +134,7 @@ public function register(
         ]);
     }
 
-    // Vérifie le code saisi par l'utilisateur
+    // Vérifie le code saisi par l'User
     #[Route('/verify/email', name: 'app_verify_email', methods: ['POST'])]
     public function verifyEmail(
         Request $request,

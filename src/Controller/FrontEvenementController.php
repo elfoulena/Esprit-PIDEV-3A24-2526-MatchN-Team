@@ -24,10 +24,10 @@ class FrontEvenementController extends AbstractController
         $evenements = $evenementRepository->findByFilters($q, $type, $sort);
 
         $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test (évite l'erreur SQL sur mot_de_passe)
+        // TEMPORAIRE: Fallback sur l'User ID 10 pour le test (évite l'erreur SQL sur mot_de_passe)
         if (!$user) {
             try {
-                $user = $entityManager->getReference(\App\Entity\Utilisateur::class, 10);
+                $user = $entityManager->getReference(\App\Entity\User::class, 10);
             } catch (\Exception $e) {
                 $user = null;
             }
@@ -39,7 +39,7 @@ class FrontEvenementController extends AbstractController
             $participatingIdsRaw = $qb->select('e.id_evenement')
                 ->from(ParticipationEvenement::class, 'p')
                 ->join('p.evenement', 'e')
-                ->where('p.utilisateur = :user')
+                ->where('p.User = :user')
                 ->setParameter('user', $user)
                 ->getQuery()
                 ->getScalarResult();
@@ -66,10 +66,10 @@ class FrontEvenementController extends AbstractController
         $evenements = $evenementRepository->findByFilters($q, $type, $sort);
 
         $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test
+        // TEMPORAIRE: Fallback sur l'User ID 10 pour le test
         if (!$user) {
             try {
-                $user = $entityManager->getReference(\App\Entity\Utilisateur::class, 10);
+                $user = $entityManager->getReference(\App\Entity\User::class, 10);
             } catch (\Exception $e) {
                 $user = null;
             }
@@ -81,7 +81,7 @@ class FrontEvenementController extends AbstractController
             $participatingIdsRaw = $qb->select('e.id_evenement')
                 ->from(ParticipationEvenement::class, 'p')
                 ->join('p.evenement', 'e')
-                ->where('p.utilisateur = :user')
+                ->where('p.User = :user')
                 ->setParameter('user', $user)
                 ->getQuery()
                 ->getScalarResult();
@@ -109,17 +109,17 @@ class FrontEvenementController extends AbstractController
         }
 
         $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test
+        // TEMPORAIRE: Fallback sur l'User ID 10 pour le test
         if (!$user) {
             try {
-                $user = $entityManager->getReference(\App\Entity\Utilisateur::class, 10);
+                $user = $entityManager->getReference(\App\Entity\User::class, 10);
             } catch (\Exception $e) {
                 $user = null;
             }
         }
 
         if (!$user) {
-            $this->addFlash('error', 'Aucun utilisateur trouvé en base de données.');
+            $this->addFlash('error', 'Aucun User trouvé en base de données.');
             return $this->redirectToRoute('app_front_evenement_index');
         }
 
@@ -127,7 +127,7 @@ class FrontEvenementController extends AbstractController
         $repoParticipation = $entityManager->getRepository(ParticipationEvenement::class);
         $existing = $repoParticipation->findOneBy([
             'evenement' => $evenement,
-            'utilisateur' => $user
+            'User' => $user
         ]);
 
         if ($existing) {
@@ -147,7 +147,7 @@ class FrontEvenementController extends AbstractController
         // Créer participation
         $participation = new ParticipationEvenement();
         $participation->setEvenement($evenement);
-        $participation->setUtilisateur($user);
+        $participation->setUser($user);
         $participation->setDateInscription(new \DateTime());
 
         $evenement->setNombre_actuel($currentParticipants + 1);
@@ -177,10 +177,10 @@ class FrontEvenementController extends AbstractController
         }
 
         $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test
+        // TEMPORAIRE: Fallback sur l'User ID 10 pour le test
         if (!$user) {
             try {
-                $user = $entityManager->getReference(\App\Entity\Utilisateur::class, 10);
+                $user = $entityManager->getReference(\App\Entity\User::class, 10);
             } catch (\Exception $e) {
                 $user = null;
             }
@@ -193,7 +193,7 @@ class FrontEvenementController extends AbstractController
         $repoParticipation = $entityManager->getRepository(ParticipationEvenement::class);
         $participation = $repoParticipation->findOneBy([
             'evenement' => $evenement,
-            'utilisateur' => $user
+            'User' => $user
         ]);
 
         if ($participation) {

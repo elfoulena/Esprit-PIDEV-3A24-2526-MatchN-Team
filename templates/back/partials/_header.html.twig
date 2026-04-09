@@ -59,10 +59,14 @@
         {# Divider #}
         <div class="header-divider"></div>
 
-        {# Profile Dropdown #}
+        {# Profile Dropdown - SIMPLIFIED VERSION WITHOUT STRING INDEX ACCESS #}
         <div class="header-profile" onclick="toggleProfileMenu()">
             <div class="profile-avatar">
-                {% if app.user %}{{ app.user.prenom[0]|upper }}{{ app.user.nom[0]|upper }}{% else %}?{% endif %}
+                {# SIMPLE FALLBACK - just show an icon instead of trying to access string characters #}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
             </div>
             <div class="profile-info">
                 <span class="profile-name">{% if app.user %}{{ app.user.prenom }} {{ app.user.nom }}{% else %}Invité{% endif %}</span>
@@ -93,7 +97,7 @@
                     Paramètres
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item dropdown-item-danger">
+                <a href="{{ path('app_logout') }}" class="dropdown-item dropdown-item-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -220,8 +224,10 @@
     width: 34px; height: 34px;
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
     flex-shrink: 0;
 }
 .profile-info {

@@ -30,30 +30,30 @@ class Reclamation
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $id_utilisateur = null;
+    private ?int $id_User = null;
 
-    public function getId_utilisateur(): ?int
+    public function getId_User(): ?int
     {
-        return $this->id_utilisateur;
+        return $this->id_User;
     }
 
-    public function setId_utilisateur(int $id_utilisateur): self
+    public function setId_User(int $id_User): self
     {
-        $this->id_utilisateur = $id_utilisateur;
+        $this->id_User = $id_User;
         return $this;
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $type_utilisateur = null;
+    private ?string $type_User = null;
 
-    public function getType_utilisateur(): ?string
+    public function getType_User(): ?string
     {
-        return $this->type_utilisateur;
+        return $this->type_User;
     }
 
-    public function setType_utilisateur(string $type_utilisateur): self
+    public function setType_User(string $type_User): self
     {
-        $this->type_utilisateur = $type_utilisateur;
+        $this->type_User = $type_User;
         return $this;
     }
 
@@ -104,26 +104,26 @@ class Reclamation
         return $this->id_reclamation;
     }
 
-    public function getIdUtilisateur(): ?int
+    public function getIdUser(): ?int
     {
-        return $this->id_utilisateur;
+        return $this->id_User;
     }
 
-    public function setIdUtilisateur(int $id_utilisateur): static
+    public function setIdUser(int $id_User): static
     {
-        $this->id_utilisateur = $id_utilisateur;
+        $this->id_User = $id_User;
 
         return $this;
     }
 
-    public function getTypeUtilisateur(): ?string
+    public function getTypeUser(): ?string
     {
-        return $this->type_utilisateur;
+        return $this->type_User;
     }
 
-    public function setTypeUtilisateur(string $type_utilisateur): static
+    public function setTypeUser(string $type_User): static
     {
-        $this->type_utilisateur = $type_utilisateur;
+        $this->type_User = $type_User;
 
         return $this;
     }

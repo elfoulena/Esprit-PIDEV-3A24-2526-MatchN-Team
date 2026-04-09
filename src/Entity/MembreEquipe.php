@@ -21,7 +21,7 @@ class MembreEquipe
     private ?Equipe $equipe = null;
 
     #[ORM\Column(name: 'id_user', type: Types::INTEGER)]
-    #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
+    #[Assert\NotNull(message: 'L\'User est obligatoire.')]
     private ?int $idUser = null;
 
     #[ORM\Column(name: 'role_equipe', type: Types::STRING, length: 30)]

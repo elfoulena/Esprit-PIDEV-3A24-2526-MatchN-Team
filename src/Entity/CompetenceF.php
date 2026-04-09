@@ -56,7 +56,7 @@ class CompetenceF
         return $this;
     }
 
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, inversedBy: 'competenceFs')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'competenceFs')]
     #[ORM\JoinTable(
         name: 'freelancer_competence',
         joinColumns: [
@@ -66,35 +66,35 @@ class CompetenceF
             new ORM\JoinColumn(name: 'freelancer_id', referencedColumnName: 'id')
         ]
     )]
-    private Collection $utilisateurs;
+    private Collection $Users;
 
     public function __construct()
     {
-        $this->utilisateurs = new ArrayCollection();
+        $this->Users = new ArrayCollection();
     }
 
     /**
-     * @return Collection<int, Utilisateur>
+     * @return Collection<int, User>
      */
-    public function getUtilisateurs(): Collection
+    public function getUsers(): Collection
     {
-        if (!$this->utilisateurs instanceof Collection) {
-            $this->utilisateurs = new ArrayCollection();
+        if (!$this->Users instanceof Collection) {
+            $this->Users = new ArrayCollection();
         }
-        return $this->utilisateurs;
+        return $this->Users;
     }
 
-    public function addUtilisateur(Utilisateur $utilisateur): self
+    public function addUser(User $User): self
     {
-        if (!$this->getUtilisateurs()->contains($utilisateur)) {
-            $this->getUtilisateurs()->add($utilisateur);
+        if (!$this->getUsers()->contains($User)) {
+            $this->getUsers()->add($User);
         }
         return $this;
     }
 
-    public function removeUtilisateur(Utilisateur $utilisateur): self
+    public function removeUser(User $User): self
     {
-        $this->getUtilisateurs()->removeElement($utilisateur);
+        $this->getUsers()->removeElement($User);
         return $this;
     }
 

@@ -1,0 +1,532 @@
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Gestion des Réclamations — MatchNTeam{% endblock %}
+{% block page_title %}Réclamations{% endblock %}
+
+{% block extra_styles %}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 0 var(--radius-lg) 0 80px;
+    opacity: 0.07;
+}
+.stat-card.blue::before   { background: var(--accent-blue); }
+.stat-card.orange::before { background: var(--accent-orange); }
+.stat-card.cyan::before   { background: #06b6d4; }
+.stat-card.green::before  { background: var(--accent-green); }
+.stat-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; font-size: 20px;
+}
+.stat-card.blue   .stat-icon { background: rgba(59,130,246,0.12);  color: var(--accent-blue); }
+.stat-card.orange .stat-icon { background: rgba(245,158,11,0.12);  color: var(--accent-orange); }
+.stat-card.cyan   .stat-icon { background: rgba(6,182,212,0.12);   color: #06b6d4; }
+.stat-card.green  .stat-icon { background: rgba(16,185,129,0.12);  color: var(--accent-green); }
+.stat-value { font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.data-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+    padding: 24px;
+}
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px; font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-color);
+}
+.data-table tbody td {
+    padding: 14px 16px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr.row-critique { background: rgba(220,38,38,0.03); }
+.data-table tbody tr.row-haute    { background: rgba(245,158,11,0.03); }
+
+.badge-priorite {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 20px; padding: 3px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: .4px;
+    white-space: nowrap; border-width: 1px; border-style: solid;
+}
+.badge-critique { background:#FEF2F2; color:#DC2626; border-color:#FECACA; }
+.badge-haute    { background:#FFFBEB; color:#D97706; border-color:#FDE68A; }
+.badge-moyenne  { background:#EFF6FF; color:#2563EB; border-color:#BFDBFE; }
+.badge-normale  { background:#F9FAFB; color:#6B7280; border-color:#E5E7EB; }
+
+.filter-bar {
+    display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;
+}
+.filter-bar input,
+.filter-bar select {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    font-size: 13px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+}
+.filter-bar input { flex: 1; min-width: 180px; }
+.filter-bar select { width: 180px; }
+.btn-filter {
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--accent-blue);
+    background: var(--card-bg);
+    color: var(--accent-blue);
+    font-weight: 700; font-size: 13px;
+    cursor: pointer; transition: all var(--transition);
+    font-family: inherit;
+}
+.btn-filter:hover { background: var(--accent-blue); color: #fff; }
+
+.bandeau-tri {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: var(--radius-sm);
+    padding: 11px 18px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; margin-bottom: 14px;
+}
+
+.statut-pill {
+    border-radius: 10px; padding: 10px 14px;
+    text-align: center; cursor: pointer;
+    transition: .2s; font-size: 13px; font-weight: 600;
+}
+{% endblock %}
+
+{% block content %}
+
+{# Flashs #}
+{% for msg in app.flashes('success') %}
+    <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;color:#059669;font-weight:600;">
+        ✅ {{ msg }}
+    </div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+    <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;color:#dc2626;font-weight:600;">
+        ❌ {{ msg }}
+    </div>
+{% endfor %}
+
+{# ── Stats ── #}
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Total réclamations</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">🆕</div>
+        <div class="stat-value">{{ stats.nouveau }}</div>
+        <div class="stat-label">Nouveau</div>
+    </div>
+    <div class="stat-card cyan">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value">{{ stats.en_cours }}</div>
+        <div class="stat-label">En cours</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ stats.ferme }}</div>
+        <div class="stat-label">Fermées</div>
+    </div>
+</div>
+
+{# ── Tableau ── #}
+<div class="data-card">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:800;color:var(--text-primary);">
+            Liste des réclamations
+        </div>
+        <button onclick="ouvrirStats()" style="
+            display:inline-flex;align-items:center;gap:6px;
+            padding:8px 16px;border-radius:var(--radius-sm);
+            background:rgba(139,92,246,0.1);color:var(--accent-purple);
+            border:1px solid rgba(139,92,246,0.3);
+            font-weight:700;font-size:13px;cursor:pointer;
+            font-family:inherit;transition:all var(--transition);"
+            onmouseover="this.style.background='var(--accent-purple)';this.style.color='#fff'"
+            onmouseout="this.style.background='rgba(139,92,246,0.1)';this.style.color='var(--accent-purple)'">
+            📊 Statistiques
+        </button>
+    </div>
+
+    {# Filtre #}
+    <form method="GET" class="filter-bar">
+        <input type="text" name="search"
+               placeholder="🔍 Rechercher dans les messages..."
+               value="{{ search }}">
+        <select name="statut">
+            <option value="">Tous les statuts</option>
+            <option value="nouveau"  {{ statut == 'nouveau'  ? 'selected' }}>Nouveau</option>
+            <option value="en_cours" {{ statut == 'en_cours' ? 'selected' }}>En cours</option>
+            <option value="fermé"    {{ statut == 'fermé'    ? 'selected' }}>Fermé</option>
+        </select>
+        <select name="tri" style="width:200px;{% if tri == 'priorite' %}border-color:#DC2626;color:#DC2626;font-weight:700;{% endif %}">
+            <option value="">📋 Tri par défaut</option>
+            <option value="priorite" {{ tri == 'priorite' ? 'selected' }}>🚨 Tri par urgence</option>
+        </select>
+        <button type="submit" class="btn-filter">Filtrer</button>
+        {% if tri == 'priorite' %}
+            <a href="{{ path('admin_reclamation_index', {statut: statut, search: search}) }}"
+               style="padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border-color);font-size:13px;color:var(--text-secondary);text-decoration:none;">
+                ✕ Réinitialiser
+            </a>
+        {% endif %}
+    </form>
+
+    {# Bandeau tri actif #}
+    {% if tri == 'priorite' %}
+    <div class="bandeau-tri">
+        <span style="font-size:18px;">🚨</span>
+        <span style="color:#991B1B;font-weight:700;">Tri intelligent actif</span>
+        <span style="color:#B91C1C;">— Les réclamations les plus urgentes apparaissent en premier.</span>
+        <span style="margin-left:auto;display:flex;gap:6px;font-size:11px;">
+            <span style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:20px;padding:2px 8px;">🔴 CRITIQUE</span>
+            <span style="background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;border-radius:20px;padding:2px 8px;">🟠 HAUTE</span>
+            <span style="background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;border-radius:20px;padding:2px 8px;">🔵 MOYENNE</span>
+            <span style="background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB;border-radius:20px;padding:2px 8px;">⚪ NORMALE</span>
+        </span>
+    </div>
+    {% endif %}
+
+    {# Table #}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#ID</th>
+                <th>Priorité</th>
+                <th>Type</th>
+                <th>Message</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in reclamations %}
+            {% set r = item.reclamation %}
+            {% set p = item.priorite %}
+
+            {% if p.niveau == 'CRITIQUE' %}
+                {% set rowClass   = 'row-critique' %}
+                {% set badgeClass = 'badge-critique' %}
+                {% set pIcon      = '🔴' %}
+            {% elseif p.niveau == 'HAUTE' %}
+                {% set rowClass   = 'row-haute' %}
+                {% set badgeClass = 'badge-haute' %}
+                {% set pIcon      = '🟠' %}
+            {% elseif p.niveau == 'MOYENNE' %}
+                {% set rowClass   = '' %}
+                {% set badgeClass = 'badge-moyenne' %}
+                {% set pIcon      = '🔵' %}
+            {% else %}
+                {% set rowClass   = '' %}
+                {% set badgeClass = 'badge-normale' %}
+                {% set pIcon      = '⚪' %}
+            {% endif %}
+
+            <tr class="{{ rowClass }}">
+                <td><strong>#{{ r.id }}</strong></td>
+                <td><span class="badge-priorite {{ badgeClass }}">{{ pIcon }} {{ p.niveau }}</span></td>
+                <td>{{ r.type }}</td>
+                <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    {{ r.message|slice(0,80) }}…
+                </td>
+                <td>
+                    {% if r.statut == 'nouveau' %}
+                        <span style="background:rgba(245,158,11,0.12);color:#d97706;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">🆕 Nouveau</span>
+                    {% elseif r.statut == 'en_cours' %}
+                        <span style="background:rgba(6,182,212,0.12);color:#0891b2;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">⏳ En cours</span>
+                    {% else %}
+                        <span style="background:rgba(16,185,129,0.12);color:#059669;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">✅ Fermé</span>
+                    {% endif %}
+                </td>
+                <td style="color:var(--text-secondary);font-size:12px;">
+                    {{ r.dateCreation ? r.dateCreation|date('d/m/Y') : '-' }}
+                </td>
+                <td style="white-space:nowrap;">
+                    <button onclick="ouvrirReponse({{ r.id }}, '{{ r.message|e('js') }}', '{{ r.statut }}')"
+                            style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:var(--radius-sm);background:rgba(59,130,246,0.1);color:var(--accent-blue);border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">
+                        ✉️ Répondre
+                    </button>
+                    <form method="POST" action="{{ path('admin_reclamation_supprimer', {id: r.id}) }}"
+                          style="display:inline;" onsubmit="return confirm('Supprimer ?')">
+                        <button style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:var(--radius-sm);background:rgba(239,68,68,0.1);color:#dc2626;border:none;font-size:12px;cursor:pointer;">
+                            🗑
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary);">
+                    Aucune réclamation trouvée.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+{# Chart.js #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+function ouvrirReponse(id, message, statutActuel) {
+    document.getElementById('formReponse').action = '/admin/reclamations/' + id + '/repondre';
+    document.getElementById('msgReclamation').textContent = message;
+    document.getElementById('contenuReponse').value = '';
+    document.getElementById('charCounter').textContent = '0 caractères';
+
+    document.querySelectorAll('.statut-pill').forEach(p => {
+        p.style.background = 'transparent';
+        p.style.color = p.dataset.color;
+    });
+
+    const map = { 'nouveau': 's_nouveau', 'en_cours': 's_en_cours', 'fermé': 's_ferme' };
+    const radioId = map[statutActuel];
+    if (radioId) {
+        const radio = document.getElementById(radioId);
+        if (radio) {
+            radio.checked = true;
+            const pill = radio.nextElementSibling;
+            pill.style.background = pill.dataset.color;
+            pill.style.color = 'white';
+        }
+    }
+    new bootstrap.Modal(document.getElementById('modalReponse')).show();
+}
+
+function updateCounter(el) {
+    document.getElementById('charCounter').textContent = el.value.length + ' caractères';
+}
+
+document.querySelectorAll('.statut-option input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+        document.querySelectorAll('.statut-pill').forEach(p => {
+            p.style.background = 'transparent';
+            p.style.color = p.dataset.color;
+        });
+        const pill = this.nextElementSibling;
+        pill.style.background = pill.dataset.color;
+        pill.style.color = 'white';
+    });
+});
+
+let chartInstance = null;
+function ouvrirStats() {
+    const modalEl = document.getElementById('modalStats');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    modalEl.addEventListener('shown.bs.modal', function onShown() {
+        this.removeEventListener('shown.bs.modal', onShown);
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+        const ctx = document.getElementById('chartStats').getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Nouveau', 'En cours', 'Fermé'],
+                datasets: [{
+                    data: [{{ stats.nouveau }}, {{ stats.en_cours }}, {{ stats.ferme }}],
+                    backgroundColor: ['#F59E0B', '#06B6D4', '#22C55E'],
+                    borderColor: ['#fff', '#fff', '#fff'],
+                    borderWidth: 4, hoverOffset: 12, borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, cutout: '62%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const total = {{ stats.total }};
+                                const pct = total > 0 ? Math.round(ctx.raw / total * 100) : 0;
+                                return '  ' + ctx.label + ' : ' + ctx.raw + ' (' + pct + '%)';
+                            }
+                        },
+                        backgroundColor: '#1e293b', padding: 12, cornerRadius: 10
+                    }
+                },
+                animation: { animateRotate: true, duration: 700 }
+            }
+        });
+    });
+}
+</script>
+
+{# Modal Répondre #}
+<div class="modal fade" id="modalReponse" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border:none;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.15);">
+            <div style="background:linear-gradient(135deg,#1e293b,#334155);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="background:rgba(255,255,255,.1);border-radius:10px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:20px;">✉️</div>
+                    <div>
+                        <div style="color:white;font-weight:700;font-size:16px;">Répondre à la réclamation</div>
+                        <div style="color:rgba(255,255,255,.5);font-size:12px;">Réponse officielle — visible par l'utilisateur</div>
+                    </div>
+                </div>
+                <button type="button" data-bs-dismiss="modal" style="background:rgba(255,255,255,.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+            </div>
+            <form method="POST" id="formReponse">
+                <div style="padding:24px 28px;display:flex;flex-direction:column;gap:20px;background:#f8fafc;">
+                    <div style="background:white;border-radius:var(--radius-md);padding:16px;border-left:4px solid var(--accent-blue);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:11px;font-weight:700;color:var(--accent-blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">💬 Message de l'utilisateur</div>
+                        <div id="msgReclamation" style="color:var(--text-primary);font-size:14px;line-height:1.6;font-style:italic;"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">Changer le statut</div>
+                        <div style="display:flex;gap:10px;">
+                            <label style="flex:1;cursor:pointer;" for="s_nouveau">
+                                <input type="radio" name="statut" id="s_nouveau" value="nouveau" style="display:none;">
+                                <div class="statut-pill" data-color="#F59E0B" style="border:2px solid #F59E0B;color:#F59E0B;">🆕 Nouveau</div>
+                            </label>
+                            <label style="flex:1;cursor:pointer;" for="s_en_cours">
+                                <input type="radio" name="statut" id="s_en_cours" value="en_cours" style="display:none;">
+                                <div class="statut-pill" data-color="#06B6D4" style="border:2px solid #06B6D4;color:#06B6D4;">⏳ En cours</div>
+                            </label>
+                            <label style="flex:1;cursor:pointer;" for="s_ferme">
+                                <input type="radio" name="statut" id="s_ferme" value="fermé" style="display:none;">
+                                <div class="statut-pill" data-color="#22C55E" style="border:2px solid #22C55E;color:#22C55E;">✅ Fermé</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">Votre réponse</div>
+                        <div style="position:relative;">
+                            <textarea name="contenu" id="contenuReponse" rows="5"
+                                      placeholder="Rédigez une réponse claire et professionnelle..."
+                                      oninput="updateCounter(this)"
+                                      style="width:100%;resize:vertical;border:2px solid var(--border-color);border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;line-height:1.6;color:var(--text-primary);outline:none;font-family:inherit;transition:border-color .2s;"
+                                      onfocus="this.style.borderColor='var(--accent-blue)'"
+                                      onblur="this.style.borderColor='var(--border-color)'"></textarea>
+                            <div id="charCounter" style="position:absolute;bottom:10px;right:12px;font-size:11px;color:var(--text-secondary);">0 caractères</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:16px 28px;background:white;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;gap:10px;">
+                    <button type="button" data-bs-dismiss="modal" style="background:none;border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:9px 20px;color:var(--text-secondary);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;">Annuler</button>
+                    <button type="submit" style="background:var(--accent-blue);border:none;border-radius:var(--radius-sm);padding:9px 24px;color:white;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">✉ Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Modal Stats #}
+<div class="modal fade" id="modalStats" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+        <div class="modal-content" style="border:none;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.15);">
+            <div style="background:linear-gradient(135deg,#1e293b,#334155);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="background:rgba(255,255,255,.1);border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;">📊</div>
+                    <div>
+                        <div style="color:white;font-weight:700;font-size:15px;">Statistiques</div>
+                        <div style="color:rgba(255,255,255,.5);font-size:12px;">Répartition par statut</div>
+                    </div>
+                </div>
+                <button type="button" data-bs-dismiss="modal" style="background:rgba(255,255,255,.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">×</button>
+            </div>
+            <div style="padding:24px;background:#f8fafc;">
+                <div style="position:relative;width:100%;max-width:280px;margin:0 auto;">
+                    <canvas id="chartStats"></canvas>
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+                        <div style="font-size:28px;font-weight:800;color:var(--text-primary);line-height:1;">{{ stats.total }}</div>
+                        <div style="font-size:11px;color:var(--text-secondary);">total</div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap;">
+                    <span style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#F59E0B;display:inline-block;"></span>
+                        Nouveau <strong style="background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:20px;">{{ stats.nouveau }}</strong>
+                    </span>
+                    <span style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#06B6D4;display:inline-block;"></span>
+                        En cours <strong style="background:#CFFAFE;color:#155E75;padding:1px 6px;border-radius:20px;">{{ stats.en_cours }}</strong>
+                    </span>
+                    <span style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#22C55E;display:inline-block;"></span>
+                        Fermé <strong style="background:#DCFCE7;color:#166534;padding:1px 6px;border-radius:20px;">{{ stats.ferme }}</strong>
+                    </span>
+                </div>
+                {% if stats.total > 0 %}
+                <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
+                    <div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">
+                            <span>🆕 Nouveau</span><span>{{ ((stats.nouveau / stats.total) * 100)|round }}%</span>
+                        </div>
+                        <div style="background:var(--border-color);border-radius:99px;height:6px;overflow:hidden;">
+                            <div style="background:#F59E0B;height:100%;border-radius:99px;width:{{ ((stats.nouveau / stats.total) * 100)|round }}%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">
+                            <span>⏳ En cours</span><span>{{ ((stats.en_cours / stats.total) * 100)|round }}%</span>
+                        </div>
+                        <div style="background:var(--border-color);border-radius:99px;height:6px;overflow:hidden;">
+                            <div style="background:#06B6D4;height:100%;border-radius:99px;width:{{ ((stats.en_cours / stats.total) * 100)|round }}%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">
+                            <span>✅ Fermé</span><span>{{ ((stats.ferme / stats.total) * 100)|round }}%</span>
+                        </div>
+                        <div style="background:var(--border-color);border-radius:99px;height:6px;overflow:hidden;">
+                            <div style="background:#22C55E;height:100%;border-radius:99px;width:{{ ((stats.ferme / stats.total) * 100)|round }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div style="padding:14px 24px;background:white;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;">
+                <button type="button" data-bs-dismiss="modal" style="background:var(--accent-blue);border:none;border-radius:var(--radius-sm);padding:8px 20px;color:white;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

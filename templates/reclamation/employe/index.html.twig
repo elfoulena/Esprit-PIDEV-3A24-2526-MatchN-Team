@@ -1,0 +1,443 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes Réclamations - Employé{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: #F0F4F9; overflow-x: hidden; }
+
+        /* ── Layout ── */
+        .emp-wrapper { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar { width: 280px; background: #1A2340; color: #fff; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,.15); position: sticky; top: 0; height: 100vh; }
+        .sidebar-header { background: #141B33; padding: 30px 20px 22px; text-align: center; }
+        .sidebar-logo-icon { font-size: 38px; }
+        .sidebar-logo-text { font-size: 18px; font-weight: 700; letter-spacing: 3px; margin-top: 8px; }
+        .sidebar-logo-subtext { font-size: 11px; color: #7A8BB5; }
+        .user-info { background: #222E52; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2D3D6A; }
+        .user-avatar { font-size: 28px; background: #2D3D6A; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .user-details .user-name { font-weight: 700; font-size: 13px; }
+        .user-details .user-role { font-size: 11px; color: #7A8BB5; }
+        .user-details .online-status { color: #22C55E; font-size: 10px; }
+        .sidebar-menu { flex: 1; padding: 20px 15px; overflow-y: auto; }
+        .menu-section-title { color: #4A5C8A; font-size: 10px; font-weight: 700; letter-spacing: 1.8px; margin: 14px 0 6px 8px; }
+        .menu-button { display: flex; align-items: center; gap: 12px; padding: 11px 14px; color: #A0AEC0; text-decoration: none; font-size: 13px; border-radius: 8px; transition: .2s; margin-bottom: 4px; }
+        .menu-button:hover { background: #222E52; color: white; }
+        .menu-button.active { background: linear-gradient(135deg, #0F6E56, #1D9E75); color: white; font-weight: 700; box-shadow: 0 4px 10px rgba(29,158,117,.35); }
+        .menu-button.highlight { background: rgba(255,45,85,.1); color: #ff6b6b; border: 1px solid rgba(255,45,85,.3); }
+        .sidebar-footer { background: #141B33; padding: 15px 18px; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .status-text { color: #7A8BB5; }
+        .logout-link { color: #7A8BB5; text-decoration: none; }
+        .logout-link:hover { color: #E53E3E; }
+
+        /* ── Main content ── */
+        .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .top-bar { background: white; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+        .page-title { font-size: 18px; font-weight: 700; color: #1A2340; }
+        .top-bar-right { display: flex; align-items: center; gap: 15px; }
+        .datetime { background: #F1F5F9; padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #64748B; }
+
+        .content-scroll { flex: 1; overflow-y: auto; padding: 28px 32px; }
+        .content-area { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+        /* ── Hero banner ── */
+        .hero-banner {
+            background: linear-gradient(135deg, #085041, #0F6E56, #1D9E75);
+            border-radius: 16px; padding: 26px 28px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: white; box-shadow: 0 12px 20px rgba(8,80,65,.25);
+        }
+        .hero-title { font-size: 24px; font-weight: 700; }
+        .hero-subtitle { opacity: .85; font-size: 13px; margin-top: 5px; }
+        .hero-badge { background: rgba(255,255,255,.2); padding: 6px 14px; border-radius: 20px; font-size: 12px; }
+        .btn-new {
+            background: rgba(255,255,255,.15);
+            border: 2px solid rgba(255,255,255,.5);
+            border-radius: 20px; padding: 8px 20px;
+            color: white; font-weight: 700; font-size: 13px;
+            cursor: pointer; transition: .2s;
+        }
+        .btn-new:hover { background: rgba(255,255,255,.3); }
+
+        /* ── Stats grid ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .stat-card {
+            background: white; border-radius: 14px; padding: 20px 22px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.06);
+            border-top: 4px solid; transition: transform .2s, box-shadow .2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
+        .stat-card.primary { border-color: #1D9E75; }
+        .stat-card.warning { border-color: #F59E0B; }
+        .stat-card.info    { border-color: #06B6D4; }
+        .stat-card.success { border-color: #22C55E; }
+        .stat-icon { font-size: 28px; margin-bottom: 10px; }
+        .stat-label { font-size: 11px; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; }
+        .stat-number { font-size: 36px; font-weight: 700; color: #1A2340; margin-top: 2px; }
+
+        /* ── Activity card ── */
+        .activity-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+        .section-title { font-size: 16px; font-weight: 700; color: #1A2340; margin-bottom: 16px; }
+
+        /* ── Filter bar ── */
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+        .filter-input {
+            flex: 1; padding: 9px 14px; border-radius: 10px;
+            border: 1.5px solid #E2E8F0; font-size: 13px; font-family: inherit;
+            outline: none; transition: border-color .2s; background: #FAFBFF;
+        }
+        .filter-input:focus { border-color: #1D9E75; }
+        .filter-select {
+            width: 200px; padding: 9px 14px; border-radius: 10px;
+            border: 1.5px solid #E2E8F0; font-size: 13px; font-family: inherit;
+            outline: none; background: #FAFBFF; cursor: pointer;
+        }
+        .filter-select:focus { border-color: #1D9E75; }
+        .btn-filter {
+            background: white; border: 2px solid #9FE1CB;
+            border-radius: 10px; padding: 9px 22px;
+            color: #0F6E56; font-weight: 700; font-size: 13px;
+            cursor: pointer; transition: .2s; font-family: inherit;
+        }
+        .btn-filter:hover { background: #1D9E75; color: white; border-color: #1D9E75; }
+
+        /* ── Table ── */
+        .rec-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .rec-table thead tr { background: #1A2340; color: white; }
+        .rec-table thead th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .rec-table thead th:first-child { border-radius: 10px 0 0 10px; }
+        .rec-table thead th:last-child  { border-radius: 0 10px 10px 0; }
+        .rec-table tbody tr { border-bottom: 1px solid #F1F5F9; transition: background .15s; }
+        .rec-table tbody tr:hover { background: #F0FBF7; }
+        .rec-table tbody td { padding: 13px 16px; color: #334155; vertical-align: middle; }
+
+        /* ── Badges statut ── */
+        .badge-statut { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: .4px; }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .badge-nouveau  { background: #FEF3C7; color: #92400E; }
+        .badge-nouveau  .badge-dot { background: #D97706; }
+        .badge-en_cours { background: #CFFAFE; color: #155E75; }
+        .badge-en_cours .badge-dot { background: #06B6D4; }
+        .badge-ferme    { background: #DCFCE7; color: #166534; }
+        .badge-ferme    .badge-dot { background: #22C55E; }
+
+        /* ── Action buttons ── */
+        .btn-action {
+            padding: 6px 12px; border-radius: 8px; border: none;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: .2s; font-family: inherit;
+        }
+        .btn-edit   { background: #FEF3C7; color: #92400E; }
+        .btn-edit:hover   { background: #F59E0B; color: white; }
+        .btn-delete { background: #FEE2E2; color: #991B1B; }
+        .btn-delete:hover { background: #EF4444; color: white; }
+
+        /* ── Modal ── */
+        .modal-header-custom {
+            background: linear-gradient(135deg, #1A2340 0%, #2D3D6A 100%);
+            padding: 24px 28px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-icon-box {
+            background: rgba(255,255,255,.12); border-radius: 12px;
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .modal-title-custom { color: white; font-weight: 700; font-size: 16px; }
+        .modal-subtitle-custom { color: rgba(255,255,255,.5); font-size: 12px; margin-top: 2px; }
+        .modal-close-btn {
+            background: rgba(255,255,255,.1); border: none; color: white;
+            width: 32px; height: 32px; border-radius: 50%; font-size: 18px;
+            cursor: pointer; line-height: 1; transition: .2s;
+        }
+        .modal-close-btn:hover { background: rgba(255,255,255,.2); }
+        .modal-body-custom { padding: 24px 28px; background: #FAFBFF; display: flex; flex-direction: column; gap: 18px; }
+        .form-label-custom { font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 8px; }
+        .textarea-custom {
+            width: 100%; resize: vertical; border: 2px solid #E2E8F0;
+            border-radius: 12px; padding: 12px 14px;
+            font-size: 14px; line-height: 1.6; color: #1A2340;
+            outline: none; transition: border-color .2s; font-family: inherit;
+            background: white;
+        }
+        .textarea-custom:focus { border-color: #1D9E75; }
+        .modal-footer-custom {
+            padding: 16px 28px; background: white;
+            border-top: 1px solid #F1F5F9;
+            display: flex; justify-content: flex-end; gap: 12px;
+        }
+        .btn-cancel {
+            background: none; border: 2px solid #E2E8F0; border-radius: 10px;
+            padding: 10px 22px; color: #64748B; font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: .2s; font-family: inherit;
+        }
+        .btn-cancel:hover { border-color: #94A3B8; color: #334155; }
+        .btn-submit-green {
+            background: linear-gradient(135deg, #085041, #1D9E75);
+            border: none; border-radius: 10px; padding: 10px 28px;
+            color: white; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: .2s; font-family: inherit;
+            box-shadow: 0 4px 14px rgba(29,158,117,.35);
+        }
+        .btn-submit-green:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(29,158,117,.45); }
+        .btn-submit-amber {
+            background: linear-gradient(135deg, #D97706, #F59E0B);
+            border: none; border-radius: 10px; padding: 10px 28px;
+            color: white; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: .2s; font-family: inherit;
+            box-shadow: 0 4px 14px rgba(245,158,11,.35);
+        }
+        .btn-submit-amber:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(245,158,11,.45); }
+
+        .empty-state { text-align: center; padding: 48px 0; color: #94A3B8; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="emp-wrapper">
+
+    {# ── Sidebar ── #}
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon">🏢</div>
+            <div class="sidebar-logo-text">EMPLOYÉ</div>
+            <div class="sidebar-logo-subtext">Espace personnel</div>
+        </div>
+        <div class="user-info">
+            <div class="user-avatar">👤</div>
+            <div class="user-details">
+                <div class="user-name">Mon Profil</div>
+                <div class="user-role">Employé</div>
+                <div class="online-status">● En ligne</div>
+            </div>
+        </div>
+        <nav class="sidebar-menu">
+            <div class="menu-section-title">NAVIGATION</div>
+            <a href="#" class="menu-button">🏠 Tableau de bord</a>
+            <a href="#" class="menu-button">📁 Mes Tâches</a>
+            <a href="#" class="menu-button">📅 Planning</a>
+            <div class="menu-section-title">SUPPORT</div>
+            <a href="#" class="menu-button active">📢 Mes Réclamations</a>
+            <a href="#" class="menu-button">💬 Chat Admin</a>
+            <div class="menu-section-title">COMPTE</div>
+            <a href="#" class="menu-button">⚙️ Paramètres</a>
+            <a href="#" class="menu-button highlight">🚪 Déconnexion</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="status-bar">
+                <span class="status-text">● Système opérationnel</span>
+                <a href="#" class="logout-link">Quitter</a>
+            </div>
+        </div>
+    </aside>
+
+    {# ── Main ── #}
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">📢 Mes Réclamations</div>
+            <div class="top-bar-right">
+                <div class="datetime">🕐 {{ "now"|date("d/m/Y H:i") }}</div>
+            </div>
+        </div>
+
+        <div class="content-scroll">
+        <div class="content-area">
+
+            {% for msg in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ✅ {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+            {% for msg in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ❌ {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {# ── Hero banner ── #}
+            <div class="hero-banner">
+                <div>
+                    <div class="hero-title">Mes réclamations</div>
+                    <div class="hero-subtitle">Suivez et gérez vos demandes auprès de l'administration</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <div class="hero-badge">🕐 Dernière mise à jour : maintenant</div>
+                    <button class="btn-new" data-bs-toggle="modal" data-bs-target="#modalNouvelle">
+                        ➕ Nouvelle réclamation
+                    </button>
+                </div>
+            </div>
+
+            {# ── Stats ── #}
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-label">Total</div>
+                    <div class="stat-number">{{ stats.total }}</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">🆕</div>
+                    <div class="stat-label">Nouveau</div>
+                    <div class="stat-number">{{ stats.nouveau }}</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-label">En cours</div>
+                    <div class="stat-number">{{ stats.en_cours }}</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-label">Fermées</div>
+                    <div class="stat-number">{{ stats.ferme }}</div>
+                </div>
+            </div>
+
+            {# ── Table card ── #}
+            <div class="activity-card">
+                <div class="section-title">📋 Liste de mes réclamations</div>
+
+                <form method="GET" class="filter-bar">
+                    <input type="text" name="search" class="filter-input"
+                           placeholder="🔍 Rechercher dans mes messages..."
+                           value="{{ search }}">
+                    <select name="statut" class="filter-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="nouveau"  {{ statut == 'nouveau'  ? 'selected' }}>🆕 Nouveau</option>
+                        <option value="en_cours" {{ statut == 'en_cours' ? 'selected' }}>⏳ En cours</option>
+                        <option value="fermé"    {{ statut == 'fermé'    ? 'selected' }}>✅ Fermé</option>
+                    </select>
+                    <button type="submit" class="btn-filter">Filtrer</button>
+                </form>
+
+                <table class="rec-table">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Message</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in reclamations %}
+                        <tr>
+                            <td><strong style="color:#1D9E75;">#{{ r.id }}</strong></td>
+                            <td style="max-width:340px;">{{ r.message|slice(0,80) }}{% if r.message|length > 80 %}...{% endif %}</td>
+                            <td>
+                                <span class="badge-statut
+                                    {% if r.statut == 'nouveau' %}badge-nouveau
+                                    {% elseif r.statut == 'en_cours' %}badge-en_cours
+                                    {% else %}badge-ferme{% endif %}">
+                                    <span class="badge-dot"></span>{{ r.statut }}
+                                </span>
+                            </td>
+                            <td style="color:#64748B;">{{ r.dateCreation ? r.dateCreation|date('d/m/Y') : '—' }}</td>
+                            <td>
+                                {% if r.statut == 'nouveau' %}
+                                    <button class="btn-action btn-edit"
+                                            onclick="ouvrirModifier({{ r.id }}, '{{ r.message|e('js') }}')">
+                                        ✏️ Modifier
+                                    </button>
+                                    <form method="POST"
+                                          action="{{ path('employe_reclamation_delete', {id: r.id}) }}"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Supprimer cette réclamation ?')">
+                                        <button class="btn-action btn-delete">🗑</button>
+                                    </form>
+                                {% else %}
+                                    <span style="font-size:12px;color:#94A3B8;font-style:italic;">Non modifiable</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📭</div>
+                                    <div style="font-size:14px;">Aucune réclamation trouvée.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        </div>
+    </div>
+</div>
+
+{# ── Modal Nouvelle Réclamation ── #}
+<div class="modal fade" id="modalNouvelle" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none;border-radius:20px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.2);">
+            <div class="modal-header-custom">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div class="modal-icon-box">➕</div>
+                    <div>
+                        <div class="modal-title-custom">Nouvelle réclamation</div>
+                        <div class="modal-subtitle-custom">Décrivez votre problème en détail</div>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" data-bs-dismiss="modal">×</button>
+            </div>
+            <form method="POST" action="{{ path('employe_reclamation_new') }}">
+                <div class="modal-body-custom">
+                    <div>
+                        <div class="form-label-custom">Votre message</div>
+                        <textarea name="message" rows="6" class="textarea-custom"
+                                  placeholder="Décrivez votre réclamation avec le plus de détails possible..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-submit-green">✅ Soumettre</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ── Modal Modifier ── #}
+<div class="modal fade" id="modalModifier" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none;border-radius:20px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.2);">
+            <div class="modal-header-custom">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div class="modal-icon-box">✏️</div>
+                    <div>
+                        <div class="modal-title-custom">Modifier la réclamation</div>
+                        <div class="modal-subtitle-custom">Uniquement disponible pour les réclamations nouvelles</div>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" data-bs-dismiss="modal">×</button>
+            </div>
+            <form method="POST" id="formModifier">
+                <div class="modal-body-custom">
+                    <div>
+                        <div class="form-label-custom">Votre message</div>
+                        <textarea name="message" id="taModifier" rows="6" class="textarea-custom" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-submit-amber">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function ouvrirModifier(id, message) {
+    document.getElementById('formModifier').action = '/employe/reclamations/' + id + '/modifier';
+    document.getElementById('taModifier').value = message;
+    new bootstrap.Modal(document.getElementById('modalModifier')).show();
+}
+</script>
+{% endblock %}

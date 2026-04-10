@@ -1,0 +1,42 @@
+{# templates/equipe/edit.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Modifier {{ equipe.nomEquipe }} — MatchNTeam{% endblock %}
+{% block page_title %}Modifier l'équipe{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary);">
+    <a href="{{ path('app_equipe_index') }}" style="color: var(--text-secondary); text-decoration: none;">Équipes</a>
+    <span>/</span>
+    <a href="{{ path('app_equipe_show', {'id_equipe': equipe.idEquipe}) }}" style="color: var(--text-secondary); text-decoration: none;">{{ equipe.nomEquipe }}</a>
+    <span>/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">Modifier</span>
+</div>
+
+<div style="margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between;">
+    <div>
+        <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Modifier « {{ equipe.nomEquipe }} »</h2>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 3px;">Modifiez les informations de cette équipe.</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ path('app_equipe_show', {'id_equipe': equipe.idEquipe}) }}"
+           style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-secondary); font-size: 13px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Retour
+        </a>
+        <form method="post" action="{{ path('app_equipe_delete', {'id_equipe': equipe.idEquipe}) }}"
+              onsubmit="return confirm('Supprimer définitivement l\'équipe « {{ equipe.nomEquipe }} » ?');" style="margin:0;">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipe.idEquipe) }}">
+            <button type="submit"
+                    style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(239,68,68,0.1); color: var(--accent-red); border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Supprimer
+            </button>
+        </form>
+    </div>
+</div>
+
+{% include 'equipe/_form.html.twig' %}
+
+{% endblock %}

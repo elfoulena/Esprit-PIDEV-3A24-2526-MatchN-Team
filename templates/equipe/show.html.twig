@@ -1,0 +1,172 @@
+{# templates/equipe/show.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}{{ equipe.nomEquipe }} — MatchNTeam{% endblock %}
+{% block page_title %}Détail Équipe{% endblock %}
+
+{% block extra_styles %}
+.detail-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+    margin-bottom: 24px;
+}
+.detail-banner {
+    padding: 28px 32px; border-bottom: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: flex-start;
+}
+.detail-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border-color);
+}
+.detail-stat-cell {
+    padding: 18px 24px; border-right: 1px solid var(--border-color);
+}
+.detail-stat-cell:last-child { border-right: none; }
+.stat-cell-label { font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-cell-value { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+.badge-status {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block;
+}
+.badge-status.active   { background: rgba(16,185,129,0.12); color: #059669; }
+.badge-status.paused   { background: rgba(245,158,11,0.12); color: #b45309; }
+.badge-status.inactive { background: rgba(239,68,68,0.10); color: #dc2626; }
+
+.member-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; background: #f8fafc;
+    border: 1px solid var(--border-color); border-radius: 20px; font-size: 13px;
+}
+{% endblock %}
+
+{% block content %}
+
+{# Breadcrumb + actions #}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary);">
+        <a href="{{ path('app_equipe_index') }}" style="color: var(--text-secondary); text-decoration: none;">Équipes</a>
+        <span>/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">{{ equipe.nomEquipe }}</span>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="{{ path('app_membre_equipe_index', {'id_equipe': equipe.idEquipe}) }}"
+           style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(16,185,129,0.10); color: #059669; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Membres ({{ equipe.nbMembresActuel }})
+        </a>
+        <a href="{{ path('app_equipe_edit', {'id_equipe': equipe.idEquipe}) }}"
+           style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(59,130,246,0.10); color: var(--accent-blue); border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier
+        </a>
+        <form method="post" action="{{ path('app_equipe_delete', {'id_equipe': equipe.idEquipe}) }}"
+              onsubmit="return confirm('Supprimer l\'équipe « {{ equipe.nomEquipe }} » ?');" style="margin:0;">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipe.idEquipe) }}">
+            <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(239,68,68,0.10); color: var(--accent-red); border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Supprimer
+            </button>
+        </form>
+        <a href="{{ path('app_equipe_index') }}"
+           style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bg-surface); color: var(--text-primary); border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Retour
+        </a>
+    </div>
+</div>
+
+{# Main detail card #}
+<div class="detail-card">
+
+    {# Banner #}
+    <div class="detail-banner">
+        <div style="display: flex; align-items: center; gap: 18px;">
+            <div style="width: 58px; height: 58px; border-radius: 14px; background: {{ equipe.couleurEquipe }}22; display: flex; align-items: center; justify-content: center; border: 2px solid {{ equipe.couleurEquipe }}55; flex-shrink: 0;">
+                <span style="font-size: 24px; font-weight: 900; color: {{ equipe.couleurEquipe }};">{{ equipe.nomEquipe|slice(0,1)|upper }}</span>
+            </div>
+            <div>
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">{{ equipe.departement ?? 'Département non défini' }}</div>
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary); margin: 0 0 5px;">{{ equipe.nomEquipe }}</h2>
+                {% if equipe.description %}
+                    <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">{{ equipe.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            {% if equipe.statut == 'Active' %}
+                <span class="badge-status active">● Active</span>
+            {% elseif equipe.statut == 'En pause' %}
+                <span class="badge-status paused">● En pause</span>
+            {% else %}
+                <span class="badge-status inactive">● Inactive</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Stats row #}
+    <div class="detail-stats">
+        <div class="detail-stat-cell">
+            <div class="stat-cell-label">Date Création</div>
+            <div class="stat-cell-value">{{ equipe.dateCreation ? equipe.dateCreation|date('d/m/Y') : '—' }}</div>
+        </div>
+        <div class="detail-stat-cell">
+            <div class="stat-cell-label">Membres</div>
+            <div class="stat-cell-value" style="color: var(--accent-blue);">{{ equipe.nbMembresActuel }} / {{ equipe.nbMembresMax }}</div>
+            <div style="margin-top: 8px; background: #e2e8f0; border-radius: 4px; height: 4px;">
+                {% set pct = equipe.nbMembresMax > 0 ? ((equipe.nbMembresActuel / equipe.nbMembresMax) * 100)|round : 0 %}
+                <div style="background: var(--accent-blue); height: 4px; border-radius: 4px; width: {{ pct > 100 ? 100 : pct }}%;"></div>
+            </div>
+        </div>
+        <div class="detail-stat-cell">
+            <div class="stat-cell-label">Budget</div>
+            <div class="stat-cell-value">{{ equipe.budget ? equipe.budget ~ ' DT' : '—' }}</div>
+        </div>
+        <div class="detail-stat-cell">
+            <div class="stat-cell-label">Couleur</div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+                <div style="width: 22px; height: 22px; border-radius: 5px; background: {{ equipe.couleurEquipe }};"></div>
+                <span style="font-size: 13px; font-weight: 600;">{{ equipe.couleurEquipe }}</span>
+            </div>
+        </div>
+    </div>
+
+    {# Members preview #}
+    {% if equipe.membres|length > 0 %}
+    <div style="padding: 24px 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Membres de l'équipe</div>
+            <a href="{{ path('app_membre_equipe_index', {'id_equipe': equipe.idEquipe}) }}" style="font-size: 12px; font-weight: 600; color: var(--accent-blue); text-decoration: none;">Voir tous →</a>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            {% for membre in equipe.membres|slice(0, 8) %}
+            <div class="member-pill">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: {{ equipe.couleurEquipe }}33; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: {{ equipe.couleurEquipe }};">
+                    {{ membre.user.id }}
+                </div>
+                <span style="font-weight: 600;">User #{{ membre.user.nom }} {{ membre.user.prenom }}</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">{{ membre.roleEquipe }}</span>
+                {% if membre.statutMembre == 'Actif' %}
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% if equipe.membres|length > 8 %}
+                <div style="padding: 8px 14px; background: #f1f5f9; border-radius: 20px; font-size: 13px; color: var(--text-secondary); font-weight: 600;">+{{ equipe.membres|length - 8 }} autres</div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="opacity: 0.3; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <p style="font-size: 14px; margin-bottom: 14px;">Aucun membre dans cette équipe</p>
+        <a href="{{ path('app_membre_equipe_new', {'id_equipe': equipe.idEquipe}) }}"
+           style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--accent-blue); color: #fff; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter un membre
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,22 @@
+{# templates/equipe/new.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Nouvelle Équipe — MatchNTeam{% endblock %}
+{% block page_title %}Nouvelle Équipe{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary);">
+    <a href="{{ path('app_equipe_index') }}" style="color: var(--text-secondary); text-decoration: none;">Équipes</a>
+    <span>/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">Nouvelle équipe</span>
+</div>
+
+<div style="margin-bottom: 22px;">
+    <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Créer une équipe</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 3px;">Remplissez les informations ci-dessous pour créer une nouvelle équipe.</p>
+</div>
+
+{% include 'equipe/_form.html.twig' %}
+
+{% endblock %}

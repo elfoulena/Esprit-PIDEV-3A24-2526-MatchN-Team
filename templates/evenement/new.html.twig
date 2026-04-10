@@ -1,0 +1,19 @@
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Nouvel Événement — MatchNTeam{% endblock %}
+{% block page_title %}Gestion des Événements{% endblock %}
+
+{% block content %}
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Nouvel Événement</h2>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">Création d'un nouvel événement d'entreprise</p>
+        </div>
+        <a href="{{ path('app_evenement_index') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f1f5f9; color: #334155; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Retour à la liste
+        </a>
+    </div>
+
+    {{ include('evenement/_form.html.twig') }}
+{% endblock %}

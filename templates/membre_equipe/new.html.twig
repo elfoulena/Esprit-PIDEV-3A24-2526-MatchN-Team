@@ -1,0 +1,26 @@
+{# templates/membre_equipe/new.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Nouveau Membre — {{ equipe.nomEquipe }}{% endblock %}
+{% block page_title %}Ajouter un membre{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary);">
+    <a href="{{ path('app_equipe_index') }}" style="color: var(--text-secondary); text-decoration: none;">Équipes</a>
+    <span>/</span>
+    <a href="{{ path('app_equipe_show', {'id_equipe': equipe.idEquipe}) }}" style="color: var(--text-secondary); text-decoration: none;">{{ equipe.nomEquipe }}</a>
+    <span>/</span>
+    <a href="{{ path('app_membre_equipe_index', {'id_equipe': equipe.idEquipe}) }}" style="color: var(--text-secondary); text-decoration: none;">Membres</a>
+    <span>/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">Nouveau</span>
+</div>
+
+<div style="margin-bottom: 22px;">
+    <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Ajouter un membre</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 3px;">Équipe : <strong>{{ equipe.nomEquipe }}</strong></p>
+</div>
+
+{% include 'membre_equipe/_form.html.twig' %}
+
+{% endblock %}

@@ -285,8 +285,8 @@
             Compétences
         </a>
 
-        <a href="{{ path('admin_dashboard') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'affectation' %}active{% endif %}">
+        <a href="{{ path('app_affectation_index') }}"
+           class="nav-item {% if app.request.attributes.get('_route') starts with 'app_affectation' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M20 7h-4.18A3 3 0 0 0 16 5.18V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v1.18A3 3 0 0 0 8.18 7H4"/>
                 <line x1="12" y1="12" x2="12" y2="16"/>
@@ -296,8 +296,8 @@
             Affectations
         </a>
 
-        <a href="{{ path('admin_dashboard') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'evaluation' %}active{% endif %}">
+        <a href="{{ path('app_evaluation_index') }}"
+           class="nav-item {% if app.request.attributes.get('_route') starts with 'app_evaluation' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>

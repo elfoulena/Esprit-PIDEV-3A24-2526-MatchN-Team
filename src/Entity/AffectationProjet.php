@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,7 +28,7 @@ class AffectationProjet
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'affectationProjets')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'User_id', referencedColumnName: 'id')]
     private ?User $User = null;
 
@@ -182,6 +181,27 @@ class AffectationProjet
         $this->taux_horaire = $taux_horaire;
 
         return $this;
+    }
+
+    public function peutEtreEvaluee(): bool
+    {
+        return in_array($this->statut, ['TERMINEE', 'ACCEPTEE']);
+    }
+
+    public function calculerCoutEstime(): ?float
+    {
+        if (!$this->date_debut || !$this->date_fin || !$this->taux_horaire) {
+            return null;
+        }
+        $days = $this->date_debut->diff($this->date_fin)->days;
+        return $days * 8 * $this->taux_horaire;
+    }
+
+    public function __toString(): string
+    {
+        $user = $this->User ? ($this->User->getPrenom() . ' ' . $this->User->getNom()) : '?';
+        $projet = $this->projet ? $this->projet->getTitre() : '?';
+        return $user . ' -> ' . $projet;
     }
 
 }

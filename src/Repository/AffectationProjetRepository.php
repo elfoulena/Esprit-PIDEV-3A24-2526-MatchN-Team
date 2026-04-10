@@ -16,28 +16,27 @@ class AffectationProjetRepository extends ServiceEntityRepository
         parent::__construct($registry, AffectationProjet::class);
     }
 
-//    /**
-//     * @return AffectationProjet[] Returns an array of AffectationProjet objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('a.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return AffectationProjet[]
+     */
+    public function findAllWithDetails(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.User', 'u')
+            ->addSelect('u')
+            ->leftJoin('a.projet', 'p')
+            ->addSelect('p')
+            ->orderBy('a.date_debut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?AffectationProjet
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function countByStatut(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->select('a.statut, COUNT(a.id) as total')
+            ->groupBy('a.statut')
+            ->getQuery()
+            ->getResult();
+    }
 }

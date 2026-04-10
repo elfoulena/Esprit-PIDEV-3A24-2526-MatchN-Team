@@ -9,37 +9,41 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    #[Route('/', name: 'home')] 
+    #[Route('/', name: 'home')]
     public function home(): Response
     {
+        // If NOT logged in → go to login
         if (!$this->getUser()) {
             return $this->redirectToRoute('app_login');
         }
 
-        return match(true) {
-            $this->isGranted('ROLE_ADMIN')      => $this->redirectToRoute('admin_dashboard'),    // ✅ Corrigé
+        // Redirect حسب role
+        return match (true) {
+            $this->isGranted('ROLE_ADMIN')      => $this->redirectToRoute('admin_dashboard'),
             $this->isGranted('ROLE_EMPLOYE')    => $this->redirectToRoute('employe_dashboard'),
             $this->isGranted('ROLE_FREELANCER') => $this->redirectToRoute('freelancer_dashboard'),
-            default => $this->redirectToRoute('app_login'),
+            default                             => $this->redirectToRoute('app_login'),
         };
     }
 
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
+        // If already logged in → go home
         if ($this->getUser()) {
-            return $this->redirectToRoute('home'); 
+            return $this->redirectToRoute('home');
         }
 
-        $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $authenticationUtils->getLastUsername();
-
         return $this->render('security/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'error'         => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
 
     #[Route('/logout', name: 'app_logout')]
-    public function logout(): void {}
+    public function logout(): void
+    {
+        // Symfony handles logout automatically
+        throw new \LogicException('This method can be blank.');
+    }
 }

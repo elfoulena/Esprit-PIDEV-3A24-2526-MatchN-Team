@@ -20,9 +20,10 @@ class MembreEquipe
     #[ORM\JoinColumn(name: 'id_equipe', referencedColumnName: 'id_equipe', nullable: false)]
     private ?Equipe $equipe = null;
 
-    #[ORM\Column(name: 'id_user', type: Types::INTEGER)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false)]
     #[Assert\NotNull(message: 'L\'User est obligatoire.')]
-    private ?int $idUser = null;
+    private ?User $user = null;
 
     #[ORM\Column(name: 'role_equipe', type: Types::STRING, length: 30)]
     private ?string $roleEquipe = 'Membre';
@@ -64,8 +65,10 @@ class MembreEquipe
     public function getIdMembre(): ?int { return $this->idMembre; }
     public function getEquipe(): ?Equipe { return $this->equipe; }
     public function setEquipe(?Equipe $equipe): self { $this->equipe = $equipe; return $this; }
-    public function getIdUser(): ?int { return $this->idUser; }
-    public function setIdUser(?int $idUser): self { $this->idUser = $idUser; return $this; }
+    
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): self { $this->user = $user; return $this; }
+    
     public function getRoleEquipe(): ?string { return $this->roleEquipe; }
     public function setRoleEquipe(?string $roleEquipe): self { $this->roleEquipe = $roleEquipe; return $this; }
     public function getDateAffectation(): ?\DateTimeInterface { return $this->dateAffectation; }

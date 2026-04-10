@@ -1,115 +1,138 @@
+{# templates/equipe/_form.html.twig #}
 <style>
-.custom-form-container {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-    padding: 30px;
-    max-width: 680px;
-    margin: 0 auto 30px auto;
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-width: 700px;
 }
-.custom-form-header {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 700; color: #64748b;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin-bottom: 24px; padding-bottom: 16px;
-    border-bottom: 1px solid #f1f5f9;
+.form-card-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border-color);
+    background: #f8fafc;
+    display: flex; align-items: center; gap: 10px;
 }
+.form-card-header h3 {
+    font-size: 12px; font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 1px; margin: 0;
+}
+.form-card-body { padding: 28px; }
 .form-group { margin-bottom: 20px; }
-.form-row { display: flex; gap: 20px; }
-.form-col { flex: 1; }
-.form-label { display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 8px; }
-.form-control {
-    width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1;
-    border-radius: 6px; font-size: 14px; color: #1e293b;
-    transition: all 0.2s; background: #fff; font-family: inherit; box-sizing: border-box;
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 7px; letter-spacing: 0.3px;
 }
-.form-control:focus { outline: none; border-color: #3ba3e8; box-shadow: 0 0 0 3px rgba(59,163,232,0.1); }
-textarea.form-control { min-height: 100px; resize: vertical; }
-.form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; }
-.btn-reset { padding: 10px 24px; background: #f1f5f9; color: #334155; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
-.btn-reset:hover { background: #e2e8f0; }
-.btn-submit { padding: 10px 24px; background: #3ba3e8; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
-.btn-submit:hover { background: #2980b9; }
-.form-control.is-invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
-.form-control.is-valid   { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
-.field-error { color: #ef4444; font-size: 12px; font-weight: 600; margin-top: 5px; display: block; }
+.form-control {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm); font-size: 13.5px;
+    color: var(--text-primary); background: #fff;
+    font-family: inherit; transition: all var(--transition);
+    box-sizing: border-box;
+}
+.form-control:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.10); }
+textarea.form-control { min-height: 96px; resize: vertical; }
+.form-control.is-invalid { border-color: var(--accent-red); box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+.form-control.is-valid   { border-color: var(--accent-green); }
+.field-error { color: var(--accent-red); font-size: 11.5px; font-weight: 600; margin-top: 4px; display: block; }
+.form-actions {
+    display: flex; justify-content: flex-end; gap: 10px;
+    margin-top: 28px; padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-cancel {
+    padding: 10px 22px; background: var(--bg-surface); color: var(--text-primary);
+    border: none; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none;
+    display: inline-flex; align-items: center;
+}
+.btn-save {
+    padding: 10px 24px; background: var(--accent-blue); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: background var(--transition);
+}
+.btn-save:hover { background: #2563eb; }
 </style>
 
-<div class="custom-form-container">
-    <div class="custom-form-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-        INFORMATIONS DE L'ÉQUIPE
+<div class="form-card">
+    <div class="form-card-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <h3>Informations de l'équipe</h3>
     </div>
+    <div class="form-card-body">
 
-    {{ form_start(form, {'attr': {'id': 'equipe_form', 'novalidate': 'novalidate'}}) }}
+        {{ form_start(form, {'attr': {'id': 'equipe_form', 'novalidate': 'novalidate'}}) }}
 
-        <div class="form-group">
-            {{ form_label(form.nomEquipe, 'Nom de l\'équipe *', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Équipe Innovation'}}) }}
-            {{ form_errors(form.nomEquipe) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Décrivez l\'équipe...'}}) }}
-            {{ form_errors(form.description) }}
-        </div>
-
-        <div class="form-row">
-            <div class="form-group form-col">
-                {{ form_label(form.dateCreation, 'Date de création *', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.dateCreation) }}
+            <div class="form-group">
+                {{ form_label(form.nomEquipe, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Équipe Innovation'}}) }}
+                {{ form_errors(form.nomEquipe) }}
             </div>
-            <div class="form-group form-col">
-                {{ form_label(form.statut, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.statut) }}
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group form-col">
-                {{ form_label(form.departement, 'Département', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.departement, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.departement) }}
+            <div class="form-group">
+                {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Décrivez l\'équipe...'}}) }}
+                {{ form_errors(form.description) }}
             </div>
-            <div class="form-group form-col">
-                {{ form_label(form.nbMembresMax, 'Membres max', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.nbMembresMax, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 10'}}) }}
-                {{ form_errors(form.nbMembresMax) }}
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group form-col">
-                {{ form_label(form.budget, 'Budget (DT)', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.budget, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 50000'}}) }}
-                {{ form_errors(form.budget) }}
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.dateCreation, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateCreation) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.statut) }}
+                </div>
             </div>
-            <div class="form-group form-col">
-                {{ form_label(form.couleurEquipe, 'Couleur', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.couleurEquipe, {'attr': {'class': 'form-control', 'style': 'height: 42px; padding: 4px 8px;'}}) }}
-                {{ form_errors(form.couleurEquipe) }}
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.departement, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.departement, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.departement) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.nbMembresMax, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nbMembresMax, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 10', 'min': '1', 'max': '100'}}) }}
+                    {{ form_errors(form.nbMembresMax) }}
+                </div>
             </div>
-        </div>
 
-        <div class="form-actions">
-            <button type="reset" class="btn-reset" onclick="resetErrors()">Réinitialiser</button>
-            <button type="submit" class="btn-submit">{{ button_label|default('Enregistrer') }}</button>
-        </div>
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.budget, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.budget, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 50000'}}) }}
+                    {{ form_errors(form.budget) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.couleurEquipe, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.couleurEquipe, {'attr': {'class': 'form-control', 'style': 'height: 42px; padding: 4px 8px; cursor: pointer;'}}) }}
+                    {{ form_errors(form.couleurEquipe) }}
+                </div>
+            </div>
 
-    {{ form_end(form) }}
+            <div class="form-actions">
+                <a href="{{ path('app_equipe_index') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-save">{{ button_label|default('Enregistrer') }}</button>
+            </div>
+
+        {{ form_end(form) }}
+
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('equipe_form');
     if (!form) return;
-
     function showError(field, msg) {
         field.classList.add('is-invalid'); field.classList.remove('is-valid');
         let err = field.parentNode.querySelector('.field-error');
@@ -123,37 +146,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function validateField(field) {
         if (!field) return true;
-        const val = field.value.trim();
-        const id = field.id || '';
-        if (id.includes('nom_equipe') || id.includes('nomEquipe')) {
+        const val = field.value.trim(), id = field.id || '';
+        if (id.includes('nom')) {
             if (!val) { showError(field, 'Le nom est obligatoire.'); return false; }
             if (val.length < 2) { showError(field, 'Minimum 2 caractères.'); return false; }
-            if (val.length > 100) { showError(field, 'Maximum 100 caractères.'); return false; }
         }
-        if (id.includes('nb_membres_max') || id.includes('nbMembresMax')) {
+        if (id.includes('nb_membres') || id.includes('nbMembres')) {
             if (!val || parseInt(val) < 1) { showError(field, 'Minimum 1 membre.'); return false; }
             if (parseInt(val) > 100) { showError(field, 'Maximum 100 membres.'); return false; }
         }
-        if (id.includes('budget') && val && parseFloat(val) < 0) {
-            showError(field, 'Le budget ne peut pas être négatif.'); return false;
-        }
         clearError(field); return true;
     }
-
-    form.querySelectorAll('.form-control').forEach(function(field) {
-        field.addEventListener('blur', function() { validateField(field); });
-        field.addEventListener('input', function() { if (field.classList.contains('is-invalid')) validateField(field); });
+    form.querySelectorAll('.form-control').forEach(f => {
+        f.addEventListener('blur', () => validateField(f));
+        f.addEventListener('input', () => { if (f.classList.contains('is-invalid')) validateField(f); });
     });
-
     form.addEventListener('submit', function(e) {
         let valid = true;
-        form.querySelectorAll('.form-control').forEach(function(f) { if (!validateField(f)) valid = false; });
+        form.querySelectorAll('.form-control').forEach(f => { if (!validateField(f)) valid = false; });
         if (!valid) e.preventDefault();
     });
 });
-
-function resetErrors() {
-    document.querySelectorAll('.form-control').forEach(function(f) { f.classList.remove('is-invalid','is-valid'); });
-    document.querySelectorAll('.field-error').forEach(function(e) { e.remove(); });
-}
 </script>

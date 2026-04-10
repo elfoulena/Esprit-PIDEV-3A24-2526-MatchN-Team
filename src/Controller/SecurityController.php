@@ -17,7 +17,7 @@ class SecurityController extends AbstractController
         }
 
         return match(true) {
-            $this->isGranted('ROLE_ADMIN')      => $this->redirectToRoute('admin_dashboard'),    // ✅ Corrigé
+            $this->isGranted('ROLE_ADMIN')      => $this->redirectToRoute('admin_dashboard'), 
             $this->isGranted('ROLE_EMPLOYE')    => $this->redirectToRoute('employe_dashboard'),
             $this->isGranted('ROLE_FREELANCER') => $this->redirectToRoute('freelancer_dashboard'),
             default => $this->redirectToRoute('app_login'),

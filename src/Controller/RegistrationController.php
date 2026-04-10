@@ -125,7 +125,6 @@ public function register(
     return $this->render('registration/register.html.twig');
 }
 
-    // Page "en attente de vérification"
     #[Route('/verify/pending', name: 'app_verify_pending')]
     public function pending(Request $request): Response
     {
@@ -134,7 +133,6 @@ public function register(
         ]);
     }
 
-    // Vérifie le code saisi par l'User
     #[Route('/verify/email', name: 'app_verify_email', methods: ['POST'])]
     public function verifyEmail(
         Request $request,

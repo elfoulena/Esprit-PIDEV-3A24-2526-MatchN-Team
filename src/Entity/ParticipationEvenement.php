@@ -45,16 +45,16 @@ class ParticipationEvenement
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'participations')]
     #[ORM\JoinColumn(name: 'id_User', referencedColumnName: 'id', nullable: false)]
-    private ?User $User = null;
+    private ?User $utilisateur = null;
 
-    public function getUser(): ?User
+    public function getUtilisateur(): ?User
     {
-        return $this->User;
+        return $this->utilisateur;
     }
 
-    public function setUser(?User $User): self
+    public function setUtilisateur(?User $utilisateur): self
     {
-        $this->User = $User;
+        $this->utilisateur = $utilisateur;
         return $this;
     }
 

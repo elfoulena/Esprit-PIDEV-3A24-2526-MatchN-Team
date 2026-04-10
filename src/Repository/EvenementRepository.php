@@ -51,14 +51,14 @@ class EvenementRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findBySearch(?string $q): array
+    public function findBySearch(?string $q, bool $includeArchived = false): array
     {
         $qb = $this->createQueryBuilder('e');
         if ($q) {
             $qb->andWhere('e.titre LIKE :q OR e.lieu LIKE :q')
                ->setParameter('q', '%'.$q.'%');
-        } else {
-            // Hide finished events by default in back-office
+        } elseif (!$includeArchived) {
+            // Hide finished events by default in back-office if not searching or requesting archives
             $now = new \DateTime();
             $qb->andWhere('e.date_fin > :now')
                ->setParameter('now', $now);

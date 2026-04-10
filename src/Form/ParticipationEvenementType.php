@@ -23,9 +23,15 @@ class ParticipationEvenementType extends AbstractType
                 'class' => Evenement::class,
                 'choice_label' => 'titre',
             ])
+<<<<<<< HEAD
             ->add('User', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'nom',
+=======
+            ->add('utilisateur', EntityType::class, [
+                'class' => User::class,
+                'choice_label' => 'id',
+>>>>>>> origin/integ3
             ])
         ;
     }

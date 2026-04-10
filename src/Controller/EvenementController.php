@@ -18,9 +18,12 @@ final class EvenementController extends AbstractController
     public function index(EvenementRepository $evenementRepository, Request $request): Response
     {
         $q = $request->query->get('q');
+        $archived = $request->query->getBoolean('archived', false);
+        
         return $this->render('evenement/index.html.twig', [
-            'evenements' => $evenementRepository->findBySearch($q),
+            'evenements' => $evenementRepository->findBySearch($q, $archived),
             'q' => $q,
+            'archived' => $archived,
         ]);
     }
 

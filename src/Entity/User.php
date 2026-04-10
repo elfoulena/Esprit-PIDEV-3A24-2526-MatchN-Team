@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Enum\Role;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -88,6 +90,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // FREELANCER
     #[ORM\Column(name: "description_freelancer", type: "text", nullable: true)]
     private ?string $description = null;
+
+    #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $participations;
+
+    public function __construct()
+    {
+        $this->participations = new ArrayCollection();
+    }
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
@@ -213,4 +223,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // GITHUB
     public function getGithubUsername(): ?string { return $this->githubUsername; }
     public function setGithubUsername(?string $githubUsername): static { $this->githubUsername = $githubUsername; return $this; }
+
+    /**
+     * @return Collection<int, ParticipationEvenement>
+     */
+    public function getParticipations(): Collection
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(ParticipationEvenement $participation): static
+    {
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipation(ParticipationEvenement $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            // set the owning side to null (unless already changed)
+            if ($participation->getUtilisateur() === $this) {
+                $participation->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
 }

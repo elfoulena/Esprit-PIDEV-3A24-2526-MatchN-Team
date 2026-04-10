@@ -1,0 +1,26 @@
+{% extends 'front/base_front.html.twig' %}
+
+{% block title %}Accueil - Matchup{% endblock %}
+
+{% block body %}
+
+<!-- Hero Section -->
+<section id="hero" class="hero section dark-background">
+
+  <img src="{{ asset('assets/img/hero-bg.jpg') }}" alt="" data-aos="fade-in">
+
+  <div class="container text-center" data-aos="fade-up" data-aos-delay="100">
+    <h2>Matchup</h2>
+    <p>La plateforme ultime pour organiser et participer à des événements innovants.</p>
+    {% if is_granted('ROLE_EMPLOYE') %}
+      <a href="{{ path('app_front_evenement_index') }}" class="btn-get-started">Voir les Événements</a>
+    {% elseif is_granted('ROLE_ADMIN') %}
+      <a href="{{ path('admin_dashboard') }}" class="btn-get-started">Dashboard Admin</a>
+    {% else %}
+      <a href="{{ path('app_login') }}" class="btn-get-started">Se connecter</a>
+    {% endif %}
+  </div>
+
+</section><!-- /Hero Section -->
+
+{% endblock %}

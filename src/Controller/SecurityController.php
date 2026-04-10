@@ -17,13 +17,18 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Redirect حسب role
-        return match (true) {
-            $this->isGranted('ROLE_ADMIN')      => $this->redirectToRoute('admin_dashboard'),
-            $this->isGranted('ROLE_EMPLOYE')    => $this->redirectToRoute('employe_dashboard'),
-            $this->isGranted('ROLE_FREELANCER') => $this->redirectToRoute('freelancer_dashboard'),
-            default                             => $this->redirectToRoute('app_login'),
-        };
+        // Admin → back-office dashboard
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        // Freelancer
+        if ($this->isGranted('ROLE_FREELANCER')) {
+            return $this->redirectToRoute('freelancer_dashboard');
+        }
+
+        // Employé (ou tout autre rôle) → page front
+        return $this->render('front/index.html.twig');
     }
 
     #[Route('/login', name: 'app_login')]

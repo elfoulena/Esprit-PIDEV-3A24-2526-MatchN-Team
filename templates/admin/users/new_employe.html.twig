@@ -1,0 +1,180 @@
+{# templates/admin/users/new_employe.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Créer un compte Employé — MatchNTeam{% endblock %}
+{% block page_title %}Créer un compte Employé{% endblock %}
+
+{% block extra_styles %}
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 32px 36px;
+    max-width: 600px;
+}
+.form-header {
+    margin-bottom: 28px;
+}
+.form-header h3 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+.form-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.form-group {
+    margin-bottom: 18px;
+}
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+}
+.form-group label .required {
+    color: var(--accent-red);
+    margin-left: 2px;
+}
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+}
+.form-control:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+.form-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-submit {
+    padding: 11px 24px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity var(--transition);
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-submit:hover { opacity: 0.88; }
+.btn-cancel {
+    padding: 11px 20px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: all var(--transition);
+}
+.btn-cancel:hover { background: var(--border-color); }
+
+.info-box {
+    background: rgba(59,130,246,0.07);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-size: 12.5px;
+    color: #1e40af;
+    line-height: 1.6;
+}
+.info-box svg { width: 16px; height: 16px; vertical-align: middle; margin-right: 6px; }
+{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px;">
+    <a href="{{ path('admin_users_index') }}" style="color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour aux utilisateurs
+    </a>
+</div>
+
+<div class="form-card">
+    <div class="form-header">
+        <h3>Nouveau compte Employé</h3>
+        <p>Créez un compte RH. L'utilisateur recevra un email avec ses identifiants et un code de vérification à 6 chiffres.</p>
+    </div>
+
+    <div class="info-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Un email contenant les identifiants et le <strong>code OTP de vérification</strong> sera envoyé automatiquement. Le compte sera actif seulement après vérification.
+    </div>
+
+    <form method="post" action="{{ path('admin_users_new_employe') }}">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom <span class="required">*</span></label>
+                <input type="text" name="nom" class="form-control" required minlength="2" placeholder="Dupont">
+            </div>
+            <div class="form-group">
+                <label>Prénom <span class="required">*</span></label>
+                <input type="text" name="prenom" class="form-control" required minlength="2" placeholder="Marie">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" name="email" class="form-control" required placeholder="marie.dupont@entreprise.com">
+        </div>
+
+        <div class="form-group">
+            <label>Téléphone</label>
+            <input type="tel" name="telephone" class="form-control" placeholder="+216 XX XXX XXX">
+        </div>
+
+        <div class="form-group">
+            <label>Mot de passe provisoire <span class="required">*</span></label>
+            <input type="text" name="plainPassword" class="form-control" required minlength="8" placeholder="Min. 8 caractères">
+            <div class="hint">Ce mot de passe sera communiqué à l'utilisateur par email. Il devra le changer après sa première connexion.</div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.54 2 2 0 0 1 3.58 1.36h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Créer le compte et envoyer l'email
+            </button>
+            <a href="{{ path('admin_users_index') }}" class="btn-cancel">Annuler</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

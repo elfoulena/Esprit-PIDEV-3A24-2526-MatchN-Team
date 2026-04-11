@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
-use App\Entity\Equipe;
 use App\Entity\User;
 use App\Enum\Role;
 use App\Repository\EquipeRepository;
@@ -14,7 +13,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route('/admin')]
-class AdminController extends AbstractController
+class DashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'admin_dashboard')]
     public function dashboard(EntityManagerInterface $em, EquipeRepository $equipeRepo): Response
@@ -25,7 +24,6 @@ class AdminController extends AbstractController
         $totalEquipes   = $equipeRepo->count([]);
         $equipesActives = $equipeRepo->count(['statut' => 'Active']);
 
-        // Count members across all teams
         $totalMembres = 0;
         foreach ($equipeRepo->findAll() as $eq) {
             $totalMembres += $eq->getNbMembresActuel();

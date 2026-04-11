@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,12 +13,18 @@ class SecurityController extends AbstractController
     #[Route('/', name: 'home')]
     public function home(): Response
     {
-        // If NOT logged in → go to login
-        if (!$this->getUser()) {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
-        // Redirect حسب role
+        // Non-admin users must verify their email before accessing dashboard
+        if (!$user->isVerified() && !$this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('app_verify_pending', ['email' => $user->getEmail()]);
+        }
+
         return match (true) {
             $this->isGranted('ROLE_ADMIN')      => $this->redirectToRoute('admin_dashboard'),
             $this->isGranted('ROLE_EMPLOYE')    => $this->redirectToRoute('employe_dashboard'),

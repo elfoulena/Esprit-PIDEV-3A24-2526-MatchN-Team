@@ -71,6 +71,7 @@ class Competence
         return $this;
     }
 
+    #[ORM\ManyToMany(targetEntity: Projet::class, mappedBy: 'competences')]
     private Collection $projets;
 
     public function __construct()

@@ -157,16 +157,20 @@ class Projet
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $priorite = null;
 
-    public function getPriorite(): ?string
-    {
-        return $this->priorite;
-    }
+    public function getPriorite(): ?string { return $this->priorite; }
+    public function setPriorite(?string $priorite): self { $this->priorite = $priorite; return $this; }
 
-    public function setPriorite(?string $priorite): self
-    {
-        $this->priorite = $priorite;
-        return $this;
-    }
+    #[ORM\Column(name: 'visible_employe', type: 'boolean', options: ['default' => false])]
+    private bool $visibleEmploye = false;
+
+    public function isVisibleEmploye(): bool { return $this->visibleEmploye; }
+    public function setVisibleEmploye(bool $v): self { $this->visibleEmploye = $v; return $this; }
+
+    #[ORM\Column(name: 'visible_freelancer', type: 'boolean', options: ['default' => false])]
+    private bool $visibleFreelancer = false;
+
+    public function isVisibleFreelancer(): bool { return $this->visibleFreelancer; }
+    public function setVisibleFreelancer(bool $v): self { $this->visibleFreelancer = $v; return $this; }
 
     #[ORM\OneToMany(targetEntity: AffectationProjet::class, mappedBy: 'projet')]
     private Collection $affectationProjets;
@@ -238,6 +242,11 @@ class Projet
         return $this;
     }
 
+    #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'projets')]
+    #[ORM\JoinTable(name: 'projet_competence',
+        joinColumns: [new ORM\JoinColumn(name: 'projet_id', referencedColumnName: 'id_projet')],
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'competence_id', referencedColumnName: 'id_competence')]
+    )]
     private Collection $competences;
 
     public function __construct()

@@ -1,289 +1,248 @@
 {# templates/employe/dashboard.html.twig #}
-{% extends 'base.html.twig' %}
+{% extends 'back/base_employe.html.twig' %}
 
-{% block title %}Bienvenue — Espace Employé{% endblock %}
+{% block title %}Tableau de bord — MatchNTeam{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
 
-{% block stylesheets %}
-<style>
-    * { box-sizing: border-box; }
+{% block extra_styles %}
+.welcome-banner {
+    background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 60%, #14b8a6 100%);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+}
+.welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+}
+.welcome-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: 160px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+}
+.welcome-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+.welcome-sub   { font-size: 14px; opacity: 0.75; }
 
-    .welcome-page {
-        min-height: 100vh;
-        background: #f5f4f0;
-        display: flex;
-        flex-direction: column;
-    }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 0 var(--radius-lg) 0 80px;
+    opacity: 0.07;
+}
+.stat-card.blue::before   { background: var(--accent-blue); }
+.stat-card.teal::before   { background: var(--accent-teal); }
+.stat-card.green::before  { background: var(--accent-green); }
+.stat-card.orange::before { background: var(--accent-orange); }
 
-    /* ---- Navbar ---- */
-    .navbar {
-        background: #fff;
-        border-bottom: 0.5px solid #ddd;
-        padding: 0 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 56px;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    .navbar-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-    }
-    .brand-logo {
-        width: 32px;
-        height: 32px;
-        background: #1a1a1a;
-        border-radius: 7px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        font-weight: 700;
-        color: #fff;
-        font-family: Georgia, serif;
-    }
-    .brand-name {
-        font-size: 15px;
-        font-weight: 500;
-        color: #1a1a1a;
-    }
-    .navbar-right {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .nav-user {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .nav-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #e6f1fb;
-        color: #185fa5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 500;
-    }
-    .nav-name {
-        font-size: 13px;
-        font-weight: 500;
-        color: #1a1a1a;
-    }
-    .nav-role {
-        font-size: 11px;
-        color: #888;
-    }
-    .btn-logout {
-        padding: 7px 14px;
-        border: 0.5px solid #f09595;
-        border-radius: 7px;
-        color: #a32d2d;
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        background: #fff;
-        transition: background 0.15s;
-    }
-    .btn-logout:hover { background: #fcebeb; }
+.stat-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+}
+.stat-card.blue   .stat-icon { background: rgba(14,165,233,0.12);  color: var(--accent-blue); }
+.stat-card.teal   .stat-icon { background: rgba(20,184,166,0.12);  color: var(--accent-teal); }
+.stat-card.green  .stat-icon { background: rgba(16,185,129,0.12);  color: var(--accent-green); }
+.stat-card.orange .stat-icon { background: rgba(245,158,11,0.12);  color: var(--accent-orange); }
 
-    /* ---- Contenu principal ---- */
-    .welcome-body {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 3rem 1.5rem;
-    }
-    .welcome-card {
-        background: #fff;
-        border: 0.5px solid #ddd;
-        border-radius: 20px;
-        padding: 3rem;
-        max-width: 560px;
-        width: 100%;
-        text-align: center;
-    }
-    .welcome-icon-wrap {
-        width: 72px;
-        height: 72px;
-        background: #e6f1fb;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.75rem;
-    }
-    .welcome-icon {
-        width: 36px;
-        height: 36px;
-        fill: none;
-        stroke: #185fa5;
-        stroke-width: 1.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-    .welcome-badge {
-        display: inline-block;
-        background: #e6f1fb;
-        color: #185fa5;
-        font-size: 11px;
-        font-weight: 500;
-        padding: 4px 12px;
-        border-radius: 20px;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        margin-bottom: 1rem;
-    }
-    .welcome-title {
-        font-size: 28px;
-        font-weight: 500;
-        color: #1a1a1a;
-        font-family: Georgia, serif;
-        margin: 0 0 0.75rem;
-        line-height: 1.3;
-    }
-    .welcome-title span { color: #185fa5; }
-    .welcome-sub {
-        font-size: 14px;
-        color: #888;
-        line-height: 1.7;
-        margin: 0 0 2rem;
-    }
+.stat-value { font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 2rem;
-        text-align: left;
-    }
-    .info-item {
-        background: #f9f8f5;
-        border-radius: 10px;
-        padding: 12px 14px;
-    }
-    .info-label {
-        font-size: 11px;
-        color: #aaa;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 0 0 3px;
-    }
-    .info-value {
-        font-size: 14px;
-        font-weight: 500;
-        color: #1a1a1a;
-        margin: 0;
-    }
+.section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+}
+.section-title {
+    font-size: 15px; font-weight: 800; color: var(--text-primary);
+    display: flex; align-items: center; gap: 8px;
+}
+.section-title span {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; background: var(--bg-surface); color: var(--text-secondary);
+}
 
-    .divider {
-        border: none;
-        border-top: 0.5px solid #eee;
-        margin: 0 0 1.5rem;
-    }
+.data-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th {
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 11px; font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-color);
+}
+.data-table tbody td {
+    padding: 14px 20px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: #f8fafc; }
 
-    .welcome-note {
-        font-size: 12px;
-        color: #bbb;
-        line-height: 1.6;
-    }
+.status-dot {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+}
+.status-dot.active   { background: rgba(16,185,129,0.12); color: #059669; }
+.status-dot.inactive { background: rgba(239,68,68,0.10);  color: #dc2626; }
 
-    @media (max-width: 480px) {
-        .welcome-card { padding: 2rem 1.25rem; }
-        .info-grid { grid-template-columns: 1fr; }
-        .navbar { padding: 0 1rem; }
-        .nav-name, .nav-role { display: none; }
-    }
-</style>
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+@media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col    { grid-template-columns: 1fr; }
+}
 {% endblock %}
 
-{% block body %}
-<div class="welcome-page">
+{% block content %}
 
-    {# Navbar #}
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <div class="brand-logo">RH</div>
-            <span class="brand-name">MatchNTeam</span>
+<div class="welcome-banner">
+    <div class="welcome-title">Bonjour, {{ app.user ? app.user.nom : 'Employé' }} 👋</div>
+    <div class="welcome-sub">{{ "now"|date("l d F Y") }} — Espace Employé</div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
         </div>
-        <div class="navbar-right">
-            <div class="nav-user">
-                <div class="nav-avatar">
-                    {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
-                </div>
-                <div>
-                    <div class="nav-name">{{ app.user.prenom }} {{ app.user.nom }}</div>
-                    <div class="nav-role">Employé</div>
-                </div>
-            </div>
-            <a href="{{ path('app_logout') }}" class="btn-logout"
-               onclick="return confirm('Voulez-vous vous déconnecter ?')">
-                Déconnexion
-            </a>
+        <div class="stat-value">{{ employes|length }}</div>
+        <div class="stat-label">Employés</div>
+    </div>
+    <div class="stat-card teal">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
         </div>
-    </nav>
+        <div class="stat-value">{{ freelancers|length }}</div>
+        <div class="stat-label">Freelancers</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-value">{{ totalEquipes }}</div>
+        <div class="stat-label">Équipes</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="stat-value">{{ totalMembres }}</div>
+        <div class="stat-label">Membres assignés</div>
+    </div>
+</div>
 
-    {# Contenu #}
-    <div class="welcome-body">
-        <div class="welcome-card">
+<div class="two-col">
 
-            <div class="welcome-icon-wrap">
-                <svg class="welcome-icon" viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
+    <div>
+        <div class="section-header">
+            <div class="section-title">
+                Employés <span>{{ employes|length }}</span>
             </div>
+        </div>
+        <div class="data-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Poste</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for emp in employes %}
+                    <tr>
+                        <td style="font-weight:700;">{{ emp.nom }} {{ emp.prenom }}</td>
+                        <td style="color:var(--text-secondary); font-size:12px;">{{ emp.email }}</td>
+                        <td style="font-size:12.5px;">{{ emp.poste ?: '—' }}</td>
+                        <td>
+                            <span class="status-dot {{ emp.actif ? 'active' : 'inactive' }}">
+                                ● {{ emp.actif ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" style="text-align:center; color:var(--text-secondary); padding:30px;">Aucun employé</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            <span class="welcome-badge">Espace Employé</span>
-
-            <h1 class="welcome-title">
-                Bonjour,<br>
-                <span>{{ app.user.prenom }} {{ app.user.nom }}</span>
-            </h1>
-
-            <p class="welcome-sub">
-                Bienvenue sur votre espace personnel.<br>
-                Votre compte est actif et opérationnel.
-            </p>
-
-            <div class="info-grid">
-                <div class="info-item">
-                    <p class="info-label">Email</p>
-                    <p class="info-value" style="font-size:12px; word-break:break-all;">
-                        {{ app.user.email }}
-                    </p>
-                </div>
-                <div class="info-item">
-                    <p class="info-label">Poste</p>
-                    <p class="info-value">{{ app.user.poste ?? 'Non défini' }}</p>
-                </div>
-                <div class="info-item">
-                    <p class="info-label">Département</p>
-                    <p class="info-value">{{ app.user.departement ?? 'Non défini' }}</p>
-                </div>
-                <div class="info-item">
-                    <p class="info-label">Contrat</p>
-                    <p class="info-value">{{ app.user.typeContrat ?? 'Non défini' }}</p>
-                </div>
+    <div>
+        <div class="section-header">
+            <div class="section-title">
+                Freelancers <span>{{ freelancers|length }}</span>
             </div>
-
-            <hr class="divider">
-
-            <p class="welcome-note">
-                Pour toute modification de vos informations, veuillez contacter votre administrateur RH.
-            </p>
-
+        </div>
+        <div class="data-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for fl in freelancers %}
+                    <tr>
+                        <td style="font-weight:700;">{{ fl.nom }} {{ fl.prenom }}</td>
+                        <td style="color:var(--text-secondary); font-size:12px;">{{ fl.email }}</td>
+                        <td>
+                            <span class="status-dot {{ fl.actif ? 'active' : 'inactive' }}">
+                                ● {{ fl.actif ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="3" style="text-align:center; color:var(--text-secondary); padding:30px;">Aucun freelancer</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
+
 {% endblock %}

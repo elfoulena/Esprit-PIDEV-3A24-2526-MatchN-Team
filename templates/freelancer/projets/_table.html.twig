@@ -1,0 +1,88 @@
+{# templates/freelancer/projets/_table.html.twig — partial for AJAX reload #}
+{% if projets|length > 0 %}
+<div class="proj-grid">
+    {% for p in projets %}
+    {% set demandeStatut = demandeMap[p.idProjet] ?? null %}
+    <div class="proj-card">
+        <div>
+            <div class="proj-card-title">{{ p.titre }}</div>
+            {% if p.description %}
+            <div class="proj-card-desc" style="margin-top:6px;">{{ p.description }}</div>
+            {% endif %}
+        </div>
+        <div class="proj-meta">
+            {% if p.statut %}
+                <span class="badge badge-{{ p.statut|lower|replace({' ':'_'}) }}">{{ p.statut|replace({'_':' '})|upper }}</span>
+            {% endif %}
+            {% if p.priorite == 'HAUTE' %}<span class="prio-haute">▲ Haute</span>
+            {% elseif p.priorite == 'MOYENNE' %}<span class="prio-moyenne">● Moyenne</span>
+            {% elseif p.priorite == 'BASSE' %}<span class="prio-basse">▼ Basse</span>{% endif %}
+        </div>
+        {% if p.competences|length > 0 %}
+        <div>
+            {% for c in p.competences %}
+                <span class="comp-chip">{{ c.nomCompetence }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div style="display:flex; gap:10px; font-size:12px; color:var(--text-secondary);">
+            {% if p.dateFin %}<span>Fin : {{ p.dateFin|date('d/m/Y') }}</span>{% endif %}
+            {% if p.budgetFreelance %}<span>Budget : {{ p.budgetFreelance|number_format(0,'.',',')|raw }} TND</span>{% endif %}
+        </div>
+
+        {# ── Action area ── #}
+        {% if demandeStatut == 'ACCEPTE' %}
+            <div class="btn-accepte">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Candidature acceptée
+            </div>
+        {% elseif demandeStatut == 'REFUSE' %}
+            <div class="btn-refuse">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Candidature refusée
+            </div>
+        {% elseif demandeStatut == 'EN_ATTENTE' %}
+            <div class="btn-attente">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                En attente de réponse
+            </div>
+        {% else %}
+            {# Postuler form with message + github #}
+            <div class="postuler-wrap" id="pw-{{ p.idProjet }}">
+                <button type="button" class="btn-postuler" onclick="showForm({{ p.idProjet }})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                    Postuler à ce projet
+                </button>
+                <form method="post" action="{{ path('freelancer_projets_postuler', {'id': p.idProjet}) }}"
+                      class="postuler-form" id="pf-{{ p.idProjet }}" style="display:none;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('postuler_'~p.idProjet) }}">
+                    <div class="pf-group">
+                        <label class="pf-label">Message de motivation <span class="pf-req">*</span></label>
+                        <textarea name="message" class="pf-input" rows="3"
+                                  placeholder="Expliquez pourquoi vous êtes le bon profil pour ce projet…"></textarea>
+                    </div>
+                    <div class="pf-group">
+                        <label class="pf-label">Profil GitHub <span class="pf-req">*</span></label>
+                        <input type="url" name="github" class="pf-input"
+                               placeholder="https://github.com/votre-profil">
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button type="submit" class="btn-postuler" style="flex:1; font-size:12.5px; padding:8px 12px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                            Envoyer la candidature
+                        </button>
+                        <button type="button" class="btn-cancel-postuler" onclick="hideForm({{ p.idProjet }})">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-msg">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.3;"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    <div style="font-size:14px;">Aucun projet disponible pour le moment.</div>
+</div>
+{% endif %}

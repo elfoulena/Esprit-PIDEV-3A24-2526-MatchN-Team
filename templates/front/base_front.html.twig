@@ -1,0 +1,340 @@
+{# templates/front/base_front.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MatchNTeam{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-main:       #f8fafc;
+            --card-bg:       #ffffff;
+            --border-color:  rgba(0,0,0,0.08);
+            --text-primary:  #0f172a;
+            --text-secondary:#64748b;
+            --accent-blue:   #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green:  #10b981;
+            --radius-sm:     8px;
+            --radius-md:     12px;
+            --radius-lg:     16px;
+            --radius-xl:     24px;
+            --shadow-sm:     0 1px 4px rgba(0,0,0,0.06);
+            --shadow-md:     0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg:     0 12px 40px rgba(0,0,0,0.10);
+            --transition:    0.18s ease;
+            --navbar-h:      68px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ══════════════════ NAVBAR ══════════════════ */
+        .navbar {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            height: var(--navbar-h);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        .navbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        /* Brand */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800; color: #fff;
+        }
+        .brand-text {
+            font-size: 17px; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Nav links */
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+        .navbar-links a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+        .navbar-links a:hover, .navbar-links a.active {
+            color: var(--accent-blue);
+            background: rgba(59,130,246,0.07);
+        }
+        .navbar-links a svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+        /* Auth actions */
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .btn-outline {
+            padding: 8px 18px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13.5px; font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition);
+            background: var(--card-bg);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        .btn-cta {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: var(--radius-md);
+            font-size: 13.5px; font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            transition: opacity var(--transition);
+        }
+        .btn-cta:hover { opacity: 0.88; }
+
+        /* User avatar in navbar (when logged in) */
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-avatar {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800; color: #fff;
+        }
+        .navbar-username {
+            font-size: 13.5px; font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Mobile hamburger (visible < 768px) */
+        .navbar-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+        }
+        .navbar-toggle span {
+            width: 22px; height: 2px;
+            background: var(--text-primary);
+            border-radius: 2px;
+            transition: all var(--transition);
+        }
+
+        /* ══════════════════ PAGE CONTENT ══════════════════ */
+        .page-content {
+            flex: 1;
+        }
+
+        /* ══════════════════ FLASH MESSAGES ══════════════════ */
+        .flash-container {
+            max-width: 1200px;
+            margin: 16px auto 0;
+            padding: 0 24px;
+        }
+        .flash-success {
+            background: rgba(16,185,129,0.09);
+            border: 1px solid rgba(16,185,129,0.25);
+            color: #065f46;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 13.5px; font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .flash-error {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #991b1b;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 13.5px; font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* ══════════════════ FOOTER ══════════════════ */
+        .footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 28px 24px;
+            margin-top: auto;
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .footer-brand { display: flex; align-items: center; gap: 8px; }
+        .footer-copy { font-size: 12.5px; color: var(--text-secondary); }
+        .footer-links { display: flex; gap: 16px; }
+        .footer-links a {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+        .footer-links a:hover { color: var(--accent-blue); }
+
+        @media (max-width: 768px) {
+            .navbar-links, .navbar-actions { display: none; }
+            .navbar-toggle { display: flex; }
+        }
+
+        {% block extra_styles %}{% endblock %}
+    </style>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+{# ══════════════ NAVBAR ══════════════ #}
+<nav class="navbar">
+    <div class="navbar-inner">
+
+        <a href="{{ path('home') }}" class="navbar-brand">
+            <div class="brand-icon">MN</div>
+            <span class="brand-text">MatchNTeam</span>
+        </a>
+
+        <ul class="navbar-links">
+            <li>
+                <a href="{{ path('home') }}"
+                   class="{% if app.request.attributes.get('_route') == 'home' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Accueil
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_front_evenement_index') }}"
+                   class="{% if app.request.attributes.get('_route') starts with 'app_front_evenement' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Événements
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Équipes
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    Freelancers
+                </a>
+            </li>
+        </ul>
+
+        <div class="navbar-actions">
+            {% if app.user %}
+                <div class="navbar-user">
+                    <div class="navbar-avatar">
+                        {{ (app.user.nom|slice(0,1) ~ app.user.prenom|slice(0,1))|upper }}
+                    </div>
+                    <span class="navbar-username">{{ app.user.prenom }}</span>
+                    <a href="{{ path('app_logout') }}" class="btn-outline" style="font-size:12px; padding:6px 14px;">
+                        Déconnexion
+                    </a>
+                </div>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn-outline">Se connecter</a>
+                <a href="{{ path('app_register') }}" class="btn-cta">S'inscrire</a>
+            {% endif %}
+        </div>
+
+        <button class="navbar-toggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</nav>
+
+{# Flash messages #}
+<div class="flash-container">
+    {% for msg in app.flashes('success') %}
+        <div class="flash-success">✓ {{ msg }}</div>
+    {% endfor %}
+    {% for msg in app.flashes('error') %}
+        <div class="flash-error">{{ msg }}</div>
+    {% endfor %}
+</div>
+
+{# ══════════════ PAGE CONTENT ══════════════ #}
+<div class="page-content">
+    {% block content %}{% endblock %}
+</div>
+
+{# ══════════════ FOOTER ══════════════ #}
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="brand-icon" style="width:28px;height:28px;font-size:10px;">MN</div>
+            <span class="footer-copy">&copy; {{ "now"|date("Y") }} MatchNTeam. Tous droits réservés.</span>
+        </div>
+        <div class="footer-links">
+            <a href="#">À propos</a>
+            <a href="#">Contact</a>
+            <a href="#">Confidentialité</a>
+        </div>
+    </div>
+</footer>
+
+{% block javascripts %}{% endblock %}
+</body>
+</html>

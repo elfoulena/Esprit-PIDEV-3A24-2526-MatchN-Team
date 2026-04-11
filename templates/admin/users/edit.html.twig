@@ -1,0 +1,158 @@
+{# templates/admin/users/edit.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Modifier {{ user.nom }} — MatchNTeam{% endblock %}
+{% block page_title %}Modifier un utilisateur{% endblock %}
+
+{% block extra_styles %}
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 32px 36px;
+    max-width: 600px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { margin-bottom: 18px; }
+.form-group label {
+    display: block;
+    font-size: 12px; font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 6px;
+}
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+}
+.form-control:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.form-control:disabled {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+}
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-top: 1px solid var(--border-color);
+}
+.toggle-label { font-size: 14px; font-weight: 600; }
+.toggle-switch input { display: none; }
+.toggle-track {
+    width: 44px; height: 24px;
+    background: #d1d5db;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+input:checked + .toggle-track { background: var(--accent-green); }
+input:checked + .toggle-track::after { transform: translateX(20px); }
+.form-actions {
+    display: flex; gap: 12px; align-items: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-submit {
+    padding: 11px 24px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: #fff; border: none;
+    border-radius: var(--radius-md);
+    font-size: 13.5px; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: opacity var(--transition);
+}
+.btn-submit:hover { opacity: 0.88; }
+.btn-cancel {
+    padding: 11px 20px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13.5px; font-weight: 600;
+    text-decoration: none; transition: all var(--transition);
+}
+.btn-cancel:hover { background: var(--border-color); }
+{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px;">
+    <a href="{{ path('admin_users_index') }}" style="color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour aux utilisateurs
+    </a>
+</div>
+
+<div class="form-card">
+    <div style="margin-bottom:24px;">
+        <div style="font-size:17px; font-weight:800; margin-bottom:4px;">{{ user.nom }} {{ user.prenom }}</div>
+        <div style="font-size:13px; color:var(--text-secondary);">{{ user.email }}</div>
+    </div>
+
+    <form method="post" action="{{ path('admin_users_edit', {'id': user.id}) }}">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom</label>
+                <input type="text" name="nom" class="form-control" value="{{ user.nom }}" required minlength="2">
+            </div>
+            <div class="form-group">
+                <label>Prénom</label>
+                <input type="text" name="prenom" class="form-control" value="{{ user.prenom }}" required minlength="2">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" value="{{ user.email }}" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Téléphone</label>
+            <input type="tel" name="telephone" class="form-control" value="{{ user.telephone }}">
+        </div>
+
+        <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" name="adresse" class="form-control" value="{{ user.adresse }}">
+        </div>
+
+        <div class="toggle-row">
+            <span class="toggle-label">Compte actif</span>
+            <label class="toggle-switch">
+                <input type="checkbox" name="actif" value="1" {{ user.actif ? 'checked' : '' }}>
+                <div class="toggle-track"></div>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Enregistrer</button>
+            <a href="{{ path('admin_users_index') }}" class="btn-cancel">Annuler</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{# templates/freelancer/dashboard.html.twig #}
+{% extends 'back/base_freelancer.html.twig' %}
+{% block title %}Tableau de bord — MatchNTeam{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+{% block extra_styles %}
+.welcome-banner { background: linear-gradient(135deg, #3b0764 0%, #7c3aed 60%, #8b5cf6 100%); border-radius: var(--radius-lg); padding: 32px 36px; color:#fff; position:relative; overflow:hidden; margin-bottom:28px; }
+.welcome-banner::before { content:''; position:absolute; top:-60px; right:-60px; width:260px; height:260px; border-radius:50%; background:rgba(255,255,255,0.06); }
+.welcome-title { font-size:26px; font-weight:800; margin-bottom:6px; }
+.welcome-sub { font-size:14px; opacity:0.75; }
+.quick-actions { display:grid; grid-template-columns: repeat(2,1fr); gap:16px; }
+.action-card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:24px; display:flex; align-items:center; gap:16px; text-decoration:none; color:var(--text-primary); transition: all var(--transition); box-shadow: var(--shadow-sm); }
+.action-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.action-icon { width:48px; height:48px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.action-icon.purple { background:rgba(139,92,246,0.12); color:var(--accent); }
+.action-icon.green  { background:rgba(16,185,129,0.12); color:var(--accent-green); }
+.action-icon svg { width:22px; height:22px; }
+.action-label { font-size:14px; font-weight:700; margin-bottom:2px; }
+.action-sub { font-size:12px; color:var(--text-secondary); }
+{% endblock %}
+{% block content %}
+<div class="welcome-banner">
+    <div class="welcome-title">Bonjour, {{ app.user ? app.user.prenom : 'Freelancer' }} 👋</div>
+    <div class="welcome-sub">{{ "now"|date("l d F Y") }} — Espace Freelancer</div>
+</div>
+<div class="quick-actions">
+    <a href="{{ path('freelancer_projets_index') }}" class="action-card">
+        <div class="action-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        </div>
+        <div>
+            <div class="action-label">Projets disponibles</div>
+            <div class="action-sub">Parcourez et postulez aux projets ouverts aux freelancers</div>
+        </div>
+    </a>
+    <a href="{{ path('freelancer_mes_demandes') }}" class="action-card">
+        <div class="action-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div>
+            <div class="action-label">Mes candidatures</div>
+            <div class="action-sub">Suivez le statut de vos demandes de participation</div>
+        </div>
+    </a>
+</div>
+{% endblock %}

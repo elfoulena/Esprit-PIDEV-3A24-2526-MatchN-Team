@@ -1,0 +1,125 @@
+{# templates/back/base_freelancer.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MatchNTeam Freelancer{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-main:        #f0f2f5;
+            --bg-surface:     #e8eaf0;
+            --card-bg:        #ffffff;
+            --border-color:   rgba(0,0,0,0.08);
+            --text-primary:   #1e293b;
+            --text-secondary: #64748b;
+            --accent:         #8b5cf6;
+            --accent2:        #6d28d9;
+            --accent-green:   #10b981;
+            --accent-orange:  #f59e0b;
+            --accent-red:     #ef4444;
+            --sidebar-w:      260px;
+            --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+            --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.09);
+            --transition: 0.18s ease;
+        }
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--bg-main); color: var(--text-primary); display: flex; min-height: 100vh; }
+
+        .sidebar { width: var(--sidebar-w); background: var(--card-bg); border-right: 1px solid var(--border-color); position: fixed; top:0; left:0; bottom:0; z-index:100; display:flex; flex-direction:column; box-shadow: var(--shadow-sm); }
+        .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:11px; text-decoration:none; }
+        .brand-logo { width:36px; height:36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; flex-shrink:0; }
+        .brand-name { font-size:16px; font-weight:800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .sidebar-section-label { padding:20px 20px 6px; font-size:10px; font-weight:700; letter-spacing:1.4px; color:#94a3b8; text-transform:uppercase; }
+        .sidebar-nav { flex:1; padding:8px 12px 16px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; }
+        .nav-item { display:flex; align-items:center; gap:11px; padding:10px 14px; border-radius: var(--radius-md); font-size:13.5px; font-weight:500; color:var(--text-secondary); text-decoration:none; transition: all var(--transition); position:relative; }
+        .nav-item svg { width:18px; height:18px; flex-shrink:0; stroke-width:1.8; }
+        .nav-item:hover { background: rgba(139,92,246,0.07); color: var(--accent); }
+        .nav-item.active { background: linear-gradient(135deg, rgba(139,92,246,0.13), rgba(109,40,217,0.07)); color: var(--accent); font-weight:700; }
+        .nav-item.active::before { content:''; position:absolute; left:0; top:6px; bottom:6px; width:3px; background: linear-gradient(var(--accent), var(--accent2)); border-radius:0 3px 3px 0; }
+        .nav-divider { height:1px; background:var(--border-color); margin:10px 12px; }
+        .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border-color); }
+        .user-pill { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .user-avatar { width:34px; height:34px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; flex-shrink:0; }
+        .user-info { flex:1; min-width:0; }
+        .user-name { font-size:13px; font-weight:700; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .user-role { font-size:11px; color:var(--text-secondary); }
+        .logout-btn { display:flex; align-items:center; gap:8px; color:var(--accent-red); text-decoration:none; font-size:13px; font-weight:600; padding:8px 10px; border-radius:var(--radius-sm); transition:background var(--transition); }
+        .logout-btn:hover { background: rgba(239,68,68,0.08); }
+        .logout-btn svg { width:16px; height:16px; }
+
+        .main-content { flex:1; margin-left:var(--sidebar-w); display:flex; flex-direction:column; min-height:100vh; }
+        .topbar { background:var(--card-bg); border-bottom:1px solid var(--border-color); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; box-shadow:var(--shadow-sm); }
+        .topbar-title { font-size:15px; font-weight:700; }
+        .topbar-badge { font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(109,40,217,0.08)); color:var(--accent); }
+        .page-body { padding:28px 32px; flex:1; }
+        .flash-wrap { padding:0 32px; margin-top:16px; }
+        .flash-success { background:rgba(16,185,129,0.09); border:1px solid rgba(16,185,129,0.25); color:#065f46; border-radius:var(--radius-sm); padding:11px 16px; font-size:13px; font-weight:600; }
+        .flash-error { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); color:#991b1b; border-radius:var(--radius-sm); padding:11px 16px; font-size:13px; font-weight:600; }
+        {% block extra_styles %}{% endblock %}
+    </style>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+<aside class="sidebar">
+    <a class="sidebar-brand" href="{{ path('freelancer_dashboard') }}">
+        <div class="brand-logo">FL</div>
+        <span class="brand-name">MatchNTeam</span>
+    </a>
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Principal</div>
+        <a href="{{ path('freelancer_dashboard') }}" class="nav-item {% if app.request.attributes.get('_route') == 'freelancer_dashboard' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Tableau de bord
+        </a>
+
+        <div class="sidebar-section-label" style="margin-top:6px;">Projets</div>
+        <a href="{{ path('freelancer_projets_index') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'freelancer_projets' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            Projets disponibles
+        </a>
+        <a href="{{ path('freelancer_mes_demandes') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'freelancer_mes_demandes' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Mes candidatures
+        </a>
+
+        <div class="sidebar-section-label" style="margin-top:6px;">Communication</div>
+        <a href="{{ path('app_front_evenement_index') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'app_front_evenement' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Événements
+        </a>
+        <div class="nav-divider"></div>
+        <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Paramètres
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-pill">
+            <div class="user-avatar">{{ app.user ? (app.user.nom|slice(0,1)~app.user.prenom|slice(0,1))|upper : 'FL' }}</div>
+            <div class="user-info">
+                <div class="user-name">{{ app.user ? app.user.nom~' '~app.user.prenom : 'Freelancer' }}</div>
+                <div class="user-role">Freelancer</div>
+            </div>
+        </div>
+        <a href="{{ path('app_logout') }}" class="logout-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Déconnexion
+        </a>
+    </div>
+</aside>
+<div class="main-content">
+    <header class="topbar">
+        <span class="topbar-title">{% block page_title %}MatchNTeam{% endblock %}</span>
+        <div><span class="topbar-badge">Freelancer</span></div>
+    </header>
+    {% for msg in app.flashes('success') %}<div class="flash-wrap"><div class="flash-success">✓ {{ msg }}</div></div>{% endfor %}
+    {% for msg in app.flashes('error') %}<div class="flash-wrap"><div class="flash-error">{{ msg }}</div></div>{% endfor %}
+    <div class="page-body">{% block content %}{% endblock %}</div>
+</div>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

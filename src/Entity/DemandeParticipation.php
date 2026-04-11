@@ -155,4 +155,19 @@ class DemandeParticipation
         return $this;
     }
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $github = null;
+
+    public function getGithub(): ?string
+    {
+        return $this->github;
+    }
+
+    public function setGithub(?string $github): static
+    {
+        $this->github = $github;
+
+        return $this;
+    }
+
 }

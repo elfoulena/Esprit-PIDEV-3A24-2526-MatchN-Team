@@ -1,0 +1,73 @@
+{# templates/admin/projets/_table.html.twig — partial for AJAX reload #}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Titre</th>
+            <th>Statut</th>
+            <th>Priorité</th>
+            <th>Visibilité</th>
+            <th>Compétences</th>
+            <th>Budget total</th>
+            <th>Date fin</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in projets %}
+        {% set st = p.statut|lower|replace({' ': '_'}) %}
+        <tr>
+            <td style="color:var(--text-secondary); font-size:12px;">#{{ p.idProjet }}</td>
+            <td style="font-weight:700; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                <a href="{{ path('admin_projets_show', {'id': p.idProjet}) }}" style="color:inherit; text-decoration:none;">{{ p.titre }}</a>
+            </td>
+            <td>
+                {% if p.statut %}
+                    <span class="badge badge-{{ p.statut|lower|replace({' ':'_'}) }} {% if not p.statut %}badge-default{% endif %}">
+                        {{ p.statut|replace({'_':' '})|upper }}
+                    </span>
+                {% else %}<span style="color:var(--text-secondary);">—</span>{% endif %}
+            </td>
+            <td>
+                {% if p.priorite == 'HAUTE' %}<span class="prio-haute">▲ Haute</span>
+                {% elseif p.priorite == 'MOYENNE' %}<span class="prio-moyenne">● Moyenne</span>
+                {% elseif p.priorite == 'BASSE' %}<span class="prio-basse">▼ Basse</span>
+                {% else %}<span style="color:var(--text-secondary);">—</span>{% endif %}
+            </td>
+            <td>
+                {% if p.visibleEmploye %}<span class="vis-badge vis-employe">👔 Employés</span> {% endif %}
+                {% if p.visibleFreelancer %}<span class="vis-badge vis-freelancer">💼 Freelancers</span>{% endif %}
+                {% if not p.visibleEmploye and not p.visibleFreelancer %}<span style="color:var(--text-secondary); font-size:12px;">Privé</span>{% endif %}
+            </td>
+            <td style="font-size:12px;">
+                {% if p.competences|length > 0 %}
+                    {% for c in p.competences|slice(0,2) %}
+                        <span style="display:inline-block; background:rgba(139,92,246,0.08); color:#7c3aed; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; margin:1px;">{{ c.nomCompetence }}</span>
+                    {% endfor %}
+                    {% if p.competences|length > 2 %}<span style="font-size:11px; color:var(--text-secondary);">+{{ p.competences|length - 2 }}</span>{% endif %}
+                {% else %}<span style="color:var(--text-secondary);">—</span>{% endif %}
+            </td>
+            <td style="font-size:13px;">{{ p.budgetTotal ? p.budgetTotal|number_format(0,'.',',')|raw ~ ' TND' : '—' }}</td>
+            <td style="font-size:12px; color:var(--text-secondary);">{{ p.dateFin ? p.dateFin|date('d/m/Y') : '—' }}</td>
+            <td>
+                <div class="actions">
+                    <a href="{{ path('admin_projets_show', {'id': p.idProjet}) }}" class="action-btn view" title="Voir">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                    <a href="{{ path('admin_projets_edit', {'id': p.idProjet}) }}" class="action-btn edit" title="Modifier">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    <form method="post" action="{{ path('admin_projets_delete', {'id': p.idProjet}) }}" style="margin:0;" onsubmit="return confirm('Supprimer ce projet ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_projet_'~p.idProjet) }}">
+                        <button type="submit" class="action-btn delete" title="Supprimer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="9" class="empty-state">Aucun projet trouvé.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>

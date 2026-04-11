@@ -1,10 +1,10 @@
-{# templates/back/base_admin.html.twig #}
+{# templates/back/base_employe.html.twig #}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MatchNTeam Admin{% endblock %}</title>
+    <title>{% block title %}MatchNTeam Employé{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -17,11 +17,12 @@
             --border-color:   rgba(0,0,0,0.08);
             --text-primary:   #1e293b;
             --text-secondary: #64748b;
-            --accent-blue:    #3b82f6;
-            --accent-purple:  #8b5cf6;
+            --accent-blue:    #0ea5e9;
+            --accent-teal:    #14b8a6;
             --accent-green:   #10b981;
             --accent-orange:  #f59e0b;
             --accent-red:     #ef4444;
+            --accent-purple:  #8b5cf6;
             --sidebar-w:      260px;
             --radius-sm:      8px;
             --radius-md:      12px;
@@ -50,7 +51,6 @@
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow-sm);
-            transition: transform var(--transition);
         }
 
         .sidebar-brand {
@@ -63,16 +63,15 @@
         }
         .brand-logo {
             width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
             border-radius: var(--radius-sm);
             display: flex; align-items: center; justify-content: center;
             font-size: 13px; font-weight: 800; color: #fff;
             flex-shrink: 0;
-            letter-spacing: -0.5px;
         }
         .brand-name {
             font-size: 16px; font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
             -webkit-background-clip: text; background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -105,16 +104,15 @@
             color: var(--text-secondary);
             text-decoration: none;
             transition: all var(--transition);
-            cursor: pointer;
             position: relative;
         }
         .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 1.8; }
         .nav-item:hover {
-            background: rgba(59,130,246,0.07);
+            background: rgba(14,165,233,0.07);
             color: var(--accent-blue);
         }
         .nav-item.active {
-            background: linear-gradient(135deg, rgba(59,130,246,0.13), rgba(139,92,246,0.07));
+            background: linear-gradient(135deg, rgba(14,165,233,0.13), rgba(20,184,166,0.07));
             color: var(--accent-blue);
             font-weight: 700;
         }
@@ -123,7 +121,7 @@
             position: absolute;
             left: 0; top: 6px; bottom: 6px;
             width: 3px;
-            background: linear-gradient(var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(var(--accent-blue), var(--accent-teal));
             border-radius: 0 3px 3px 0;
         }
 
@@ -145,7 +143,7 @@
         }
         .user-avatar {
             width: 34px; height: 34px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 800; color: #fff;
@@ -190,30 +188,19 @@
             position: sticky; top: 0; z-index: 50;
             box-shadow: var(--shadow-sm);
         }
-        .topbar-title {
-            font-size: 15px; font-weight: 700; color: var(--text-primary);
-        }
-        .topbar-right {
-            display: flex; align-items: center; gap: 12px;
-        }
+        .topbar-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+        .topbar-right { display: flex; align-items: center; gap: 12px; }
         .topbar-badge {
             font-size: 11px; font-weight: 700;
             padding: 4px 12px;
             border-radius: 20px;
-            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.08));
+            background: linear-gradient(135deg, rgba(14,165,233,0.12), rgba(20,184,166,0.08));
             color: var(--accent-blue);
         }
 
-        .page-body {
-            padding: 28px 32px;
-            flex: 1;
-        }
+        .page-body { padding: 28px 32px; flex: 1; }
 
-        /* Flash messages */
-        .flash-wrap {
-            padding: 0 32px;
-            margin-top: 16px;
-        }
+        .flash-wrap { padding: 0 32px; margin-top: 16px; }
         .flash-success {
             background: rgba(16,185,129,0.09);
             border: 1px solid rgba(16,185,129,0.25);
@@ -221,7 +208,6 @@
             border-radius: var(--radius-sm);
             padding: 11px 16px;
             font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
         }
         .flash-error {
             background: rgba(239,68,68,0.08);
@@ -239,78 +225,21 @@
 <body>
 
 {# ══════════════ SIDEBAR ══════════════ #}
-<aside class="sidebar" id="sidebar">
-    <a class="sidebar-brand" href="{{ path('admin_dashboard') }}">
-        <div class="brand-logo">RH</div>
+<aside class="sidebar">
+    <a class="sidebar-brand" href="{{ path('employe_dashboard') }}">
+        <div class="brand-logo">MT</div>
         <span class="brand-name">MatchNTeam</span>
     </a>
 
     <nav class="sidebar-nav">
-        <!-- PRINCIPAL -->
         <div class="sidebar-section-label">Principal</div>
 
-        <a href="{{ path('admin_dashboard') }}"
-           class="nav-item {% if app.request.attributes.get('_route') == 'admin_dashboard' %}active{% endif %}">
+        <a href="{{ path('employe_dashboard') }}"
+           class="nav-item {% if app.request.attributes.get('_route') == 'employe_dashboard' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             Tableau de bord
         </a>
 
-        <!-- UTILISATEURS -->
-        <div class="sidebar-section-label" style="margin-top: 6px;">Utilisateurs</div>
-
-        <a href="{{ path('admin_users_index') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_users' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Tous les utilisateurs
-        </a>
-
-        <!-- PROJETS -->
-        <div class="sidebar-section-label" style="margin-top: 6px;">Projets</div>
-
-        <a href="{{ path('admin_projets_index') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_projets' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-            Tous les Projets
-        </a>
-
-        <a href="{{ path('admin_projets_demandes') }}"
-           class="nav-item {% if app.request.attributes.get('_route') == 'admin_projets_demandes' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Demandes participation
-        </a>
-
-        <a href="{{ path('admin_competences_index') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_competences' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            Compétences
-        </a>
-
-        <a href="{{ path('app_affectation_index') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'app_affectation' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M20 7h-4.18A3 3 0 0 0 16 5.18V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v1.18A3 3 0 0 0 8.18 7H4"/>
-                <line x1="12" y1="12" x2="12" y2="16"/>
-                <line x1="8" y1="14" x2="16" y2="14"/>
-                <rect x="4" y="7" width="16" height="13" rx="2"/>
-            </svg>
-            Affectations
-        </a>
-
-        <a href="{{ path('app_evaluation_index') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'app_evaluation' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-            Part-Time
-        </a>
-
-        <a href="{{ path('admin_dashboard') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_competences_freelancer' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-            Compétences du freelancer
-        </a>
-
-        <!-- EQUIPES -->
         <div class="sidebar-section-label" style="margin-top: 6px;">Équipes</div>
 
         <a href="{{ path('app_equipe_index') }}"
@@ -319,33 +248,29 @@
             Gestion Équipes
         </a>
 
-        <a href="{{ path('admin_dashboard') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_demandes_equipes' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Demandes d'équipes
+        <div class="sidebar-section-label" style="margin-top: 6px;">Projets</div>
+
+        <a href="{{ path('employe_projets_index') }}"
+           class="nav-item {% if app.request.attributes.get('_route') == 'employe_projets_index' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            Projets disponibles
         </a>
 
-        <!-- COMMUNICATION -->
+        <a href="{{ path('employe_mes_affectations') }}"
+           class="nav-item {% if app.request.attributes.get('_route') == 'employe_mes_affectations' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Mes affectations
+        </a>
+
         <div class="sidebar-section-label" style="margin-top: 6px;">Communication</div>
 
-        <a href="{{ path('admin_dashboard') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_reclamations' %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Réclamation
-        </a>
-
-        <a href="{{ path('app_evenement_index') }}"
-           class="nav-item {% if app.request.attributes.get('_route') starts with 'app_evenement' %}active{% endif %}">
+        <a href="{{ path('app_front_evenement_index') }}"
+           class="nav-item {% if app.request.attributes.get('_route') starts with 'app_front_evenement' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             Événements
         </a>
 
         <div class="nav-divider"></div>
-
-        <a href="#" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-            Rapports
-        </a>
 
         <a href="#" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
@@ -356,11 +281,11 @@
     <div class="sidebar-footer">
         <div class="user-pill">
             <div class="user-avatar">
-                {{ app.user ? (app.user.nom|slice(0,1) ~ app.user.prenom|slice(0,1))|upper : 'AD' }}
+                {{ app.user ? (app.user.nom|slice(0,1) ~ app.user.prenom|slice(0,1))|upper : 'EM' }}
             </div>
             <div class="user-info">
-                <div class="user-name">{{ app.user ? app.user.nom ~ ' ' ~ app.user.prenom : 'Admin' }}</div>
-                <div class="user-role">Administrateur RH</div>
+                <div class="user-name">{{ app.user ? app.user.nom ~ ' ' ~ app.user.prenom : 'Employé' }}</div>
+                <div class="user-role">{{ app.user and app.user.poste ? app.user.poste : 'Employé' }}</div>
             </div>
         </div>
         <a href="{{ path('app_logout') }}" class="logout-btn">
@@ -375,11 +300,10 @@
     <header class="topbar">
         <span class="topbar-title">{% block page_title %}MatchNTeam{% endblock %}</span>
         <div class="topbar-right">
-            <span class="topbar-badge">Admin RH</span>
+            <span class="topbar-badge">Espace Employé</span>
         </div>
     </header>
 
-    {# Flash messages #}
     {% for msg in app.flashes('success') %}
         <div class="flash-wrap"><div class="flash-success">✓ {{ msg }}</div></div>
     {% endfor %}

@@ -390,6 +390,52 @@
                         </div>
                     </div>
                 </div>
+                {# ── IA Améliorer ── #}
+<div style="display:flex;flex-direction:column;gap:6px;">
+    <button type="button" id="btnAmeliorerIA"
+            onclick="ameliorerAvecIA()"
+            style="display:flex;align-items:center;justify-content:center;gap:8px;
+                   width:100%;padding:10px;border:none;border-radius:var(--radius-sm);
+                   background:linear-gradient(135deg,#6c63ff,#4f46e5);
+                   color:white;font-weight:700;font-size:13px;cursor:pointer;
+                   font-family:inherit;transition:opacity .2s;">
+        ✨ Améliorer avec l'IA
+    </button>
+    <div id="lblAIStatus"
+         style="font-size:11px;color:#a09cff;font-style:italic;min-height:16px;"></div>
+</div>
+
+{# ── Traduction ── #}
+<div style="background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.25);
+            border-radius:var(--radius-sm);padding:12px;display:flex;flex-direction:column;gap:8px;">
+    <div style="font-size:10px;font-weight:700;color:#00d4aa;letter-spacing:1px;">
+        🌍 TRADUIRE LA RÉCLAMATION
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+        <select id="cbLangue"
+                style="flex:1;padding:7px 10px;border-radius:var(--radius-sm);
+                       border:1px solid rgba(0,212,170,0.3);background:#0d1a18;
+                       color:#00d4aa;font-family:inherit;font-size:12px;">
+            <option value="en">🇬🇧 Anglais (English)</option>
+            <option value="es">🇪🇸 Espagnol (Español)</option>
+        </select>
+        <button type="button" id="btnTraduire"
+                onclick="traduireReclamation()"
+                style="padding:7px 14px;border:none;border-radius:var(--radius-sm);
+                       background:#00d4aa;color:#0d0f1a;font-weight:700;
+                       font-size:12px;cursor:pointer;font-family:inherit;">
+            🌍 Traduire
+        </button>
+    </div>
+    <div id="lblTraductionStatus"
+         style="font-size:11px;color:#00d4aa;font-style:italic;min-height:14px;"></div>
+    <textarea id="taTraduction" rows="3" readonly
+              placeholder="La traduction apparaîtra ici..."
+              style="width:100%;border:1px solid rgba(0,212,170,0.2);
+                     border-radius:var(--radius-sm);background:#0d1a18;
+                     color:#00d4aa;font-size:12px;padding:8px;
+                     font-family:inherit;resize:vertical;"></textarea>
+</div>
                 <div style="padding:16px 28px;background:white;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;gap:10px;">
                     <button type="button" data-bs-dismiss="modal" style="background:none;border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:9px 20px;color:var(--text-secondary);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;">Annuler</button>
                     <button type="submit" style="background:var(--accent-blue);border:none;border-radius:var(--radius-sm);padding:9px 24px;color:white;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">✉ Envoyer</button>
@@ -511,6 +557,88 @@
 
 <script>
 // ── Réclamations ──
+// ── IA : Améliorer la réponse ──
+function ameliorerAvecIA() {
+    const texte    = document.getElementById('contenuReponse').value.trim();
+    const contexte = document.getElementById('msgReclamation').textContent.trim();
+    const btn      = document.getElementById('btnAmeliorerIA');
+    const status   = document.getElementById('lblAIStatus');
+
+    if (!texte) {
+        status.textContent = '⚠️ Rédigez d\'abord votre réponse.';
+        return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = '⏳ Amélioration en cours...';
+    status.textContent = '🤖 L\'IA analyse votre réponse...';
+
+    const formData = new FormData();
+    formData.append('texte',    texte);
+    formData.append('contexte', contexte);
+
+    fetch('{{ path("admin_reclamation_ai_ameliorer") }}', {
+        method: 'POST',
+        body:   formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.result) {
+            document.getElementById('contenuReponse').value = data.result;
+            status.textContent = '✅ Réponse améliorée avec succès !';
+        } else {
+            status.textContent = '❌ Erreur : ' + (data.error || 'inconnue');
+        }
+    })
+    .catch(e => { status.textContent = '❌ Erreur réseau : ' + e.message; })
+    .finally(() => {
+        btn.disabled    = false;
+        btn.textContent = '✨ Améliorer avec l\'IA';
+    });
+}
+
+// ── Traduction ──
+function traduireReclamation() {
+    const msgReclamation = document.getElementById('msgReclamation');
+    const texte  = msgReclamation ? msgReclamation.textContent.trim() : '';
+    const langue = document.getElementById('cbLangue').value;
+    const btn    = document.getElementById('btnTraduire');
+    const status = document.getElementById('lblTraductionStatus');
+    const ta     = document.getElementById('taTraduction');
+
+    if (!texte) {
+        status.textContent = '⚠️ Sélectionnez d\'abord une réclamation.';
+        return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = '⏳ ...';
+    status.textContent = '🌍 Traduction en cours...';
+    ta.value = '';
+
+    const formData = new FormData();
+    formData.append('texte',  texte);
+    formData.append('langue', langue);
+
+    fetch('{{ path("admin_reclamation_ai_traduire") }}', {
+        method: 'POST',
+        body:   formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.result) {
+            ta.value = data.result;
+            status.textContent = '✅ Traduction réussie !';
+        } else {
+            status.textContent = '❌ Erreur : ' + (data.error || 'inconnue');
+        }
+    })
+    .catch(e => { status.textContent = '❌ Erreur réseau : ' + e.message; })
+    .finally(() => {
+        btn.disabled    = false;
+        btn.textContent = '🌍 Traduire';
+    });
+}
 function ouvrirReponse(id, message, statutActuel) {
     document.getElementById('formReponse').action = '/admin/reclamations/' + id + '/repondre';
     document.getElementById('msgReclamation').textContent = message;

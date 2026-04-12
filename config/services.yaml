@@ -23,16 +23,10 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
-    
+
     App\Service\HCaptchaService:
         arguments:
             $hcaptchaSecret: '%hcaptcha.secret%'
-
-    App\Service\WhatsAppService:
-        arguments:
-            $twilioSid: '%env(TWILIO_SID)%'
-            $twilioAuthToken: '%env(TWILIO_AUTH_TOKEN)%'
-            $twilioWhatsappFrom: '%env(TWILIO_WHATSAPP_FROM)%'
 
     App\Service\WhatsAppService:
         arguments:
@@ -55,3 +49,4 @@ services:
     App\Service\TicketPdfService:
         arguments:
             $scanBaseUrl: '%app.scan_base_url%'
+

@@ -1,14 +1,10 @@
 <?php
-
 namespace App\Repository;
 
 use App\Entity\Reclamation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Reclamation>
- */
 class ReclamationRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +12,29 @@ class ReclamationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reclamation::class);
     }
 
-//    /**
-//     * @return Reclamation[] Returns an array of Reclamation objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findWithFilters(?string $statut, ?string $search): array
+    {
+        $qb = $this->createQueryBuilder('r');
+        if ($statut) {
+            $qb->andWhere('r.statut = :statut')->setParameter('statut', $statut);
+        }
+        if ($search) {
+            $qb->andWhere('r.message LIKE :search')->setParameter('search', '%'.$search.'%');
+        }
+        return $qb->orderBy('r.dateCreation', 'DESC')->getQuery()->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Reclamation
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findByUserWithFilters(int $userId, ?string $statut, ?string $search): array
+    {
+        $qb = $this->createQueryBuilder('r')
+            ->andWhere('r.utilisateurId = :userId')
+            ->setParameter('userId', $userId);
+        if ($statut) {
+            $qb->andWhere('r.statut = :statut')->setParameter('statut', $statut);
+        }
+        if ($search) {
+            $qb->andWhere('r.message LIKE :search')->setParameter('search', '%'.$search.'%');
+        }
+        return $qb->orderBy('r.dateCreation', 'DESC')->getQuery()->getResult();
+    }
 }

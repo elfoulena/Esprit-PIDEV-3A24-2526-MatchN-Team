@@ -6,12 +6,15 @@ use App\Entity\MembreEquipe;
 use App\Form\MembreEquipeType;
 use App\Repository\EquipeRepository;
 use App\Repository\MembreEquipeRepository;
+use App\Service\WhatsAppService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route('/admin/equipe/{id_equipe}/membre')]
@@ -124,5 +127,97 @@ class MembreEquipeController extends AbstractController
         }
 
         return $this->redirectToRoute('app_membre_equipe_index', ['id_equipe' => $equipe->getIdEquipe()]);
+    }
+
+
+    #[Route('/send-whatsapp', name: 'app_membre_equipe_send_whatsapp', methods: ['POST'])]
+    public function sendWhatsAppNotification(
+        int $id_equipe, 
+        Request $request, 
+        EquipeRepository $equipeRepo, 
+        MembreEquipeRepository $membreRepo,
+        WhatsAppService $whatsAppService
+    ): JsonResponse {
+        $equipe = $equipeRepo->find($id_equipe);
+        if (!$equipe) {
+            return $this->json(['error' => 'Équipe introuvable'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $message = $data['message'] ?? '';
+        $sendToAll = $data['sendToAll'] ?? true;
+        $memberIds = $data['memberIds'] ?? [];
+
+        if (empty($message)) {
+            return $this->json(['error' => 'Le message ne peut pas être vide'], 400);
+        }
+
+        // Get members to notify
+        if ($sendToAll) {
+            $members = $membreRepo->findBy(['equipe' => $equipe, 'statutMembre' => 'Actif']);
+        } else {
+            $members = $membreRepo->findBy(['idMembre' => $memberIds]);
+        }
+
+        if (empty($members)) {
+            return $this->json(['error' => 'Aucun membre à notifier'], 400);
+        }
+
+        $results = [];
+        $successCount = 0;
+        $failCount = 0;
+
+        foreach ($members as $member) {
+            $user = $member->getUser();
+            if (!$user || !$user->getTelephone()) {
+                $results[] = [
+                    'member' => $user ? $user->getNom() . ' ' . $user->getPrenom() : 'Membre #' . $member->getIdMembre(),
+                    'status' => 'failed',
+                    'error' => 'Numéro de téléphone manquant'
+                ];
+                $failCount++;
+                continue;
+            }
+
+            // Format phone number
+            $phoneNumber = $whatsAppService->formatPhoneNumber($user->getTelephone());
+            
+            // Format message with context
+            $formattedMessage = sprintf(
+                "🏢 Équipe: %s\n👤 Membre: %s %s\n\n%s\n\n📅 %s",
+                $equipe->getNomEquipe(),
+                $user->getPrenom(),
+                $user->getNom(),
+                $message,
+                (new \DateTime())->format('d/m/Y H:i')
+            );
+            
+            // Send WhatsApp message
+            $result = $whatsAppService->sendWhatsAppMessage($phoneNumber, $formattedMessage);
+            
+            if ($result['success']) {
+                $results[] = [
+                    'member' => $user->getNom() . ' ' . $user->getPrenom(),
+                    'phone' => $user->getTelephone(),
+                    'status' => 'success'
+                ];
+                $successCount++;
+            } else {
+                $results[] = [
+                    'member' => $user->getNom() . ' ' . $user->getPrenom(),
+                    'status' => 'failed',
+                    'error' => $result['error']
+                ];
+                $failCount++;
+            }
+        }
+
+        return $this->json([
+            'success' => true,
+            'total' => count($members),
+            'sent' => $successCount,
+            'failed' => $failCount,
+            'results' => $results
+        ]);
     }
 }

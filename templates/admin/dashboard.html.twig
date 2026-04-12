@@ -220,7 +220,7 @@
                             </span>
                         </td>
                         <td>
-                            <form method="post" action="{{ path('admin_toggle_employe', {'id': emp.id}) }}" style="margin:0;">
+                            <form method="post" action="{{ path('admin_user_toggle', {'id': emp.id}) }}" style="margin:0;">
                                 <input type="hidden" name="_token" value="{{ csrf_token('toggle_' ~ emp.id) }}">
                                 <button type="submit" class="btn-sm {{ emp.actif ? 'danger' : 'success' }}">
                                     {{ emp.actif ? 'Désactiver' : 'Activer' }}

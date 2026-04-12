@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,16 +12,8 @@ class SecurityController extends AbstractController
     #[Route('/', name: 'home')]
     public function home(): Response
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
-
-        if (!$user) {
+        if (!$this->getUser()) {
             return $this->redirectToRoute('app_login');
-        }
-
-        // Non-admin users must verify their email before accessing dashboard
-        if (!$user->isVerified() && !$this->isGranted('ROLE_ADMIN')) {
-            return $this->redirectToRoute('app_verify_pending', ['email' => $user->getEmail()]);
         }
 
         return match (true) {
@@ -36,7 +27,6 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // If already logged in → go home
         if ($this->getUser()) {
             return $this->redirectToRoute('home');
         }
@@ -50,7 +40,6 @@ class SecurityController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {
-        // Symfony handles logout automatically
         throw new \LogicException('This method can be blank.');
     }
 }

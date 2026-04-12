@@ -1,0 +1,225 @@
+{# templates/affectation/index.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Gestion des Affectations — MatchNTeam{% endblock %}
+{% block page_title %}Gestion des Affectations{% endblock %}
+
+{% block extra_styles %}
+.page-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.btn-primary {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; background: var(--accent-blue); color: #fff;
+    border-radius: var(--radius-md); text-decoration: none;
+    font-size: 13px; font-weight: 700;
+    transition: all var(--transition); box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+.filter-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+}
+.filter-form { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { display: flex; flex-direction: column; gap: 5px; }
+.filter-label { font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+.filter-input, .filter-select {
+    padding: 9px 13px; border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm); font-size: 13px; color: var(--text-primary);
+    background: #fff; font-family: inherit; min-width: 140px;
+    transition: border-color var(--transition);
+}
+.filter-input:focus, .filter-select:focus { outline: none; border-color: var(--accent-blue); }
+.filter-input { min-width: 220px; }
+
+.btn-filter {
+    padding: 9px 18px; background: var(--text-secondary); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+    transition: background var(--transition);
+}
+.btn-filter:hover { background: #475569; }
+.btn-reset-filter {
+    padding: 9px 14px; background: var(--bg-surface); color: var(--text-primary);
+    border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;
+}
+
+.data-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th {
+    padding: 12px 18px; text-align: left; font-size: 10.5px; font-weight: 700;
+    color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;
+    background: #f8fafc; border-bottom: 1px solid var(--border-color);
+}
+.data-table tbody td {
+    padding: 14px 18px; font-size: 13px; border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: #f8fafc; }
+
+.badge-status {
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block;
+}
+.badge-status.en_attente { background: rgba(245,158,11,0.12); color: #b45309; }
+.badge-status.acceptee   { background: rgba(16,185,129,0.12); color: #059669; }
+.badge-status.refusee    { background: rgba(239,68,68,0.10); color: #dc2626; }
+.badge-status.terminee   { background: rgba(139,92,246,0.12); color: #7c3aed; }
+
+.action-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all var(--transition);
+}
+.action-btn:hover { filter: brightness(0.9); transform: scale(1.05); }
+.action-btn.view { background: rgba(139,92,246,0.12); color: var(--accent-purple); }
+.action-btn.edit { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
+.action-btn.del  { background: rgba(239,68,68,0.10); color: var(--accent-red); }
+
+.user-cell { display: flex; align-items: center; gap: 10px; }
+.user-avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+
+.empty-state { padding: 60px; text-align: center; color: var(--text-secondary); }
+.empty-state svg { opacity: 0.3; margin-bottom: 14px; }
+.empty-state p { font-size: 14px; }
+{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<div class="page-actions">
+    <div>
+        <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Affectations</h2>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">{{ affectations|length }} affectation(s) trouvée(s)</p>
+    </div>
+    <a href="{{ path('app_affectation_new') }}" class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle affectation
+    </a>
+</div>
+
+{# ── Filters ── #}
+<div class="filter-card">
+    <form method="get" action="{{ path('app_affectation_index') }}" class="filter-form">
+        <div class="filter-group">
+            <label class="filter-label">Rechercher</label>
+            <input type="text" name="search" class="filter-input" value="{{ search }}" placeholder="Nom, prénom ou projet...">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Statut</label>
+            <select name="statut" class="filter-select">
+                <option value="">Tous</option>
+                <option value="EN_ATTENTE" {{ statut == 'EN_ATTENTE' ? 'selected' }}>En attente</option>
+                <option value="ACCEPTEE"   {{ statut == 'ACCEPTEE'   ? 'selected' }}>Acceptée</option>
+                <option value="REFUSEE"    {{ statut == 'REFUSEE'    ? 'selected' }}>Refusée</option>
+                <option value="TERMINEE"   {{ statut == 'TERMINEE'   ? 'selected' }}>Terminée</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Trier par</label>
+            <select name="sortBy" class="filter-select">
+                <option value="date_debut"   {{ sortBy == 'date_debut'   ? 'selected' }}>Date début</option>
+                <option value="date_fin"     {{ sortBy == 'date_fin'     ? 'selected' }}>Date fin</option>
+                <option value="statut"       {{ sortBy == 'statut'       ? 'selected' }}>Statut</option>
+                <option value="taux_horaire" {{ sortBy == 'taux_horaire' ? 'selected' }}>Taux horaire</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Ordre</label>
+            <select name="sortDir" class="filter-select" style="min-width: 110px;">
+                <option value="DESC" {{ sortDir == 'DESC' ? 'selected' }}>Décroissant</option>
+                <option value="ASC"  {{ sortDir == 'ASC'  ? 'selected' }}>Croissant</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: flex-end;">
+            <button type="submit" class="btn-filter">Filtrer</button>
+            <a href="{{ path('app_affectation_index') }}" class="btn-reset-filter">Reset</a>
+        </div>
+    </form>
+</div>
+
+{# ── Table ── #}
+<div class="data-card">
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Freelancer</th>
+                    <th>Projet</th>
+                    <th>Date début</th>
+                    <th>Date fin</th>
+                    <th>Statut</th>
+                    <th>Taux horaire</th>
+                    <th style="text-align:right; padding-right: 22px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for a in affectations %}
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-sm">
+                                {{ a.user ? (a.user.nom|slice(0,1) ~ a.user.prenom|slice(0,1))|upper : '?' }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; color: var(--text-primary);">{{ a.user ? a.user.nom ~ ' ' ~ a.user.prenom : '—' }}</div>
+                                <div style="font-size: 11px; color: var(--text-secondary);">{{ a.user ? a.user.email : '' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-weight: 600;">{{ a.projet ? a.projet.titre : '—' }}</td>
+                    <td style="color: var(--text-secondary);">{{ a.dateDebut ? a.dateDebut|date('d/m/Y') : '—' }}</td>
+                    <td style="color: var(--text-secondary);">{{ a.dateFin ? a.dateFin|date('d/m/Y') : '—' }}</td>
+                    <td>
+                        {% if a.statut == 'EN_ATTENTE' %}
+                            <span class="badge-status en_attente">● En attente</span>
+                        {% elseif a.statut == 'ACCEPTEE' %}
+                            <span class="badge-status acceptee">● Acceptée</span>
+                        {% elseif a.statut == 'REFUSEE' %}
+                            <span class="badge-status refusee">● Refusée</span>
+                        {% elseif a.statut == 'TERMINEE' %}
+                            <span class="badge-status terminee">● Terminée</span>
+                        {% else %}
+                            <span class="badge-status">{{ a.statut }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-weight: 600; color: var(--accent-green);">{{ a.tauxHoraire ? a.tauxHoraire ~ ' DT/h' : '—' }}</td>
+                    <td>
+                        <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                            <a href="{{ path('app_affectation_show', {'id': a.id}) }}" class="action-btn view" title="Voir">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <a href="{{ path('app_affectation_edit', {'id': a.id}) }}" class="action-btn edit" title="Modifier">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            <form method="post" action="{{ path('app_affectation_delete', {'id': a.id}) }}" onsubmit="return confirm('Supprimer cette affectation ?');" style="margin:0;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ a.id) }}">
+                                <button type="submit" class="action-btn del" title="Supprimer">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                            <p>Aucune affectation trouvée</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

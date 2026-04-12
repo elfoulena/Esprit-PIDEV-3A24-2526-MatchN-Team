@@ -1,0 +1,66 @@
+{# templates/freelancer/mes_demandes/_table.html.twig — partial for AJAX reload #}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Projet</th>
+            <th>Compétences</th>
+            <th>Mon message</th>
+            <th>Mon GitHub</th>
+            <th>Budget freelance</th>
+            <th>Date candidature</th>
+            <th>Statut</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for d in demandes %}
+        <tr>
+            <td style="font-weight:700; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                {{ d.projet.titre }}
+            </td>
+            <td style="font-size:12px;">
+                {% if d.projet.competences|length > 0 %}
+                    {% for c in d.projet.competences|slice(0,3) %}
+                        <span class="comp-chip">{{ c.nomCompetence }}</span>
+                    {% endfor %}
+                    {% if d.projet.competences|length > 3 %}
+                        <span style="font-size:11px; color:var(--text-secondary);">+{{ d.projet.competences|length - 3 }}</span>
+                    {% endif %}
+                {% else %}<span style="color:var(--text-secondary);">—</span>{% endif %}
+            </td>
+            <td style="max-width:180px;">
+                {% if d.message %}
+                    <span style="font-size:12px; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;" title="{{ d.message }}">
+                        {{ d.message }}
+                    </span>
+                {% else %}
+                    <span style="color:var(--text-secondary); font-size:12px;">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if d.github %}
+                    <a href="{{ d.github }}" target="_blank" rel="noopener noreferrer"
+                       style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#8b5cf6; text-decoration:none; font-weight:600;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                        Voir profil
+                    </a>
+                {% else %}
+                    <span style="color:var(--text-secondary); font-size:12px;">—</span>
+                {% endif %}
+            </td>
+            <td style="font-size:13px;">{{ d.projet.budgetFreelance ? d.projet.budgetFreelance|number_format(0,'.',',')|raw ~ ' TND' : '—' }}</td>
+            <td style="font-size:12px; color:var(--text-secondary);">{{ d.createdAt ? d.createdAt|date('d/m/Y') : '—' }}</td>
+            <td>
+                {% if d.statut == 'ACCEPTE' %}
+                    <span class="badge badge-accepte">✓ Accepté</span>
+                {% elseif d.statut == 'REFUSE' %}
+                    <span class="badge badge-refuse">✗ Refusé</span>
+                {% else %}
+                    <span class="badge badge-attente">⏳ En attente</span>
+                {% endif %}
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="7" class="empty-state">Vous n'avez encore soumis aucune candidature.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>

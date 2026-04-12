@@ -43,6 +43,29 @@ class MailerService
         $this->mailer->send($email);
     }
 
+    public function sendEmployeWelcomeEmail(string $to, string $nom, string $plainPassword, string $code): void
+    {
+        $email = (new Email())
+            ->from('amenamri80@gmail.com')
+            ->to($to)
+            ->subject('Bienvenue — Votre compte Employé MatchNTeam')
+            ->html("
+                <h2>Bonjour {$nom},</h2>
+                <p>L'administrateur a créé votre compte <strong>Employé</strong> sur MatchNTeam.</p>
+                <h3>Vos identifiants de connexion :</h3>
+                <ul>
+                    <li><strong>Email :</strong> {$to}</li>
+                    <li><strong>Mot de passe :</strong> {$plainPassword}</li>
+                </ul>
+                <h3>Code de vérification :</h3>
+                <p style='font-size:28px; font-weight:bold; letter-spacing:6px; color:#3b82f6;'>{$code}</p>
+                <p>Ce code expire dans <strong>24 heures</strong>. Vous devrez le saisir lors de votre première connexion.</p>
+                <p style='color:#64748b;'>Pensez à changer votre mot de passe après votre première connexion.</p>
+            ");
+
+        $this->mailer->send($email);
+    }
+
     public function sendResetPasswordEmail(string $to, string $nom, string $code): void
     {
         $email = (new Email())

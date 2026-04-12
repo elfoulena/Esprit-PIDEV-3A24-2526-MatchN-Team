@@ -1,0 +1,53 @@
+{# templates/employe/projets/_table.html.twig — partial for AJAX reload #}
+{% if projets|length > 0 %}
+<div class="proj-grid">
+    {% for p in projets %}
+    <div class="proj-card">
+        <div>
+            <div class="proj-card-title">{{ p.titre }}</div>
+            {% if p.description %}
+            <div class="proj-card-desc" style="margin-top:6px;">{{ p.description }}</div>
+            {% endif %}
+        </div>
+        <div class="proj-meta">
+            {% if p.statut %}
+                <span class="badge badge-{{ p.statut|lower|replace({' ':'_'}) }}">{{ p.statut|replace({'_':' '})|upper }}</span>
+            {% endif %}
+            {% if p.priorite == 'HAUTE' %}<span class="prio-haute">▲ Haute</span>
+            {% elseif p.priorite == 'MOYENNE' %}<span class="prio-moyenne">● Moyenne</span>
+            {% elseif p.priorite == 'BASSE' %}<span class="prio-basse">▼ Basse</span>{% endif %}
+        </div>
+        {% if p.competences|length > 0 %}
+        <div>
+            {% for c in p.competences %}
+                <span class="comp-chip">{{ c.nomCompetence }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div style="display:flex; gap:10px; font-size:12px; color:var(--text-secondary);">
+            {% if p.dateFin %}<span>Fin : {{ p.dateFin|date('d/m/Y') }}</span>{% endif %}
+            {% if p.budgetTotal %}<span>Budget : {{ p.budgetTotal|number_format(0,'.',',')|raw }} TND</span>{% endif %}
+        </div>
+        {% if p.idProjet in affectedIds %}
+            <div class="btn-taken">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Déjà pris
+            </div>
+        {% else %}
+            <form method="post" action="{{ path('employe_projets_take', {'id': p.idProjet}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('take_projet_'~p.idProjet) }}">
+                <button type="submit" class="btn-take">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Prendre ce projet
+                </button>
+            </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-msg">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.3;"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    <div style="font-size:14px;">Aucun projet disponible pour le moment.</div>
+</div>
+{% endif %}

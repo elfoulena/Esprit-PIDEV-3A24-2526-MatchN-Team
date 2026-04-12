@@ -16,6 +16,9 @@ class EvenementRepository extends ServiceEntityRepository
         parent::__construct($registry, Evenement::class);
     }
 
+    /**
+     * General filters for front-office/visitors
+     */
     public function findByFilters(?string $q, ?string $type, ?string $sort): array
     {
         $qb = $this->createQueryBuilder('e');
@@ -23,6 +26,55 @@ class EvenementRepository extends ServiceEntityRepository
 
         $qb->andWhere('e.date_fin > :now')
            ->setParameter('now', $now);
+
+        if ($q) {
+            $qb->andWhere('e.titre LIKE :q OR e.lieu LIKE :q')
+               ->setParameter('q', '%'.$q.'%');
+        }
+
+        if ($type && $type !== 'ALL') {
+            $qb->andWhere('e.type_evenement = :type')
+               ->setParameter('type', $type);
+        }
+
+        switch ($sort) {
+            case 'date_asc':
+                $qb->orderBy('e.date_debut', 'ASC');
+                break;
+            case 'date_desc':
+                $qb->orderBy('e.date_debut', 'DESC');
+                break;
+            case 'titre_asc':
+                $qb->orderBy('e.titre', 'ASC');
+                break;
+            default:
+                $qb->orderBy('e.date_debut', 'ASC');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByEmployeFilters(?string $q, ?string $type, ?string $sort, string $filter, int $userId): array
+    {
+        $qb = $this->createQueryBuilder('e');
+        $now = new \DateTime();
+
+        // Participation filter logic
+        if ($filter === 'JOINED' || $filter === 'HISTORY') {
+            $qb->join('e.participations', 'p')
+               ->andWhere('p.utilisateur = :userId')
+               ->setParameter('userId', $userId);
+        }
+
+        if ($filter === 'HISTORY') {
+            // Already happened
+            $qb->andWhere('e.date_fin < :now')
+               ->setParameter('now', $now);
+        } else {
+            // Only upcoming by default (unless history requested)
+            $qb->andWhere('e.date_fin > :now')
+               ->setParameter('now', $now);
+        }
 
         if ($q) {
             $qb->andWhere('e.titre LIKE :q OR e.lieu LIKE :q')

@@ -2,11 +2,7 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 use App\Repository\EvaluationPartTimeRepository;
 
 #[ORM\Entity(repositoryClass: EvaluationPartTimeRepository::class)]
@@ -96,6 +92,17 @@ class EvaluationPartTime
         $this->date_evaluation = $date_evaluation;
 
         return $this;
+    }
+
+    public function getLabelNote(): string
+    {
+        $note = $this->note;
+        if ($note === null) return 'Non noté';
+        if ($note >= 9) return 'Excellent';
+        if ($note >= 7) return 'Bien';
+        if ($note >= 5) return 'Moyen';
+        if ($note >= 3) return 'Insuffisant';
+        return 'Très insuffisant';
     }
 
 }

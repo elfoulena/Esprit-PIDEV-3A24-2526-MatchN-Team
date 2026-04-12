@@ -16,28 +16,32 @@ class EvaluationPartTimeRepository extends ServiceEntityRepository
         parent::__construct($registry, EvaluationPartTime::class);
     }
 
-//    /**
-//     * @return EvaluationPartTime[] Returns an array of EvaluationPartTime objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return EvaluationPartTime[]
+     */
+    public function findAllWithDetails(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->leftJoin('e.affectationProjet', 'a')
+            ->addSelect('a')
+            ->leftJoin('a.User', 'u')
+            ->addSelect('u')
+            ->leftJoin('a.projet', 'p')
+            ->addSelect('p')
+            ->orderBy('e.date_evaluation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?EvaluationPartTime
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function existePourAffectation(int $affectationId): bool
+    {
+        $count = $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->where('e.affectationProjet = :id')
+            ->setParameter('id', $affectationId)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
 }

@@ -1,0 +1,28 @@
+{# templates/admin/projets/edit.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+{% block title %}Modifier — {{ projet.titre }}{% endblock %}
+{% block page_title %}Modifier un projet{% endblock %}
+{% block extra_styles %}
+{% include 'admin/projets/_form_styles.html.twig' %}
+{% endblock %}
+{% block content %}
+<div style="margin-bottom:20px;">
+    <a href="{{ path('admin_projets_show', {'id': projet.idProjet}) }}" style="color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour au projet
+    </a>
+</div>
+<div class="form-card">
+    <div class="form-card-header">
+        <h3>Modifier le projet</h3>
+        <p>Modifiez les informations du projet <strong>{{ projet.titre }}</strong>.</p>
+    </div>
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+        {% include 'admin/projets/_form_fields.html.twig' with {form: form} %}
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+            <a href="{{ path('admin_projets_show', {'id': projet.idProjet}) }}" class="btn-cancel">Annuler</a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

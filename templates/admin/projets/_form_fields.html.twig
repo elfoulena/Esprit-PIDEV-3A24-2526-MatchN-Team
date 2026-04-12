@@ -1,0 +1,183 @@
+{# Shared form fields for new/edit projet #}
+{# Expects: form (FormView) #}
+{% set errIcon %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{% endset %}
+
+<div class="form-section">
+    <div class="form-section-title">Informations générales</div>
+    <div class="form-grid">
+
+        <div class="form-full form-group {{ form.titre.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Titre <span class="req">*</span></label>
+            {{ form_widget(form.titre, {attr: {class: 'form-control'}}) }}
+            {% for error in form.titre.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label>Statut</label>
+            {{ form_widget(form.statut, {attr: {class: 'form-control'}}) }}
+        </div>
+
+        <div class="form-group {{ form.priorite.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Priorité <span class="req">*</span></label>
+            {{ form_widget(form.priorite, {attr: {class: 'form-control'}}) }}
+            {% for error in form.priorite.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-full form-group {{ form.description.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Description <span class="req">*</span></label>
+            {{ form_widget(form.description, {attr: {class: 'form-control'}}) }}
+            {% for error in form.description.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title">Dates <span class="req" style="font-size:10px; text-transform:none; font-weight:400; margin-left:4px;">— toutes obligatoires</span></div>
+    <div class="form-grid-3">
+
+        <div class="form-group {{ form.dateDebut.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Date de début <span class="req">*</span></label>
+            {{ form_widget(form.dateDebut, {attr: {class: 'form-control'}}) }}
+            {% for error in form.dateDebut.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group {{ form.dateFin.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Date de fin <span class="req">*</span></label>
+            {{ form_widget(form.dateFin, {attr: {class: 'form-control'}}) }}
+            {% for error in form.dateFin.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group {{ form.dateLivraison.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Date de livraison <span class="req">*</span></label>
+            {{ form_widget(form.dateLivraison, {attr: {class: 'form-control'}}) }}
+            {% for error in form.dateLivraison.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+    </div>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:6px;">
+        La date de fin et la date de livraison doivent être postérieures à la date de début.
+    </p>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title">Budget <span class="req" style="font-size:10px; text-transform:none; font-weight:400; margin-left:4px;">— tous obligatoires</span></div>
+    <div class="form-grid-3">
+
+        <div class="form-group {{ form.budgetTotal.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Budget total (TND) <span class="req">*</span></label>
+            {{ form_widget(form.budgetTotal, {attr: {class: 'form-control'}}) }}
+            {% for error in form.budgetTotal.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group {{ form.budgetInterne.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Budget interne <span class="req">*</span></label>
+            {{ form_widget(form.budgetInterne, {attr: {class: 'form-control'}}) }}
+            {% for error in form.budgetInterne.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group {{ form.budgetFreelance.vars.errors|length > 0 ? 'has-error' : '' }}">
+            <label>Budget freelance <span class="req">*</span></label>
+            {{ form_widget(form.budgetFreelance, {attr: {class: 'form-control'}}) }}
+            {% for error in form.budgetFreelance.vars.errors %}
+                <div class="field-error">{{ errIcon|raw }} {{ error.message }}</div>
+            {% endfor %}
+        </div>
+
+    </div>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:6px;">
+        Les montants ne peuvent pas être négatifs. Budget interne + freelance ≤ budget total.
+    </p>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title">Visibilité</div>
+    <div style="background:var(--bg-surface); border-radius:var(--radius-md); padding:4px 16px;">
+        <div class="toggle-row" style="border-bottom:1px solid var(--border-color);">
+            <div>
+                <div class="toggle-label">Visible pour les employés</div>
+                <div class="toggle-sub">Les employés peuvent voir et prendre ce projet</div>
+            </div>
+            <label class="toggle-switch">
+                {{ form_widget(form.visibleEmploye) }}
+                <div class="toggle-track"></div>
+            </label>
+        </div>
+        <div class="toggle-row">
+            <div>
+                <div class="toggle-label">Visible pour les freelancers</div>
+                <div class="toggle-sub">Les freelancers peuvent soumettre une candidature</div>
+            </div>
+            <label class="toggle-switch">
+                {{ form_widget(form.visibleFreelancer) }}
+                <div class="toggle-track"></div>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="form-section-title">Compétences requises</div>
+    {% if form.competences|length > 0 %}
+        <div class="competences-grid" id="compGrid">
+            {% for comp_widget in form.competences %}
+                <div class="comp-item {{ comp_widget.vars.checked ? 'selected' : '' }}" onclick="toggleComp(this)">
+                    {{ form_widget(comp_widget) }}
+                    <div class="comp-checkmark"></div>
+                    <span>{{ comp_widget.vars.label }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <p style="font-size:11px; color:var(--text-secondary); margin-top:8px;">{{ form.competences|length }} compétences disponibles — cliquez pour sélectionner</p>
+    {% else %}
+        <p style="font-size:13px; color:var(--text-secondary);">
+            Aucune compétence disponible.
+            <a href="{{ path('admin_competences_new') }}" style="color:var(--accent-blue);">Créez-en une →</a>
+        </p>
+    {% endif %}
+</div>
+
+{# Error summary #}
+{% set allErrors = [] %}
+{% for child in form %}
+    {% for error in child.vars.errors %}
+        {% set allErrors = allErrors|merge([error.message]) %}
+    {% endfor %}
+{% endfor %}
+{% if allErrors|length > 0 %}
+<div class="error-summary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+        <strong>{{ allErrors|length }} erreur{{ allErrors|length > 1 ? 's' : '' }} à corriger :</strong>
+        <ul style="margin:6px 0 0 16px; line-height:1.8;">
+            {% for msg in allErrors %}
+                <li>{{ msg }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function toggleComp(el) {
+    el.classList.toggle('selected');
+    const cb = el.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+}
+</script>

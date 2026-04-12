@@ -1,0 +1,22 @@
+{# templates/affectation/new.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Nouvelle Affectation — MatchNTeam{% endblock %}
+{% block page_title %}Nouvelle Affectation{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary);">
+    <a href="{{ path('app_affectation_index') }}" style="color: var(--text-secondary); text-decoration: none;">Affectations</a>
+    <span>/</span>
+    <span style="color: var(--text-primary); font-weight: 600;">Nouvelle affectation</span>
+</div>
+
+<div style="margin-bottom: 22px;">
+    <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Créer une affectation</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 3px;">Assignez un freelancer à un projet avec les détails de planification.</p>
+</div>
+
+{% include 'affectation/_form.html.twig' %}
+
+{% endblock %}

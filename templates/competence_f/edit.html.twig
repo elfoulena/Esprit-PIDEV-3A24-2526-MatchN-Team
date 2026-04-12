@@ -1,0 +1,162 @@
+{# templates/competence_f/edit.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Modifier — {{ competence.nom }} — MatchNTeam{% endblock %}
+{% block page_title %}Modifier une compétence{% endblock %}
+
+{% block extra_styles %}
+.page-banner {
+    background: linear-gradient(135deg, #3b0764 0%, #7c3aed 60%, #2563eb 100%);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.page-banner::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); pointer-events: none;
+}
+.banner-title  { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.banner-sub    { font-size: 13px; opacity: 0.72; }
+.btn-back {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: var(--radius-md);
+    color: #fff; font-size: 13px; font-weight: 700; text-decoration: none;
+    backdrop-filter: blur(4px); transition: background 0.18s; position: relative; z-index: 1;
+}
+.btn-back:hover { background: rgba(255,255,255,0.25); }
+
+.edit-wrap {
+    max-width: 580px;
+}
+.data-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.card-header {
+    padding: 18px 24px 14px; border-bottom: 1px solid var(--border-color);
+    display: flex; align-items: center; gap: 10px;
+}
+.card-header-title { font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.dot-purple {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent-purple);
+}
+.ia-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(139,92,246,0.10); color: #7c3aed;
+    margin-left: auto;
+}
+.card-body { padding: 26px 24px; }
+.form-group { margin-bottom: 20px; }
+.form-label {
+    display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 7px;
+}
+.form-control {
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+    background: var(--bg-surface); color: var(--text-primary); font-size: 13.5px;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box; font-family: inherit;
+}
+.form-control:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.10); }
+textarea.form-control { resize: vertical; min-height: 110px; }
+.form-actions {
+    display: flex; gap: 10px; margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-save {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 16px; background: var(--accent-purple); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.88; }
+.btn-cancel {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 16px;
+    background: var(--bg-surface); color: var(--text-secondary);
+    border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: var(--accent-purple); color: var(--accent-purple); }
+.flash-success {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 18px; margin-bottom: 20px;
+    background: rgba(16,185,129,0.10); border: 1px solid rgba(16,185,129,0.28);
+    border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: #059669;
+}
+{% endblock %}
+
+{% block content %}
+
+{% for msg in app.flashes('success') %}
+    <div class="flash-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ msg }}
+    </div>
+{% endfor %}
+
+<div class="page-banner">
+    <div>
+        <div class="banner-title">Modifier : {{ competence.nom }}</div>
+        <div class="banner-sub">Mise à jour des informations de la compétence</div>
+    </div>
+    <a href="{{ path('competence_index') }}" class="btn-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour
+    </a>
+</div>
+
+<div class="edit-wrap">
+    <div class="data-card">
+        <div class="card-header">
+            <span class="dot-purple"></span>
+            <span class="card-header-title">Informations de la compétence</span>
+            <span class="ia-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ path('competence_edit', {'id': competence.id}) }}">
+                {{ form_errors(form) }}
+
+                <div class="form-group">
+                    {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                {{ form_rest(form) }}
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Enregistrer
+                    </button>
+                    <a href="{{ path('competence_index') }}" class="btn-cancel">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

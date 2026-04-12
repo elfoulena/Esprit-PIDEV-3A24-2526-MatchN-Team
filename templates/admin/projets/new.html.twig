@@ -1,0 +1,28 @@
+{# templates/admin/projets/new.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+{% block title %}Nouveau projet{% endblock %}
+{% block page_title %}Nouveau projet{% endblock %}
+{% block extra_styles %}
+{% include 'admin/projets/_form_styles.html.twig' %}
+{% endblock %}
+{% block content %}
+<div style="margin-bottom:20px;">
+    <a href="{{ path('admin_projets_index') }}" style="color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour aux projets
+    </a>
+</div>
+<div class="form-card">
+    <div class="form-card-header">
+        <h3>Créer un nouveau projet</h3>
+        <p>Remplissez les informations du projet et sélectionnez les compétences requises.</p>
+    </div>
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+        {% include 'admin/projets/_form_fields.html.twig' with {form: form} %}
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Créer le projet</button>
+            <a href="{{ path('admin_projets_index') }}" class="btn-cancel">Annuler</a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

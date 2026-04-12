@@ -1,0 +1,594 @@
+{% extends 'back/base_employe.html.twig' %}
+
+{% block title %}Événements - MatchNTeam{% endblock %}
+{% block page_title %}Événements Disponibles{% endblock %}
+
+{% block extra_styles %}
+/* Side Drawer Styles */
+.detail-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+.detail-drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.detail-drawer {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    width: 450px;
+    height: 100vh;
+    background: #fff;
+    z-index: 1001;
+    box-shadow: -20px 0 50px rgba(0,0,0,0.15);
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+.detail-drawer.active {
+    right: 0;
+}
+
+.drawer-header {
+    padding: 60px 40px 30px;
+    position: relative;
+}
+.drawer-close {
+    position: absolute;
+    top: 24px;
+    left: 40px;
+    background: var(--bg-main);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.drawer-close:hover {
+    background: var(--text-primary);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.drawer-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 40px 100px;
+}
+
+.editorial-info-stack {
+    margin-bottom: 40px;
+}
+.info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    position: relative;
+}
+.info-row::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 28px;
+    bottom: -20px;
+    width: 1px;
+    background: var(--border-color);
+}
+.info-row:last-child::after { display: none; }
+
+.info-bullet {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--accent-blue);
+    z-index: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.info-content { flex: 1; }
+.info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    display: block;
+}
+.info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.description-section {
+    margin-top: 40px;
+}
+.description-heading {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+.description-text {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.drawer-footer {
+    padding: 24px 40px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border-color);
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.filter-tab {
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+}
+.filter-tab:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+}
+.filter-tab.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+/* Event Type Badge Styles */
+.event-type-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(14,165,233,0.08); /* Fallback */
+    color: var(--accent-blue);
+    border: none;
+}
+.type-workshop { background: rgba(14,165,233,0.1) !important; color: var(--accent-blue) !important; }
+.type-meetup { background: rgba(20,184,166,0.1) !important; color: var(--accent-teal) !important; }
+.type-conference { background: rgba(139,92,246,0.1) !important; color: var(--accent-purple) !important; }
+.type-formation { background: rgba(16,185,129,0.1) !important; color: var(--accent-green) !important; }
+.type-seminaire { background: rgba(245,158,11,0.1) !important; color: var(--accent-orange) !important; }
+.type-teambuilding { background: rgba(239,68,68,0.1) !important; color: var(--accent-red) !important; }
+.type-networking { background: rgba(236,72,153,0.1) !important; color: #ec4899 !important; }
+.type-autre { background: rgba(100,116,139,0.1) !important; color: var(--text-secondary) !important; }
+
+.events-filter-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+.filter-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+}
+.filter-group {
+    flex: 1;
+}
+.filter-group.small {
+    flex: 0 0 200px;
+}
+.filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+}
+.filter-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    font-size: 13.5px;
+    outline: none;
+    transition: border var(--transition);
+}
+.filter-input:focus {
+    border-color: var(--accent-blue);
+}
+
+/* Premium Modal Styles */
+.modal-content {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    background: #fff;
+}
+.modal-premium-header {
+    height: 160px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
+    position: relative;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: #fff;
+}
+.modal-premium-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+}
+.header-content {
+    position: relative;
+    z-index: 1;
+}
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    transition: background var(--transition);
+}
+.modal-close-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.premium-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 24px;
+}
+.premium-info-card {
+    background: var(--bg-main);
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.info-icon-box {
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-blue);
+    box-shadow: var(--shadow-sm);
+}
+.info-text-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 700;
+    display: block;
+}
+.info-text-value {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.premium-desc-section {
+    margin-top: 24px;
+}
+.premium-desc-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.premium-desc-content {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 16px;
+}
+.participation-status-footer {
+    padding: 24px;
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+{% endblock %}
+
+{% block content %}
+<div class="filter-tabs">
+    <div class="filter-tab {% if current_filter == 'ALL' %}active{% endif %}" data-filter="ALL">
+        Tous les événements
+    </div>
+    <div class="filter-tab {% if current_filter == 'JOINED' %}active{% endif %}" data-filter="JOINED">
+        Mes inscriptions
+    </div>
+    <div class="filter-tab {% if current_filter == 'HISTORY' %}active{% endif %}" data-filter="HISTORY">
+        Historique
+    </div>
+</div>
+
+<div class="events-filter-card">
+    <div class="filter-row">
+        <div class="filter-group">
+            <label class="filter-label">Recherche</label>
+            <input type="text" id="event-search" class="filter-input" placeholder="Titre, lieu..." value="{{ q }}">
+        </div>
+        <div class="filter-group small">
+            <label class="filter-label">Type</label>
+            <select id="event-type" class="filter-input">
+                <option value="ALL" {% if type == 'ALL' %}selected{% endif %}>Tous les types</option>
+                <option value="WORKSHOP" {% if type == 'WORKSHOP' %}selected{% endif %}>Workshop</option>
+                <option value="MEETUP" {% if type == 'MEETUP' %}selected{% endif %}>Meetup</option>
+                <option value="CONFERENCE" {% if type == 'CONFERENCE' %}selected{% endif %}>Conférence</option>
+                <option value="FORMATION" {% if type == 'FORMATION' %}selected{% endif %}>Formation</option>
+                <option value="SEMINAIRE" {% if type == 'SEMINAIRE' %}selected{% endif %}>Séminaire</option>
+                <option value="TEAMBUILDING" {% if type == 'TEAMBUILDING' %}selected{% endif %}>Team Building</option>
+                <option value="NETWORKING" {% if type == 'NETWORKING' %}selected{% endif %}>Networking</option>
+                <option value="AUTRE" {% if type == 'AUTRE' %}selected{% endif %}>Autre</option>
+            </select>
+        </div>
+        <div class="filter-group small">
+            <label class="filter-label">Tri</label>
+            <select id="event-sort" class="filter-input">
+                <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Date (proche)</option>
+                <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Date (lointaine)</option>
+                <option value="titre_asc" {% if sort == 'titre_asc' %}selected{% endif %}>Titre (A-Z)</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="event-list-container">
+    {% include 'employe/evenement/_list.html.twig' %}
+</div>
+
+<!-- Side Detail Drawer -->
+<div class="detail-drawer-overlay" id="drawerOverlay"></div>
+<div class="detail-drawer" id="eventDrawer">
+    <div class="drawer-header">
+        <button type="button" class="drawer-close" id="closeDrawer">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div id="drawer-type-badge" class="event-type-badge mb-3">TYPE</div>
+        <h2 class="drawer-title" id="drawer-title">Titre de l'événement</h2>
+    </div>
+
+    <div class="drawer-body">
+        <div class="editorial-info-stack">
+            <div class="info-row">
+                <div class="info-bullet"></div>
+                <div class="info-content">
+                    <span class="info-label">Date et Heure</span>
+                    <span class="info-value" id="drawer-date">...</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-bullet" style="border-color: var(--accent-teal);"></div>
+                <div class="info-content">
+                    <span class="info-label">Lieu de rendez-vous</span>
+                    <span class="info-value" id="drawer-lieu">...</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-bullet" style="border-color: var(--accent-orange);"></div>
+                <div class="info-content">
+                    <span class="info-label">Inscriptions</span>
+                    <span class="info-value" id="drawer-capacity">...</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-bullet" id="drawer-status-bullet"></div>
+                <div class="info-content">
+                    <span class="info-label">Disponibilité</span>
+                    <span class="info-value" id="drawer-status">...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="description-section">
+            <h3 class="description-heading">À propos de l'événement</h3>
+            <div class="description-text" id="drawer-description">
+                ...
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer-footer">
+        <div id="drawer-status-text" class="text-secondary small font-weight-bold" style="max-width: 150px;">
+            ...
+        </div>
+        <div id="drawer-actions">
+            <!-- Dynamic button -->
+        </div>
+    </div>
+</div>
+
+{# Bootstrap Icons for the cards #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('event-search');
+    const typeSelect = document.getElementById('event-type');
+    const sortSelect = document.getElementById('event-sort');
+    const container = document.getElementById('event-list-container');
+    const tabs = document.querySelectorAll('.filter-tab');
+
+    let currentFilter = '{{ current_filter }}';
+    let timeout = null;
+
+    function refresh() {
+        const q = searchInput.value;
+        const type = typeSelect.value;
+        const sort = sortSelect.value;
+        
+        const params = new URLSearchParams({ q, type, sort, filter: currentFilter });
+        
+        fetch(`{{ path('employe_evenement_search') }}?${params.toString()}`)
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+            });
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            refresh();
+        });
+    });
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(refresh, 300);
+    });
+    typeSelect.addEventListener('change', refresh);
+    sortSelect.addEventListener('change', refresh);
+
+    // Drawer Logic
+    const drawer = document.getElementById('eventDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const closeBtn = document.getElementById('closeDrawer');
+
+    function openDrawer(ds) {
+        document.getElementById('drawer-title').textContent = ds.title;
+        const badge = document.getElementById('drawer-type-badge');
+        badge.textContent = ds.type;
+        
+        // Reset and set Type Class
+        badge.className = 'event-type-badge mb-3';
+        const typeClass = 'type-' + ds.type.toLowerCase().replace(' ', '');
+        badge.classList.add(typeClass);
+
+        document.getElementById('drawer-date').textContent = ds.date;
+        document.getElementById('drawer-lieu').textContent = ds.lieu;
+        document.getElementById('drawer-capacity').textContent = ds.capacity;
+        document.getElementById('drawer-description').textContent = ds.desc;
+
+        const statusVal = document.getElementById('drawer-status');
+        const statusText = document.getElementById('drawer-status-text');
+        const statusBullet = document.getElementById('drawer-status-bullet');
+        const actionsWrap = document.getElementById('drawer-actions');
+        actionsWrap.innerHTML = '';
+
+        if (ds.finished === '1') {
+            statusVal.textContent = 'Terminé';
+            statusBullet.style.borderColor = 'var(--accent-red)';
+            statusText.textContent = "Événement passé";
+        } else if (ds.joined === '1') {
+            statusVal.textContent = 'Déjà inscrit';
+            statusBullet.style.borderColor = 'var(--accent-green)';
+            statusText.textContent = "Vous participez !";
+            
+            const cancelBtn = document.createElement('form');
+            cancelBtn.method = 'POST';
+            cancelBtn.action = `{{ path('employe_evenement_desister', {id_evenement: 0}) }}`.replace('0', ds.id);
+            cancelBtn.innerHTML = '<button type="submit" class="btn-action btn-cancel px-4">Se désister</button>';
+            actionsWrap.appendChild(cancelBtn);
+        } else if (ds.full === '1') {
+            statusVal.textContent = 'Complet';
+            statusBullet.style.borderColor = 'var(--accent-orange)';
+            statusText.textContent = "Plus de places";
+        } else {
+            statusVal.textContent = 'Ouvert';
+            statusBullet.style.borderColor = 'var(--accent-blue)';
+            statusText.textContent = "Inscrivez-vous !";
+
+            const partBtn = document.createElement('form');
+            partBtn.method = 'POST';
+            partBtn.action = `{{ path('employe_evenement_participer', {id_evenement: 0}) }}`.replace('0', ds.id);
+            partBtn.innerHTML = '<button type="submit" class="btn-action btn-participate px-4">Participer</button>';
+            actionsWrap.appendChild(partBtn);
+        }
+
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawerFunc() {
+        drawer.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    closeBtn.addEventListener('click', closeDrawerFunc);
+    overlay.addEventListener('click', closeDrawerFunc);
+
+    // Delegation for dynamic content
+    container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-info');
+        if (btn) {
+            openDrawer(btn.dataset);
+        }
+    });
+});
+</script>
+{% endblock %}

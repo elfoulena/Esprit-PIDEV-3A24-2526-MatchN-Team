@@ -91,12 +91,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: "description_freelancer", type: "text", nullable: true)]
     private ?string $description = null;
 
+    #[ORM\ManyToMany(targetEntity: CompetenceF::class, inversedBy: 'freelancers')]
+    #[ORM\JoinTable(
+        name: 'freelancer_competence',     
+        joinColumns: [
+            new ORM\JoinColumn(name: 'freelancer_id', referencedColumnName: 'id')
+        ],
+        inverseJoinColumns: [
+            new ORM\JoinColumn(name: 'competence_id', referencedColumnName: 'id')
+        ]
+    )]
+    private Collection $competences;
+
     #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     private Collection $participations;
 
     public function __construct()
     {
         $this->participations = new ArrayCollection();
+        $this->competences    = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -251,6 +264,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
+        return $this;
+    }
+
+    public function getCompetences(): Collection { return $this->competences; }
+
+    public function addCompetence(CompetenceF $competence): static
+    {
+        if (!$this->competences->contains($competence)) {
+            $this->competences->add($competence);
+        }
+        return $this;
+    }
+
+    public function removeCompetence(CompetenceF $competence): static
+    {
+        $this->competences->removeElement($competence);
         return $this;
     }
 }

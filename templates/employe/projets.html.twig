@@ -1,0 +1,79 @@
+{# templates/employe/projets.html.twig #}
+{% extends 'back/base_employe.html.twig' %}
+{% block title %}Projets disponibles{% endblock %}
+{% block page_title %}Projets disponibles{% endblock %}
+
+{% block extra_styles %}
+.toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.search-box { position:relative; flex:1; min-width:220px; max-width:380px; }
+.search-box svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-secondary); pointer-events:none; }
+.search-input { width:100%; padding:9px 12px 9px 38px; border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:13.5px; font-family:inherit; background:var(--card-bg); color:var(--text-primary); outline:none; transition:border-color var(--transition), box-shadow var(--transition); }
+.search-input:focus { border-color:#14b8a6; box-shadow:0 0 0 3px rgba(20,184,166,0.1); }
+.filter-select { padding:8px 12px; border:1px solid var(--border-color); border-radius:var(--radius-sm); font-size:13px; font-family:inherit; background:var(--card-bg); color:var(--text-primary); outline:none; cursor:pointer; }
+.data-card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); overflow:hidden; }
+.proj-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:16px; padding:20px; }
+.proj-card { background:var(--bg-surface); border:1.5px solid var(--border-color); border-radius:var(--radius-md); padding:20px; display:flex; flex-direction:column; gap:12px; transition:all var(--transition); }
+.proj-card:hover { border-color:#14b8a6; box-shadow:0 4px 16px rgba(20,184,166,0.1); }
+.proj-card-title { font-size:15px; font-weight:800; color:var(--text-primary); }
+.proj-card-desc { font-size:13px; color:var(--text-secondary); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.badge { display:inline-flex; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
+.badge-en_cours   { background:rgba(59,130,246,0.12); color:#1d4ed8; }
+.badge-planifie   { background:rgba(139,92,246,0.12); color:#7c3aed; }
+.badge-termine    { background:rgba(16,185,129,0.12); color:#059669; }
+.badge-en_pause   { background:rgba(245,158,11,0.12); color:#d97706; }
+.badge-annule     { background:rgba(239,68,68,0.10); color:#dc2626; }
+.prio-haute   { color:#dc2626; font-size:12px; font-weight:700; }
+.prio-moyenne { color:#d97706; font-size:12px; font-weight:700; }
+.prio-basse   { color:#059669; font-size:12px; font-weight:700; }
+.comp-chip { display:inline-block; background:rgba(139,92,246,0.08); color:#7c3aed; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; margin:2px; }
+.btn-take { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:9px 20px; background:linear-gradient(135deg,#14b8a6,#0ea5e9); color:#fff; border:none; border-radius:var(--radius-md); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity var(--transition); width:100%; }
+.btn-take:hover { opacity:0.88; }
+.btn-taken { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:9px 20px; background:rgba(16,185,129,0.1); color:#059669; border:1.5px solid rgba(16,185,129,0.4); border-radius:var(--radius-md); font-size:13px; font-weight:700; width:100%; }
+.proj-meta { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; }
+.empty-msg { text-align:center; padding:60px 20px; color:var(--text-secondary); }
+{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <div style="display:flex; gap:10px; flex:1; flex-wrap:wrap; align-items:center;">
+        <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un projet…" value="{{ q }}" autocomplete="off">
+        </div>
+        <select id="statutFilter" class="filter-select">
+            <option value="">Tous les statuts</option>
+            {% for s in ['EN_COURS','PLANIFIE','EN_PAUSE'] %}
+                <option value="{{ s }}" {{ statut == s ? 'selected' : '' }}>{{ s|replace({'_':' '})|title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <a href="{{ path('employe_mes_affectations') }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 16px; background:var(--bg-surface); border:1px solid var(--border-color); color:var(--text-secondary); border-radius:var(--radius-md); font-size:13px; font-weight:600; text-decoration:none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Mes affectations
+    </a>
+</div>
+
+<div class="data-card" id="tableWrap">
+    {% include 'employe/projets/_table.html.twig' %}
+</div>
+
+<script>
+(function() {
+    const inp  = document.getElementById('searchInput');
+    const stat = document.getElementById('statutFilter');
+    const wrap = document.getElementById('tableWrap');
+
+    function fetchTable() {
+        const params = new URLSearchParams({ q: inp.value, statut: stat.value });
+        fetch('{{ path('employe_projets_index') }}?' + params, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.text()).then(html => wrap.innerHTML = html);
+    }
+
+    let timer;
+    inp.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(fetchTable, 280); });
+    stat.addEventListener('change', fetchTable);
+})();
+</script>
+{% endblock %}

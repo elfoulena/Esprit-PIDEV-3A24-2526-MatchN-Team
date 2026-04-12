@@ -12,8 +12,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Service\GroqService;
-
 
 #[Route('/admin/reclamations')]
 class AdminReclamationController extends AbstractController
@@ -149,41 +147,4 @@ class AdminReclamationController extends AbstractController
         $this->addFlash('success', 'Réclamation supprimée.');
         return $this->redirectToRoute('admin_reclamation_index');
     }
-// Ajouter avant la dernière } du fichier
-
-#[Route('/ai/ameliorer', name: 'admin_reclamation_ai_ameliorer', methods: ['POST'])]
-public function ameliorer(Request $request, GroqService $groq): Response
-{
-    $texte    = trim($request->request->get('texte', ''));
-    $contexte = trim($request->request->get('contexte', ''));
-
-    if (empty($texte)) {
-        return $this->json(['error' => 'Texte vide'], 400);
-    }
-
-    try {
-        $resultat = $groq->ameliorer($texte, $contexte);
-        return $this->json(['result' => $resultat]);
-    } catch (\Exception $e) {
-        return $this->json(['error' => $e->getMessage()], 500);
-    }
-}
-
-#[Route('/ai/traduire', name: 'admin_reclamation_ai_traduire', methods: ['POST'])]
-public function traduire(Request $request, GroqService $groq): Response
-{
-    $texte  = trim($request->request->get('texte', ''));
-    $langue = $request->request->get('langue', 'en');
-
-    if (empty($texte)) {
-        return $this->json(['error' => 'Texte vide'], 400);
-    }
-
-    try {
-        $resultat = $groq->traduire($texte, $langue);
-        return $this->json(['result' => $resultat]);
-    } catch (\Exception $e) {
-        return $this->json(['error' => $e->getMessage()], 500);
-    }
-}    
 }

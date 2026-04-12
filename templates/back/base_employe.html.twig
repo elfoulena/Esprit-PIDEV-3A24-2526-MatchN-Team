@@ -358,6 +358,12 @@
             Réclamations
         </a>  
 
+        <a href="{{ path('employe_reclamation_index') }}"
+           class="nav-item {% if app.request.attributes.get('_route') starts with 'employe_reclamation' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Réclamations
+        </a>  
+
         <div class="nav-divider"></div>
 
         <a href="#" class="nav-item">

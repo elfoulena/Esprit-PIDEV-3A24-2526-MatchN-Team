@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 use App\Repository\CompetenceFRepository;
+use Doctrine\Common\Collections\ArrayCollection;  
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CompetenceFRepository::class)]
 #[ORM\Table(name: 'competence_f')]
@@ -14,88 +14,32 @@ class CompetenceF
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom de la compétence est obligatoire.')]
+    #[Assert\Length(max: 255)]
     private ?string $nom = null;
 
-    public function getNom(): ?string
-    {
-        return $this->nom;
-    }
-
-    public function setNom(string $nom): self
-    {
-        $this->nom = $nom;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'competences')]
+    private Collection $freelancers;
 
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-        return $this;
-    }
+    public function getId(): ?int { return $this->id; }
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'competenceFs')]
-    #[ORM\JoinTable(
-        name: 'freelancer_competence',
-        joinColumns: [
-            new ORM\JoinColumn(name: 'competence_id', referencedColumnName: 'id')
-        ],
-        inverseJoinColumns: [
-            new ORM\JoinColumn(name: 'freelancer_id', referencedColumnName: 'id')
-        ]
-    )]
-    private Collection $Users;
+    public function getNom(): ?string { return $this->nom; }
+    public function setNom(string $nom): static { $this->nom = $nom; return $this; }
+
+    public function getDescription(): ?string { return $this->description; }
+    public function setDescription(?string $description): static { $this->description = $description; return $this; }
 
     public function __construct()
     {
-        $this->Users = new ArrayCollection();
+        $this->freelancers = new ArrayCollection();
     }
 
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
-    {
-        if (!$this->Users instanceof Collection) {
-            $this->Users = new ArrayCollection();
-        }
-        return $this->Users;
-    }
-
-    public function addUser(User $User): self
-    {
-        if (!$this->getUsers()->contains($User)) {
-            $this->getUsers()->add($User);
-        }
-        return $this;
-    }
-
-    public function removeUser(User $User): self
-    {
-        $this->getUsers()->removeElement($User);
-        return $this;
-    }
-
+    public function getFreelancers(): Collection { return $this->freelancers; }
 }

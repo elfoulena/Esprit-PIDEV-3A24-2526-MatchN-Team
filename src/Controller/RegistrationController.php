@@ -113,7 +113,6 @@ public function register(
 
             $mailer->sendConfirmationEmail($user->getEmail(), $user->getNom(), $code);
 
-            $this->addFlash('success', 'Inscription réussie ! Vérifiez votre email.');
             return $this->redirectToRoute('app_verify_pending', ['email' => $user->getEmail()]);
 
         } catch (\Exception $e) {
@@ -160,7 +159,6 @@ public function register(
 
         $em->flush();
 
-        $this->addFlash('success', 'Email vérifié ! Vous pouvez vous connecter.');
         return $this->redirectToRoute('app_login');
     }
 }

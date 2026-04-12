@@ -1,0 +1,250 @@
+{# templates/admin/users/show.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}{{ utilisateur.nom }} {{ utilisateur.prenom }} — MatchNTeam{% endblock %}
+{% block page_title %}Profil utilisateur{% endblock %}
+
+{% block extra_styles %}
+.page-banner {
+    background: linear-gradient(135deg, #3b0764 0%, #7c3aed 60%, #2563eb 100%);
+    border-radius: var(--radius-lg); padding: 28px 32px; color: #fff;
+    position: relative; overflow: hidden; margin-bottom: 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.page-banner::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); pointer-events: none;
+}
+.banner-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.banner-sub   { font-size: 13px; opacity: 0.72; }
+.btn-back {
+    display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.28);
+    border-radius: var(--radius-md); color: #fff; font-size: 13px; font-weight: 700;
+    text-decoration: none; backdrop-filter: blur(4px); transition: background 0.18s;
+    position: relative; z-index: 1;
+}
+.btn-back:hover { background: rgba(255,255,255,0.25); }
+
+.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+@media (max-width: 900px) { .profile-layout { grid-template-columns: 1fr; } }
+
+.data-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+    margin-bottom: 20px;
+}
+.card-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+    font-size: 13px; font-weight: 800; color: var(--text-primary);
+    display: flex; align-items: center; gap: 8px;
+}
+.card-header .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-blue); }
+.card-body { padding: 20px; }
+
+/* Avatar card */
+.avatar-big {
+    width: 72px; height: 72px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: #fff; margin: 0 auto 14px;
+}
+.profile-name  { text-align: center; font-size: 17px; font-weight: 800; color: var(--text-primary); }
+.profile-email { text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+
+.role-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    margin: 10px auto 0; display: block; text-align: center; width: fit-content;
+}
+.role-badge.ADMIN_RH   { background: rgba(245,158,11,0.12); color: #b45309; }
+.role-badge.EMPLOYE    { background: rgba(16,185,129,0.12); color: #059669; }
+.role-badge.FREELANCER { background: rgba(139,92,246,0.12); color: #7c3aed; }
+
+.status-dot {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    margin: 8px auto 0; display: block; text-align: center; width: fit-content;
+}
+.status-dot.active   { background: rgba(16,185,129,0.12); color: #059669; }
+.status-dot.inactive { background: rgba(239,68,68,0.10);  color: #dc2626; }
+
+.divider { border: none; border-top: 1px solid var(--border-color); margin: 16px 0; }
+
+/* Info rows */
+.info-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 9px 0; border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--text-secondary); font-weight: 600; font-size: 12px; }
+.info-value { color: var(--text-primary); font-weight: 600; text-align: right; max-width: 60%; }
+
+/* Compétences pills */
+.competence-pills { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 20px; }
+.competence-pill {
+    padding: 5px 14px; border-radius: 20px;
+    background: rgba(139,92,246,0.10); color: #7c3aed;
+    font-size: 12px; font-weight: 700; border: 1px solid rgba(139,92,246,0.20);
+}
+
+/* Action buttons */
+.action-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.btn-toggle-on {
+    flex: 1; padding: 9px; border: none; border-radius: var(--radius-sm);
+    background: rgba(239,68,68,0.10); color: #dc2626;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-toggle-off {
+    flex: 1; padding: 9px; border: none; border-radius: var(--radius-sm);
+    background: rgba(16,185,129,0.12); color: #059669;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-toggle-on:hover, .btn-toggle-off:hover { opacity: 0.80; }
+.btn-delete {
+    padding: 9px 14px; border: none; border-radius: var(--radius-sm);
+    background: rgba(239,68,68,0.10); color: #dc2626;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-delete:hover { opacity: 0.80; }
+{% endblock %}
+
+{% block content %}
+
+{% set colors = ['#2563eb','#7c3aed','#059669','#b45309','#dc2626','#0891b2'] %}
+{% set color  = colors[utilisateur.id % colors|length] %}
+{% set initiales = utilisateur.nom|first ~ utilisateur.prenom|first %}
+
+<div class="page-banner">
+    <div>
+        <div class="banner-title">{{ utilisateur.nom }} {{ utilisateur.prenom }}</div>
+        <div class="banner-sub">{{ utilisateur.email }}</div>
+    </div>
+    <a href="{{ path('admin_user_index') }}" class="btn-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour
+    </a>
+</div>
+
+<div class="profile-layout">
+
+    {# ── Colonne gauche : avatar + actions ── #}
+    <div>
+        <div class="data-card">
+            <div class="card-body" style="text-align:center; padding: 28px 20px;">
+                <div class="avatar-big" style="background: {{ color }};">{{ initiales|upper }}</div>
+                <div class="profile-name">{{ utilisateur.nom }} {{ utilisateur.prenom }}</div>
+                <div class="profile-email">{{ utilisateur.email }}</div>
+                <span class="role-badge {{ utilisateur.role.value }}">{{ utilisateur.role.value }}</span>
+                <span class="status-dot {{ utilisateur.actif ? 'active' : 'inactive' }}">
+                    ● {{ utilisateur.actif ? 'Actif' : 'Inactif' }}
+                </span>
+                <hr class="divider">
+                <div class="action-buttons">
+                    <form method="post" action="{{ path('admin_user_toggle', {id: utilisateur.id}) }}" style="flex:1;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle_' ~ utilisateur.id) }}">
+                        <button type="submit" class="{{ utilisateur.actif ? 'btn-toggle-on' : 'btn-toggle-off' }}" style="width:100%;">
+                            {{ utilisateur.actif ? 'Désactiver' : 'Activer' }}
+                        </button>
+                    </form>
+                    {% if utilisateur != app.user %}
+                    <form method="post" action="{{ path('admin_user_delete', {id: utilisateur.id}) }}"
+                          onsubmit="return confirm('Supprimer cet utilisateur ? Action irréversible.')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_' ~ utilisateur.id) }}">
+                        <button type="submit" class="btn-delete">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Colonne droite : infos détaillées ── #}
+    <div>
+        {# Informations générales #}
+        <div class="data-card">
+            <div class="card-header"><span class="dot"></span> Informations générales</div>
+            <div class="card-body" style="padding: 4px 20px;">
+                <div class="info-row">
+                    <span class="info-label">Nom complet</span>
+                    <span class="info-value">{{ utilisateur.nom }} {{ utilisateur.prenom }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ utilisateur.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Téléphone</span>
+                    <span class="info-value">{{ utilisateur.telephone ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Adresse</span>
+                    <span class="info-value">{{ utilisateur.adresse ?? '—' }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Email vérifié</span>
+                    <span class="info-value">{{ utilisateur.verified ? '✓ Oui' : '✗ Non' }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# Infos spécifiques au rôle #}
+        {% if utilisateur.role.value == 'EMPLOYE' %}
+        <div class="data-card">
+            <div class="card-header"><span class="dot" style="background:var(--accent-green);"></span> Informations employé</div>
+            <div class="card-body" style="padding: 4px 20px;">
+                <div class="info-row">
+                    <span class="info-label">Poste</span>
+                    <span class="info-value">{{ utilisateur.poste ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Département</span>
+                    <span class="info-value">{{ utilisateur.departement ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type de contrat</span>
+                    <span class="info-value">{{ utilisateur.typeContrat ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Salaire</span>
+                    <span class="info-value">{{ utilisateur.salaire ? utilisateur.salaire ~ ' TND' : '—' }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if utilisateur.role.value == 'FREELANCER' %}
+        <div class="data-card">
+            <div class="card-header"><span class="dot" style="background:var(--accent-purple);"></span> Profil freelancer</div>
+            <div class="card-body" style="padding: 4px 20px;">
+                <div class="info-row">
+                    <span class="info-label">Bio</span>
+                    <span class="info-value">{{ utilisateur.description ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">GitHub</span>
+                    <span class="info-value">{{ utilisateur.githubUsername ?? '—' }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if utilisateur.competences is defined and utilisateur.competences|length > 0 %}
+        <div class="data-card">
+            <div class="card-header"><span class="dot" style="background:var(--accent-purple);"></span> Compétences ({{ utilisateur.competences|length }})</div>
+            <div class="competence-pills">
+                {% for competence in utilisateur.competences %}
+                    <span class="competence-pill">{{ competence.nom }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

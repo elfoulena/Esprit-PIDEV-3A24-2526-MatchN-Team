@@ -39,10 +39,7 @@ class DashboardController extends AbstractController
         // Check if current user has a team
         $userTeam = $membreRepo->findOneBy(['user' => $user, 'statutMembre' => 'Actif']);
         $userHasTeam = $userTeam !== null;
-<<<<<<< HEAD
         $userTeamId = $userTeam ? $userTeam->getEquipe()->getIdEquipe() : null;
-=======
->>>>>>> 2729ba8 (employe)
 
         return $this->render('employe/dashboard.html.twig', [
             'employes'       => $employes,
@@ -51,10 +48,7 @@ class DashboardController extends AbstractController
             'equipesActives' => $equipesActives,
             'totalMembres'   => $totalMembres,
             'userHasTeam'    => $userHasTeam,
-<<<<<<< HEAD
             'userTeamId'     => $userTeamId,
-=======
->>>>>>> 2729ba8 (employe)
         ]);
     }
 }

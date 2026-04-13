@@ -389,6 +389,7 @@
 					Gestion Équipes
 				</a>
 
+<<<<<<< HEAD
 				<a href="{{ path('admin_team_requests_index') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_team_requests' %}active{% endif %}">
 					<svg viewbox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
 					Demandes d'équipes
@@ -397,6 +398,17 @@
 						<span style="margin-left: auto; background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px;">{{ pendingCount }}</span>
 					{% endif %}
 				</a>
+=======
+				<a href="{{ path('admin_team_requests_index') }}"
+   class="nav-item {% if app.request.attributes.get('_route') starts with 'admin_team_requests' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    Demandes d'équipes
+    {% set pendingCount = admin_team_requests_pending_count() %}
+    {% if pendingCount > 0 %}
+        <span style="margin-left: auto; background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px;">{{ pendingCount }}</span>
+    {% endif %}
+</a>
+>>>>>>> 2729ba8 (employe)
 
 				<!-- COMMUNICATION -->
 				<div class="sidebar-section-label" style="margin-top: 6px;">Communication</div>

@@ -8,7 +8,11 @@ class GeminiService
 {
     private const API_URL  = 'https://api.groq.com/openai/v1/chat/completions';
     private const MODEL    = 'llama-3.1-8b-instant';
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> ecb6ad1 (metier notif + metier notif ..)
 
     public function __construct(private readonly HttpClientInterface $httpClient) {}
 

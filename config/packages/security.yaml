@@ -24,6 +24,12 @@ security:
         enable_csrf: true
         default_target_path: /dashboard
 
+      remember_me:
+            secret: '%kernel.secret%'      
+            lifetime: 2592000               # 30 jours
+            path: /
+            always_remember_me: false  
+
       logout:
         path: app_logout
         target: app_login

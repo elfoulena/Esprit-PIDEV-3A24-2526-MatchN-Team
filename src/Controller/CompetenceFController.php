@@ -26,7 +26,6 @@ class CompetenceFController extends AbstractController
     #[Route('', name: 'competence_index', methods: ['GET', 'POST'])]
 public function index(Request $request): Response
 {
-    // Formulaire d'ajout rapide depuis la page index
     $competence = new CompetenceF();
     $form = $this->createForm(CompetenceFType::class, $competence);
     $form->handleRequest($request);

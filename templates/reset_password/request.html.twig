@@ -1,0 +1,323 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mot de passe oublié — MatchNTeam{% endblock %}
+
+{% block stylesheets %}
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+        --bg-main:        #f0f2f5;
+        --bg-surface:     #e8eaf0;
+        --card-bg:        #ffffff;
+        --border-color:   rgba(0,0,0,0.08);
+        --text-primary:   #1e293b;
+        --text-secondary: #64748b;
+        --accent-blue:    #3b82f6;
+        --accent-purple:  #8b5cf6;
+        --accent-red:     #ef4444;
+        --radius-sm:      8px;
+        --radius-md:      12px;
+        --shadow-sm:      0 1px 4px rgba(0,0,0,0.08);
+        --shadow-md:      0 4px 20px rgba(0,0,0,0.10);
+        --transition:     0.18s ease;
+    }
+
+    body {
+        background: var(--bg-main);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .reset-page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── Panneau gauche ── */
+    .reset-left {
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .reset-left::before {
+        content: '';
+        position: absolute;
+        top: -120px; left: -120px;
+        width: 420px; height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,130,246,0.09) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .reset-left::after {
+        content: '';
+        position: absolute;
+        bottom: -80px; right: -80px;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .brand {
+        display: flex; align-items: center; gap: 10px;
+        position: relative; z-index: 1;
+    }
+    .brand-logo {
+        width: 38px; height: 38px;
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px; font-weight: 800; color: #fff;
+    }
+    .brand-name {
+        font-size: 16px; font-weight: 600; color: var(--text-primary);
+    }
+
+    .left-content { position: relative; z-index: 1; }
+    .left-title {
+        font-size: 32px; font-weight: 800;
+        color: var(--text-primary); line-height: 1.25;
+        margin-bottom: 14px;
+    }
+    .left-title .gradient-word {
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .left-sub {
+        font-size: 14px; color: var(--text-secondary);
+        line-height: 1.7; margin-bottom: 2.5rem;
+    }
+
+    /* Steps visuels */
+    .steps-list { display: flex; flex-direction: column; gap: 10px; }
+    .step-item {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        display: flex; align-items: center; gap: 14px;
+        position: relative; overflow: hidden;
+        transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .step-item:hover { transform: translateX(4px); box-shadow: var(--shadow-sm); }
+    .step-item::before {
+        content: ''; position: absolute;
+        left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .step-item:nth-child(1)::before { background: var(--accent-blue); }
+    .step-item:nth-child(2)::before { background: var(--accent-purple); }
+    .step-item:nth-child(3)::before { background: #10b981; }
+
+    .step-num {
+        width: 28px; height: 28px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 800; flex-shrink: 0;
+    }
+    .step-item:nth-child(1) .step-num { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
+    .step-item:nth-child(2) .step-num { background: rgba(139,92,246,0.12); color: var(--accent-purple); }
+    .step-item:nth-child(3) .step-num { background: rgba(16,185,129,0.12); color: #10b981; }
+
+    .step-text { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+
+    .left-footer { position: relative; z-index: 1; font-size: 12px; color: #94a3b8; }
+
+    /* ── Panneau droit ── */
+    .reset-right {
+        background: var(--bg-main);
+        display: flex; align-items: center; justify-content: center;
+        padding: 3rem 2rem; position: relative;
+    }
+    .reset-right::before {
+        content: ''; position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 500px; height: 500px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .form-wrap { width: 100%; max-width: 380px; position: relative; z-index: 1; }
+
+    .form-header { margin-bottom: 2rem; }
+    .form-title { font-size: 26px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
+    .form-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    .section-header {
+        display: flex; align-items: center; gap: 8px;
+        margin-bottom: 18px;
+    }
+    .section-header h3 {
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 1.2px; color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+        display: block; font-size: 12px; font-weight: 600;
+        color: var(--text-secondary); text-transform: uppercase;
+        letter-spacing: 0.8px; margin-bottom: 6px;
+    }
+    .form-group input {
+        width: 100%; padding: 11px 14px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        font-size: 14px; color: var(--text-primary);
+        transition: border-color var(--transition), box-shadow var(--transition);
+        font-family: inherit;
+    }
+    .form-group input::placeholder { color: #94a3b8; }
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+
+    /* Alerte erreur Symfony */
+    .alert-error {
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.2);
+        color: #991b1b;
+        border-radius: var(--radius-sm);
+        padding: 11px 14px; font-size: 13px;
+        margin-bottom: 1.4rem;
+        display: flex; align-items: flex-start; gap: 9px;
+    }
+    .alert-icon {
+        width: 16px; height: 16px; border-radius: 50%;
+        background: rgba(239,68,68,0.2);
+        font-size: 10px; font-weight: 700; color: var(--accent-red);
+        display: inline-flex; align-items: center; justify-content: center;
+        flex-shrink: 0; margin-top: 1px;
+    }
+
+    .btn-submit {
+        width: 100%; padding: 13px;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+        color: #fff; border: none; border-radius: var(--radius-sm);
+        font-size: 14px; font-weight: 700; cursor: pointer;
+        transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+        font-family: inherit; letter-spacing: 0.3px;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.25);
+    }
+    .btn-submit:hover {
+        opacity: 0.92; transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+    }
+
+    .back-link {
+        display: flex; align-items: center; gap: 6px;
+        justify-content: center; margin-top: 1.4rem;
+        color: var(--text-secondary); text-decoration: none;
+        font-size: 13px; font-weight: 500;
+        transition: color var(--transition);
+    }
+    .back-link:hover { color: var(--accent-blue); }
+
+    @media (max-width: 900px) {
+        .reset-page { grid-template-columns: 1fr; }
+        .reset-left { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="reset-page">
+
+    {# ── Panneau gauche ── #}
+    <div class="reset-left">
+        <div class="brand">
+            <div class="brand-logo">RH</div>
+            <span class="brand-name">MatchNTeam</span>
+        </div>
+
+        <div class="left-content">
+            <h1 class="left-title">
+                Récupérez<br>votre <span class="gradient-word">accès</span>
+            </h1>
+            <p class="left-sub">
+                Pas de panique. Suivez les trois étapes<br>
+                pour réinitialiser votre mot de passe.
+            </p>
+
+            <div class="steps-list">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <span class="step-text">Saisissez votre adresse email</span>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <span class="step-text">Consultez le lien reçu par email</span>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <span class="step-text">Choisissez un nouveau mot de passe</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="left-footer">
+            &copy; {{ "now"|date("Y") }} MatchNTeam — Esprit PIDEV
+        </div>
+    </div>
+
+    {# ── Panneau droit ── #}
+    <div class="reset-right">
+        <div class="form-wrap">
+
+            <div class="form-header">
+                <h2 class="form-title">Mot de passe oublié 🔑</h2>
+                <p class="form-sub">
+                    Entrez votre email et nous vous enverrons<br>
+                    un lien pour réinitialiser votre mot de passe.
+                </p>
+            </div>
+
+            <div class="section-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <h3>Adresse email</h3>
+            </div>
+
+            {{ form_start(requestForm) }}
+                {{ form_errors(requestForm) }}
+
+                <div class="form-group">
+                    {{ form_label(requestForm.email) }}
+                    {{ form_widget(requestForm.email, {
+                        'attr': {'placeholder': 'votre@email.com', 'autofocus': 'autofocus'}
+                    }) }}
+                    {{ form_errors(requestForm.email) }}
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Envoyer le lien de réinitialisation →
+                </button>
+            {{ form_end(requestForm) }}
+
+            <a href="{{ path('app_login') }}" class="back-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Retour à la connexion
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

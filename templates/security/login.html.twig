@@ -554,7 +554,7 @@
                         <input type="checkbox" name="_remember_me">
                         Se souvenir de moi
                     </label>
-                    <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+                    <a href="{{ path('app_forgot_password_request') }}" class="forgot-link">Mot de passe oublié ?</a>
                 </div>
 
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">

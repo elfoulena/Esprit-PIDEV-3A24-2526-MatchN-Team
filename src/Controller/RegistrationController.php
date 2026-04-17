@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\CompetenceF;
 use App\Enum\Role;
+use App\Service\HCaptchaService;
 use App\Form\RegistrationFormType;
 use App\Service\MailerService;
 use App\Service\SkillExtractor;
@@ -25,10 +26,17 @@ public function register(
     EntityManagerInterface $em,
     MailerService $mailer,
     ValidatorInterface $validator,
-    SkillExtractor $skillExtractor   
+    SkillExtractor $skillExtractor,
+    HCaptchaService $hCaptchaService
 ): Response {
 
     if ($request->isMethod('POST')) {
+
+    $captchaToken = $request->request->get('h-captcha-response');
+    if (!$captchaToken || !$hCaptchaService->verify($captchaToken)) {
+            $this->addFlash('error', 'Captcha invalide. Veuillez réessayer.');
+            return $this->redirectToRoute('app_register');
+        }
 
         $nom            = trim($request->request->get('nom', ''));
         $prenom         = trim($request->request->get('prenom', ''));

@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 text-center">
+            <h2>Configurer la 2FA</h2>
+            <p>Scannez ce QR code avec <strong>Google Authenticator</strong>.</p>
+
+            {# Affichage du QR code via une lib externe #}
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ qr_code_url|url_encode }}"
+                 alt="QR Code 2FA" class="mb-3" />
+
+            <p class="text-muted">Ou entrez le secret manuellement : <code>{{ secret }}</code></p>
+
+            <form method="post">
+                <div class="mb-3">
+                    <label for="code" class="form-label">Code de confirmation</label>
+                    <input type="text" id="code" name="code" class="form-control"
+                           inputmode="numeric" maxlength="6" required autofocus />
+                </div>
+                <button type="submit" class="btn btn-success w-100">Activer la 2FA</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

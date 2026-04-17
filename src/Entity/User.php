@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
+
 
 #[ORM\Entity]
 #[ORM\Table(name: "utilisateur")]
@@ -105,6 +107,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     private Collection $participations;
+
+
+    #[ORM\Column(type: "datetime", nullable: true)]
+private ?\DateTimeInterface $blockedUntil = null;
+
+public function getBlockedUntil(): ?\DateTimeInterface
+{
+    return $this->blockedUntil;
+}
+
+public function setBlockedUntil(?\DateTimeInterface $blockedUntil): self
+{
+    $this->blockedUntil = $blockedUntil;
+    return $this;
+}
 
     public function __construct()
     {
@@ -281,5 +298,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->competences->removeElement($competence);
         return $this;
+    }
+
+    public function isGoogleAuthenticatorEnabled(): bool
+    {
+        return $this->totpEnabled === true;
+    }
+
+    public function getGoogleAuthenticatorUsername(): string
+    {
+        return $this->email;
+    }
+
+    public function getGoogleAuthenticatorSecret(): ?string
+    {
+        return $this->totpSecret;
     }
 }

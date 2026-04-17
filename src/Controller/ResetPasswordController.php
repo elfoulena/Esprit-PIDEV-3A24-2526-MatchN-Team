@@ -30,7 +30,6 @@ class ResetPasswordController extends AbstractController
         private EntityManagerInterface        $entityManager,
     ) {}
 
-    // ------------------------------------------------------------------ STEP 1
     #[Route('', name: 'app_forgot_password_request')]
     public function request(Request $request, MailerInterface $mailer): Response
     {
@@ -49,12 +48,10 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    // ------------------------------------------------------------------ STEP 2
     #[Route('/check-email', name: 'app_check_email')]
     public function checkEmail(): Response
     {
-        // Génère un faux token si l'utilisateur arrive ici directement
-        // pour éviter de révéler si un email existe ou non.
+        
         if (null === ($resetToken = $this->getTokenObjectFromSession())) {
             $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
         }
@@ -64,7 +61,6 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    // ------------------------------------------------------------------ STEP 3
     #[Route('/reset/{token}', name: 'app_reset_password')]
     public function reset(
         Request $request,
@@ -72,7 +68,6 @@ class ResetPasswordController extends AbstractController
         string $token = null
     ): Response {
         if ($token) {
-            // On stocke le token en session pour ne pas l'exposer dans l'URL
             $this->storeTokenInSession($token);
             return $this->redirectToRoute('app_reset_password');
         }
@@ -84,7 +79,6 @@ class ResetPasswordController extends AbstractController
         }
 
         try {
-            /** @var User $user */
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
         } catch (ResetPasswordExceptionInterface $e) {
             $this->addFlash('reset_password_error', sprintf(
@@ -98,7 +92,6 @@ class ResetPasswordController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Supprime le token → ne peut plus être réutilisé
             $this->resetPasswordHelper->removeResetRequest($token);
 
             $user->setPassword(
@@ -107,7 +100,6 @@ class ResetPasswordController extends AbstractController
 
             $this->entityManager->flush();
 
-            // Nettoie la session
             $this->cleanSessionAfterReset();
 
             $this->addFlash('success', 'Votre mot de passe a été réinitialisé. Vous pouvez vous connecter.');
@@ -119,13 +111,11 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    // ------------------------------------------------------------------ HELPER
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
     {
         $user = $this->entityManager->getRepository(User::class)
             ->findOneBy(['email' => $emailFormData]);
 
-        // Ne pas révéler si l'email existe ou non → toujours rediriger
         if (!$user) {
             return $this->redirectToRoute('app_check_email');
         }
@@ -133,7 +123,6 @@ class ResetPasswordController extends AbstractController
         try {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
         } catch (ResetPasswordExceptionInterface $e) {
-            // Trop de demandes (throttle) → on redirige quand même silencieusement
             return $this->redirectToRoute('app_check_email');
         }
 

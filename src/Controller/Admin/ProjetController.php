@@ -5,11 +5,6 @@ namespace App\Controller\Admin;
 use App\Entity\AffectationProjet;
 use App\Entity\DemandeParticipation;
 use App\Entity\Projet;
-<<<<<<< Updated upstream
-use App\Form\ProjetType;
-use App\Repository\CompetenceRepository;
-use App\Repository\ProjetRepository;
-=======
 use App\Entity\Repository as ProjetRepositoryEntity;
 use App\Enum\Role;
 use App\Form\ProjetType;
@@ -17,7 +12,6 @@ use App\Repository\CompetenceRepository;
 use App\Repository\ProjetRepository;
 use App\Repository\UserRepository;
 use App\Service\GitHubRepositoryService;
->>>>>>> Stashed changes
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;

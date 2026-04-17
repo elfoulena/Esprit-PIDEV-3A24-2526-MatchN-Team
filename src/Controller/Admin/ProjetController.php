@@ -5,11 +5,22 @@ namespace App\Controller\Admin;
 use App\Entity\AffectationProjet;
 use App\Entity\DemandeParticipation;
 use App\Entity\Projet;
+<<<<<<< Updated upstream
 use App\Form\ProjetType;
 use App\Repository\CompetenceRepository;
 use App\Repository\ProjetRepository;
+=======
+use App\Entity\Repository as ProjetRepositoryEntity;
+use App\Enum\Role;
+use App\Form\ProjetType;
+use App\Repository\CompetenceRepository;
+use App\Repository\ProjetRepository;
+use App\Repository\UserRepository;
+use App\Service\GitHubRepositoryService;
+>>>>>>> Stashed changes
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,7 +37,10 @@ class ProjetController extends AbstractController
         $statut = $request->query->get('statut', '');
         $visib  = $request->query->get('visib', '');
 
-        $qb = $repo->createQueryBuilder('p')->orderBy('p.id_projet', 'DESC');
+        $qb = $repo->createQueryBuilder('p')
+            ->leftJoin('p.repository', 'r')
+            ->addSelect('r')
+            ->orderBy('p.id_projet', 'DESC');
 
         if ($q) {
             $qb->andWhere('p.titre LIKE :q OR p.description LIKE :q')->setParameter('q', "%$q%");
@@ -204,6 +218,51 @@ class ProjetController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', 'Projet supprimé.');
+        return $this->redirectToRoute('admin_projets_index');
+    }
+
+    #[Route('/{id}/repo/configure', name: 'admin_projets_repo_configure', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function configureRepository(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        GitHubRepositoryService $gitHubRepositoryService
+    ): RedirectResponse {
+        $projet = $em->getRepository(Projet::class)->find($id);
+        if (!$projet) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->isCsrfTokenValid('configure_repo_' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($projet->getRepository()) {
+            $this->addFlash('info', 'Ce projet a déjà un repo configuré.');
+            return $this->redirectToRoute('admin_projets_index');
+        }
+
+        try {
+            $githubRepoData = $gitHubRepositoryService->createRepositoryForProject($projet);
+
+            $repository = new ProjetRepositoryEntity();
+            $repository
+                ->setProjet($projet)
+                ->setNomRepo($githubRepoData['name'])
+                ->setRepoName($githubRepoData['name'])
+                ->setUrlRepo($githubRepoData['html_url'])
+                ->setOwner($githubRepoData['owner'])
+                ->setIsPrivate($githubRepoData['private'])
+                ->setCreatedAt(new \DateTime());
+
+            $em->persist($repository);
+            $em->flush();
+
+            $this->addFlash('success', sprintf('Repo GitHub créé: %s', $githubRepoData['html_url']));
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Impossible de configurer le repo GitHub: ' . $e->getMessage());
+        }
+
         return $this->redirectToRoute('admin_projets_index');
     }
 }

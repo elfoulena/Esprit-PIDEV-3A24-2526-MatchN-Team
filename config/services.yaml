@@ -22,3 +22,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\GroqService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+
+    App\Service\GitHubRepositoryService:
+        arguments:
+            $githubToken: '%env(string:GITHUB_TOKEN)%'
+            $githubOwner: '%env(string:GITHUB_OWNER)%'
+            $githubRepoPrivate: '%env(bool:GITHUB_REPO_PRIVATE)%'

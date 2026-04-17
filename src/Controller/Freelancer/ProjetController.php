@@ -23,6 +23,8 @@ class ProjetController extends AbstractController
 
         $qb = $em->getRepository(Projet::class)
             ->createQueryBuilder('p')
+            ->leftJoin('p.repository', 'r')
+            ->addSelect('r')
             ->where('p.visibleFreelancer = 1')
             ->orderBy('p.id_projet', 'DESC');
 

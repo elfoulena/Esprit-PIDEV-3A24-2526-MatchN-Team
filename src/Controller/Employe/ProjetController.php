@@ -23,6 +23,8 @@ class ProjetController extends AbstractController
 
         $qb = $em->getRepository(Projet::class)
             ->createQueryBuilder('p')
+            ->leftJoin('p.repository', 'r')
+            ->addSelect('r')
             ->where('p.visibleEmploye = 1')
             ->orderBy('p.id_projet', 'DESC');
 
@@ -94,10 +96,17 @@ class ProjetController extends AbstractController
     #[Route('/mes-affectations', name: 'employe_mes_affectations', methods: ['GET'])]
     public function mesAffectations(EntityManagerInterface $em): Response
     {
-        $affectations = $em->getRepository(AffectationProjet::class)->findBy(
-            ['User' => $this->getUser()],
-            ['date_debut' => 'DESC']
-        );
+        $affectations = $em->getRepository(AffectationProjet::class)
+            ->createQueryBuilder('a')
+            ->leftJoin('a.projet', 'p')
+            ->addSelect('p')
+            ->leftJoin('p.repository', 'r')
+            ->addSelect('r')
+            ->where('a.User = :user')
+            ->setParameter('user', $this->getUser())
+            ->orderBy('a.date_debut', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('employe/mes_affectations.html.twig', [
             'affectations' => $affectations,

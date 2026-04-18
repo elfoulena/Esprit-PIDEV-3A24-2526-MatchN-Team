@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            color: #fff; padding: 30px 35px; margin-bottom: 25px;
+        }
+        .header h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .header p { font-size: 11px; opacity: 0.8; }
+        .header .brand { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.6; margin-bottom: 10px; }
+
+        .profile-section {
+            padding: 0 35px; margin-bottom: 20px;
+            display: table; width: 100%;
+        }
+        .profile-left { display: table-cell; width: 50%; vertical-align: top; }
+        .profile-right { display: table-cell; width: 50%; vertical-align: top; text-align: right; }
+        .profile-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        .profile-value { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+
+        .stats-grid {
+            padding: 0 35px; margin-bottom: 25px;
+            display: table; width: 100%;
+        }
+        .stat-box {
+            display: table-cell; width: 25%; text-align: center;
+            padding: 14px 10px; border: 1px solid #e2e8f0;
+        }
+        .stat-box:first-child { border-radius: 8px 0 0 8px; }
+        .stat-box:last-child { border-radius: 0 8px 8px 0; }
+        .stat-number { font-size: 22px; font-weight: 800; color: #2563eb; }
+        .stat-label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-top: 2px; }
+
+        .section-title {
+            padding: 0 35px; font-size: 14px; font-weight: 800;
+            color: #1e293b; margin-bottom: 12px;
+            border-bottom: 2px solid #2563eb; padding-bottom: 6px;
+            margin-left: 35px; margin-right: 35px;
+        }
+
+        table.eval-table {
+            width: calc(100% - 70px); margin: 0 35px 25px;
+            border-collapse: collapse; font-size: 11px;
+        }
+        table.eval-table thead th {
+            background: #f1f5f9; padding: 10px 12px;
+            text-align: left; font-size: 9px; font-weight: 700;
+            color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        table.eval-table tbody td {
+            padding: 10px 12px; border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        table.eval-table tbody tr:nth-child(even) { background: #f8fafc; }
+
+        .note-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 700;
+        }
+        .note-green { background: #dcfce7; color: #166534; }
+        .note-orange { background: #fef3c7; color: #92400e; }
+        .note-red { background: #fee2e2; color: #991b1b; }
+
+        .footer {
+            padding: 15px 35px; margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 9px; color: #94a3b8; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+{# ── Header ── #}
+<div class="header">
+    <div class="brand">MatchNTeam</div>
+    <h1>Fiche de Performance Freelancer</h1>
+    <p>Rapport généré le {{ "now"|date("d/m/Y") }}</p>
+</div>
+
+{# ── Profile Info ── #}
+<div class="profile-section">
+    <div class="profile-left">
+        <div class="profile-label">Nom complet</div>
+        <div class="profile-value">{{ user.prenom }} {{ user.nom }}</div>
+        <div class="profile-label">Email</div>
+        <div class="profile-value">{{ user.email }}</div>
+        {% if user.telephone %}
+            <div class="profile-label">Téléphone</div>
+            <div class="profile-value">{{ user.telephone }}</div>
+        {% endif %}
+    </div>
+    <div class="profile-right">
+        {% if rank %}
+            <div class="profile-label">Classement Leaderboard</div>
+            <div class="profile-value" style="font-size: 18px; color: #2563eb;">#{{ rank }} / {{ totalFreelancers }}</div>
+        {% endif %}
+        <div class="profile-label">Statut</div>
+        <div class="profile-value" style="color: #059669;">Actif</div>
+    </div>
+</div>
+
+{# ── Stats ── #}
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-number">{{ totalEvaluations }}</div>
+        <div class="stat-label">Évaluations</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ avgNote }}/10</div>
+        <div class="stat-label">Note Moyenne</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ bestNote }}/10</div>
+        <div class="stat-label">Meilleure Note</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ totalProjects }}</div>
+        <div class="stat-label">Projets Terminés</div>
+    </div>
+</div>
+
+{# ── Evaluations Detail ── #}
+<div class="section-title">Détail des Évaluations</div>
+
+{% if evaluations|length > 0 %}
+<table class="eval-table">
+    <thead>
+        <tr>
+            <th>Projet</th>
+            <th>Période</th>
+            <th>Note</th>
+            <th>Appréciation</th>
+            <th>Commentaire</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for eval in evaluations %}
+        {% set note = eval.note ?? 0 %}
+        <tr>
+            <td style="font-weight: 700;">
+                {{ eval.affectationProjet.projet ? eval.affectationProjet.projet.titre : '—' }}
+            </td>
+            <td>
+                {{ eval.affectationProjet.dateDebut ? eval.affectationProjet.dateDebut|date('d/m/Y') : '' }}
+                {% if eval.affectationProjet.dateFin %}
+                    → {{ eval.affectationProjet.dateFin|date('d/m/Y') }}
+                {% endif %}
+            </td>
+            <td>
+                <span class="note-badge {{ note >= 7 ? 'note-green' : (note >= 5 ? 'note-orange' : 'note-red') }}">
+                    {{ note }}/10
+                </span>
+            </td>
+            <td>{{ eval.labelNote }}</td>
+            <td style="max-width: 150px;">{{ eval.commentaire ?? '—' }}</td>
+            <td>{{ eval.dateEvaluation ? eval.dateEvaluation|date('d/m/Y') : '—' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="padding: 0 35px; color: #94a3b8; text-align: center;">Aucune évaluation disponible.</p>
+{% endif %}
+
+{# ── Footer ── #}
+<div class="footer">
+    MatchNTeam — Plateforme RH | Document généré automatiquement le {{ "now"|date("d/m/Y à H:i") }} | Ce document est confidentiel.
+</div>
+
+</body>
+</html>

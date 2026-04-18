@@ -1,0 +1,409 @@
+{# templates/ai_statistics/dashboard.html.twig #}
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}AI Analytics Dashboard - MatchNTeam{% endblock %}
+{% block page_title %}AI Analytics Dashboard{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 24px;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none;
+    }
+    
+    .stat-card h3 {
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        opacity: 0.9;
+    }
+    
+    .stat-card .value {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+    
+    .stat-card .trend {
+        font-size: 12px;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .trend-up { color: #4ade80; }
+    .trend-down { color: #f87171; }
+    
+    .ai-insight-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    
+    .insight-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .insight-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    
+    .recommendation-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        border-left: 3px solid;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+    
+    .priority-high { border-left-color: #ef4444; }
+    .priority-medium { border-left-color: #f59e0b; }
+    .priority-low { border-left-color: #10b981; }
+    
+    .chart-container {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    
+    .chart-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+    }
+    
+    .skill-progress {
+        margin-bottom: 12px;
+    }
+    
+    .skill-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+    
+    .progress-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+    
+    .member-risk-card {
+        background: linear-gradient(135deg, #fef3c7, #fed7aa);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .risk-high { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+    .risk-medium { background: linear-gradient(135deg, #fef3c7, #fed7aa); }
+    
+    .btn-ai-stats {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .btn-ai-stats:hover {
+        transform: scale(1.05);
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .loading {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <h2 style="font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        🤖 AI Analytics Dashboard
+    </h2>
+    <p style="color: var(--text-secondary); margin-top: 8px;">
+        Statistiques avancées et prédictions basées sur l'intelligence artificielle
+    </p>
+</div>
+
+<div class="stats-grid">
+    {% for equipe in equipes %}
+    <div class="stat-card" onclick="loadTeamStats({{ equipe.idEquipe }})">
+        <h3>{{ equipe.nomEquipe }}</h3>
+        <div class="value">{{ equipe.membres|length }} / {{ equipe.nbMembresMax }}</div>
+        <div class="trend">
+            <span>Membres actifs</span>
+        </div>
+        <div style="margin-top: 16px; font-size: 12px;">
+            {{ equipe.departement ?? 'Département non spécifié' }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="teamStatsContainer">
+    <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M20 12V8H4v12h16v-4M12 2v4M4 4l4 4M20 4l-4 4"/>
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M18 12h3M3 12h3M12 18v3M12 3v3"/>
+        </svg>
+        <p style="margin-top: 16px;">Sélectionnez une équipe pour voir les analyses AI détaillées</p>
+    </div>
+</div>
+
+<script>
+async function loadTeamStats(equipeId) {
+    const container = document.getElementById('teamStatsContainer');
+    container.innerHTML = '<div style="text-align: center; padding: 60px;"><div class="loading">🤖 Chargement des analyses AI...</div></div>';
+    
+    try {
+        const response = await fetch(`/admin/ai-statistics/api/equipe/${equipeId}/stats`);
+        const stats = await response.json();
+        
+        container.innerHTML = `
+            <div class="ai-insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon">📊</div>
+                    <div>
+                        <h3 style="margin: 0;">Métriques clés de l'équipe</h3>
+                        <p style="margin: 4px 0 0; font-size: 12px; color: var(--text-secondary);">Performance et santé globale</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Score d'engagement</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--accent-blue);">${stats.team_metrics.engagement_score}%</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Santé de l'équipe</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--accent-green);">${stats.team_metrics.team_health_score}%</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Efficacité budgétaire</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--accent-purple);">${stats.team_metrics.budget_efficiency}%</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Indice de productivité</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--accent-orange);">${stats.team_metrics.productivity_index}%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon">🔮</div>
+                    <div>
+                        <h3 style="margin: 0;">Prédictions AI</h3>
+                        <p style="margin: 4px 0 0; font-size: 12px; color: var(--text-secondary);">Analyse prédictive et tendances</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Performance prédite</div>
+                        <div style="font-size: 32px; font-weight: 800; color: ${stats.ai_predictions.performance_prediction.predicted_score > 70 ? '#10b981' : '#f59e0b'}">
+                            ${stats.ai_predictions.performance_prediction.predicted_score}%
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Niveau de confiance: ${stats.ai_predictions.performance_prediction.confidence_level}%
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Probabilité de succès</div>
+                        <div style="font-size: 32px; font-weight: 800;">${stats.ai_predictions.success_probability}%</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Tendance: ${stats.ai_predictions.performance_prediction.trend === 'upward' ? '📈 Hausse' : stats.ai_predictions.performance_prediction.trend === 'downward' ? '📉 Baisse' : '➡️ Stable'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon">⚠️</div>
+                    <div>
+                        <h3 style="margin: 0;">Risques de turnover</h3>
+                        <p style="margin: 4px 0 0; font-size: 12px; color: var(--text-secondary);">Membres à risque de départ</p>
+                    </div>
+                </div>
+                ${stats.ai_predictions.turnover_risk.at_risk_members.length > 0 ? 
+                    stats.ai_predictions.turnover_risk.at_risk_members.map(member => `
+                        <div class="member-risk-card risk-${member.risk_level}">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${member.member}</strong>
+                                    <div style="font-size: 12px; margin-top: 4px;">Facteurs: ${member.factors.join(', ')}</div>
+                                </div>
+                                <div style="font-size: 24px; font-weight: 800;">${member.risk_score}%</div>
+                            </div>
+                        </div>
+                    `).join('') : 
+                    '<div style="text-align: center; padding: 20px;">✅ Aucun risque de turnover détecté</div>'
+                }
+            </div>
+            
+            <div class="ai-insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon">💡</div>
+                    <div>
+                        <h3 style="margin: 0;">Recommandations intelligentes</h3>
+                        <p style="margin: 4px 0 0; font-size: 12px; color: var(--text-secondary);">Actions suggérées pour optimiser l'équipe</p>
+                    </div>
+                </div>
+                ${stats.insights.recommendations.map(rec => `
+                    <div class="recommendation-item priority-${rec.priority === 1 ? 'high' : rec.priority === 2 ? 'medium' : 'low'}">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong>${rec.title}</strong>
+                                <div style="font-size: 13px; margin-top: 4px;">${rec.action}</div>
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Impact attendu: ${rec.impact}</div>
+                            </div>
+                            <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: ${rec.priority === 1 ? '#ef4444' : rec.priority === 2 ? '#f59e0b' : '#10b981'}; color: white;">
+                                Priorité ${rec.priority}
+                            </span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">Distribution des compétences</div>
+                ${Object.entries(stats.visualization_data.skill_distribution).map(([skill, count]) => `
+                    <div class="skill-progress">
+                        <div class="skill-label">
+                            <span>${skill}</span>
+                            <span>${Math.round(count / stats.team_metrics.total_members * 100)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.round(count / stats.team_metrics.total_members * 100)}%"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">Analyse des lacunes de compétences</div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">
+                        Couverture globale: ${stats.ai_predictions.skill_gap_analysis.overall_coverage}%
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">
+                        Lacunes critiques: ${stats.ai_predictions.skill_gap_analysis.critical_gaps}
+                    </div>
+                </div>
+                ${stats.ai_predictions.skill_gap_analysis.gaps.map(gap => `
+                    <div class="skill-progress">
+                        <div class="skill-label">
+                            <span>${gap.skill}</span>
+                            <span style="color: ${gap.severity === 'high' ? '#ef4444' : gap.severity === 'medium' ? '#f59e0b' : '#10b981'}">
+                                ${gap.coverage}%
+                            </span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${gap.coverage}%; background: ${gap.severity === 'high' ? '#ef4444' : gap.severity === 'medium' ? '#f59e0b' : '#10b981'};"></div>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            💡 ${gap.recommendation}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div style="display: flex; justify-content: center; margin-top: 32px;">
+                <button class="btn-ai-stats" onclick="exportTeamReport(${equipeId})">
+                    📥 Exporter le rapport complet
+                </button>
+            </div>
+        `;
+    } catch (error) {
+        container.innerHTML = '<div style="text-align: center; padding: 60px; color: #ef4444;">❌ Erreur lors du chargement des données</div>';
+        console.error('Error loading team stats:', error);
+    }
+}
+
+async function exportTeamReport(equipeId) {
+    try {
+        const response = await fetch(`/admin/ai-statistics/api/equipe/${equipeId}/stats`);
+        const stats = await response.json();
+        
+        // Create downloadable report
+        const report = JSON.stringify(stats, null, 2);
+        const blob = new Blob([report], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `team_report_${equipeId}_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting report:', error);
+    }
+}
+</script>
+{% endblock %}

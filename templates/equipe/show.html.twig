@@ -4,6 +4,13 @@
 {% block title %}{{ equipe.nomEquipe }} — MatchNTeam{% endblock %}
 {% block page_title %}Détail Équipe{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block extra_styles %}
 .detail-card {
     background: var(--card-bg); border: 1px solid var(--border-color);
@@ -37,6 +44,167 @@
     padding: 8px 14px; background: #f8fafc;
     border: 1px solid var(--border-color); border-radius: 20px; font-size: 13px;
 }
+
+/* Calendar specific styles */
+.calendar-section {
+    margin-top: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+}
+
+.calendar-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-section-title i {
+    color: #3498db;
+    font-size: 20px;
+}
+
+#calendar {
+    min-height: 600px;
+}
+
+.event-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.event-stat-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.event-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.event-stat-card .stat-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.event-stat-card .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
+.event-stat-card .stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.event-stat-card.total .stat-icon { color: #3498db; }
+.event-stat-card.upcoming .stat-icon { color: #f39c12; }
+.event-stat-card.ongoing .stat-icon { color: #2ecc71; }
+.event-stat-card.completed .stat-icon { color: #95a5a6; }
+
+/* Filter bar */
+.filter-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-bar .filter-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.filter-bar select, .filter-bar button {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+}
+
+.filter-bar button {
+    background: #64748b;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.filter-bar button:hover {
+    background: #475569;
+}
+
+/* Modal styles */
+.event-detail-modal .modal-header {
+    border-bottom: none;
+}
+
+.event-detail-modal .info-group {
+    margin-bottom: 20px;
+}
+
+.event-detail-modal .info-group label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.event-detail-modal .info-group label i {
+    margin-right: 6px;
+}
+
+.event-detail-modal .info-group p {
+    margin: 0;
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .event-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-bar {
+        flex-direction: column;
+    }
+    
+    .filter-bar .filter-group {
+        min-width: auto;
+    }
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.fc-event:hover {
+    filter: brightness(1.05);
+}
 {% endblock %}
 
 {% block content %}
@@ -54,6 +222,15 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Membres ({{ equipe.nbMembresActuel }})
         </a>
+        <a href="{{ path('app_ai_team_stats', {'id_equipe': equipe.idEquipe}) }}"
+       style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 12V8H4v12h16v-4M12 2v4M4 4l4 4M20 4l-4 4"/>
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M18 12h3M3 12h3M12 18v3M12 3v3"/>
+        </svg>
+        🤖 Statistiques AI
+    </a>
         <a href="{{ path('app_equipe_edit', {'id_equipe': equipe.idEquipe}) }}"
            style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(59,130,246,0.10); color: var(--accent-blue); border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -143,7 +320,7 @@
                 <div style="width: 24px; height: 24px; border-radius: 50%; background: {{ equipe.couleurEquipe }}33; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: {{ equipe.couleurEquipe }};">
                     {{ membre.user.id }}
                 </div>
-                <span style="font-weight: 600;">User #{{ membre.user.nom }} {{ membre.user.prenom }}</span>
+                <span style="font-weight: 600;">{{ membre.user.nom }} {{ membre.user.prenom }}</span>
                 <span style="font-size: 11px; color: var(--text-secondary);">{{ membre.roleEquipe }}</span>
                 {% if membre.statutMembre == 'Actif' %}
                     <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
@@ -169,4 +346,381 @@
 
 </div>
 
+{# Calendar Section #}
+<div class="calendar-section">
+    <div class="calendar-section-title">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendrier des événements</span>
+    </div>
+
+    {# Event Statistics #}
+    <div class="event-stats">
+        <div class="event-stat-card total" data-filter="all">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="stat-label">Total Événements</div>
+            <div class="stat-number" id="totalEvents">0</div>
+        </div>
+        <div class="event-stat-card upcoming" data-filter="upcoming">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-label">À venir</div>
+            <div class="stat-number" id="upcomingEvents">0</div>
+        </div>
+        <div class="event-stat-card ongoing" data-filter="ongoing">
+            <div class="stat-icon">
+                <i class="fas fa-play-circle"></i>
+            </div>
+            <div class="stat-label">En cours</div>
+            <div class="stat-number" id="ongoingEvents">0</div>
+        </div>
+        <div class="event-stat-card completed" data-filter="completed">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-label">Terminés</div>
+            <div class="stat-number" id="completedEvents">0</div>
+        </div>
+    </div>
+
+    {# Filter Bar #}
+    <div class="filter-bar">
+        <div class="filter-group">
+            <select id="eventTypeFilter">
+                <option value="">Tous les types</option>
+                <option value="CONFERENCE">Conférences</option>
+                <option value="WORKSHOP">Workshops</option>
+                <option value="COMPETITION">Compétitions</option>
+                <option value="FORMATION">Formations</option>
+                <option value="MEETUP">Meetups</option>
+                <option value="TEAM_BUILDING">Team Building</option>
+                <option value="EVENT_INTERNE">Événements internes</option>
+                <option value="PORTE_OUVERTE">Portes ouvertes</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <select id="eventStatusFilter">
+                <option value="">Tous les statuts</option>
+                <option value="prevu">Prévus</option>
+                <option value="en_cours">En cours</option>
+                <option value="termine">Terminés</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <button id="resetFilters">
+                <i class="fas fa-undo-alt"></i> Réinitialiser
+            </button>
+        </div>
+    </div>
+
+    {# Calendar Container #}
+    <div id="calendar"></div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let calendar = null;
+            let allEvents = [];
+            
+            // Helper functions
+            function getEventColor(type) {
+                const colors = {
+                    'CONFERENCE': '#3498db',
+                    'WORKSHOP': '#2ecc71',
+                    'COMPETITION': '#e74c3c',
+                    'FORMATION': '#9b59b6',
+                    'MEETUP': '#f39c12',
+                    'TEAM_BUILDING': '#1abc9c',
+                    'EVENT_INTERNE': '#34495e',
+                    'PORTE_OUVERTE': '#e67e22'
+                };
+                return colors[type] || '#95a5a6';
+            }
+            
+            function getStatusClass(status) {
+                const classes = {
+                    'prevu': 'bg-info',
+                    'en_cours': 'bg-warning',
+                    'termine': 'bg-success'
+                };
+                return classes[status] || 'bg-secondary';
+            }
+            
+            function getStatusText(status) {
+                const texts = {
+                    'prevu': 'Prévu',
+                    'en_cours': 'En cours',
+                    'termine': 'Terminé'
+                };
+                return texts[status] || status;
+            }
+            
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // Load statistics
+            async function loadStats() {
+                try {
+                    const response = await fetch('/api/events/stats');
+                    const stats = await response.json();
+                    
+                    document.getElementById('totalEvents').textContent = stats.total;
+                    document.getElementById('upcomingEvents').textContent = stats.upcoming;
+                    document.getElementById('ongoingEvents').textContent = stats.ongoing;
+                    document.getElementById('completedEvents').textContent = stats.completed;
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+            
+            // Load events from API
+            async function loadEvents() {
+                try {
+                    const typeFilter = document.getElementById('eventTypeFilter').value;
+                    const statusFilter = document.getElementById('eventStatusFilter').value;
+                    
+                    let url = '/api/events';
+                    const params = new URLSearchParams();
+                    
+                    if (typeFilter) params.append('type', typeFilter);
+                    if (statusFilter) params.append('status', statusFilter);
+                    
+                    if (params.toString()) {
+                        url += '?' + params.toString();
+                    }
+                    
+                    const response = await fetch(url);
+                    const events = await response.json();
+                    allEvents = events;
+                    
+                    if (calendar) {
+                        calendar.removeAllEvents();
+                        calendar.addEventSource(events);
+                    }
+                    
+                    return events;
+                } catch (error) {
+                    console.error('Error loading events:', error);
+                    return [];
+                }
+            }
+            
+            // Show event details modal
+            async function showEventDetails(eventId) {
+                try {
+                    const response = await fetch(`/api/events/${eventId}`);
+                    const event = await response.json();
+                    
+                    const statusClass = getStatusClass(event.statut);
+                    const statusText = getStatusText(event.statut);
+                    const eventColor = getEventColor(event.type);
+                    
+                    // Create modal HTML
+                    const modalHtml = `
+                        <div class="modal fade event-detail-modal" id="eventDetailModal" tabindex="-1">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="background: ${eventColor}; color: white; padding: 20px 24px;">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            ${escapeHtml(event.title)}
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body" style="padding: 24px;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-tag"></i> Type</label>
+                                                    <p>${escapeHtml(event.type)}</p>
+                                                </div>
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-map-marker-alt"></i> Lieu</label>
+                                                    <p>${escapeHtml(event.lieu)}</p>
+                                                </div>
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-clock"></i> Date début</label>
+                                                    <p>${new Date(event.start).toLocaleString('fr-FR')}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-flag-checkered"></i> Statut</label>
+                                                    <p><span class="badge ${statusClass}" style="padding: 6px 12px; border-radius: 20px;">${statusText}</span></p>
+                                                </div>
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-users"></i> Capacité</label>
+                                                    <p>${event.capacite_max} places (${event.nombre_actuel || 0} inscrits)</p>
+                                                </div>
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-hourglass-end"></i> Date fin</label>
+                                                    <p>${new Date(event.end).toLocaleString('fr-FR')}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        ${event.description ? `
+                                        <div class="row mt-3">
+                                            <div class="col-12">
+                                                <div class="info-group">
+                                                    <label><i class="fas fa-align-left"></i> Description</label>
+                                                    <p>${escapeHtml(event.description)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="modal-footer" style="border-top: 1px solid #e2e8f0; padding: 16px 24px;">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            <i class="fas fa-times"></i> Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Remove existing modal if any
+                    const existingModal = document.getElementById('eventDetailModal');
+                    if (existingModal) {
+                        existingModal.remove();
+                    }
+                    
+                    document.body.insertAdjacentHTML('beforeend', modalHtml);
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+                    modal.show();
+                    
+                    // Clean up modal when hidden
+                    document.getElementById('eventDetailModal').addEventListener('hidden.bs.modal', function() {
+                        this.remove();
+                    });
+                    
+                } catch (error) {
+                    console.error('Error fetching event details:', error);
+                }
+            }
+            
+            // Initialize calendar
+            function initCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    locale: 'fr',
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    buttonText: {
+                        today: 'Aujourd\'hui',
+                        month: 'Mois',
+                        week: 'Semaine',
+                        day: 'Jour'
+                    },
+                    events: allEvents,
+                    editable: false,
+                    selectable: true,
+                    dayMaxEvents: true,
+                    eventTimeFormat: {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    },
+                    eventClick: function(info) {
+                        showEventDetails(info.event.id);
+                    },
+                    loading: function(isLoading) {
+                        if (isLoading) {
+                            // Show loader
+                            let loader = document.getElementById('calendar-loader');
+                            if (!loader) {
+                                loader = document.createElement('div');
+                                loader.id = 'calendar-loader';
+                                loader.style.cssText = `
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    right: 0;
+                                    bottom: 0;
+                                    background: rgba(255,255,255,0.8);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    z-index: 1000;
+                                    border-radius: 12px;
+                                `;
+                                loader.innerHTML = '<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"><span class="visually-hidden">Chargement...</span></div>';
+                                calendarEl.parentNode.style.position = 'relative';
+                                calendarEl.parentNode.appendChild(loader);
+                            }
+                            loader.style.display = 'flex';
+                        } else {
+                            const loader = document.getElementById('calendar-loader');
+                            if (loader) {
+                                loader.style.display = 'none';
+                            }
+                        }
+                    }
+                });
+                
+                calendar.render();
+            }
+            
+            // Initialize everything
+            async function init() {
+                await loadStats();
+                await loadEvents();
+                initCalendar();
+                
+                // Add event listeners for filters
+                document.getElementById('eventTypeFilter').addEventListener('change', async () => {
+                    await loadEvents();
+                });
+                
+                document.getElementById('eventStatusFilter').addEventListener('change', async () => {
+                    await loadEvents();
+                });
+                
+                document.getElementById('resetFilters').addEventListener('click', () => {
+                    document.getElementById('eventTypeFilter').value = '';
+                    document.getElementById('eventStatusFilter').value = '';
+                    loadEvents();
+                });
+                
+                // Add click handlers for stat cards
+                document.querySelectorAll('.event-stat-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const filter = card.getAttribute('data-filter');
+                        if (filter === 'all') {
+                            document.getElementById('eventStatusFilter').value = '';
+                        } else if (filter === 'upcoming') {
+                            document.getElementById('eventStatusFilter').value = 'prevu';
+                        } else if (filter === 'ongoing') {
+                            document.getElementById('eventStatusFilter').value = 'en_cours';
+                        } else if (filter === 'completed') {
+                            document.getElementById('eventStatusFilter').value = 'termine';
+                        }
+                        loadEvents();
+                    });
+                });
+            }
+            
+            init();
+        });
+    </script>
 {% endblock %}

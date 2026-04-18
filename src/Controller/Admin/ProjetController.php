@@ -1,9 +1,11 @@
 <?php
 
+
 namespace App\Controller\Admin;
 
 use App\Entity\AffectationProjet;
 use App\Entity\DemandeParticipation;
+use App\Entity\Notification;
 use App\Entity\Projet;
 use App\Entity\Repository as ProjetRepositoryEntity;
 use App\Enum\Role;
@@ -64,7 +66,7 @@ class ProjetController extends AbstractController
     }
 
     #[Route('/new', name: 'admin_projets_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
     {
         $projet = new Projet();
         $form   = $this->createForm(ProjetType::class, $projet);
@@ -72,6 +74,33 @@ class ProjetController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($projet);
+
+            if ($projet->isVisibleEmploye()) {
+                $this->createProjectNotifications(
+                    $em,
+                    $userRepository->findBy(['role' => Role::EMPLOYE, 'actif' => true]),
+                    'Nouveau projet disponible',
+                    sprintf(
+                        'Un nouveau projet "%s" a ete ajoute et il est visible pour les employes.',
+                        $projet->getTitre()
+                    ),
+                    '/employe/projets'
+                );
+            }
+
+            if ($projet->isVisibleFreelancer()) {
+                $this->createProjectNotifications(
+                    $em,
+                    $userRepository->findBy(['role' => Role::FREELANCER, 'actif' => true]),
+                    'Nouveau projet disponible',
+                    sprintf(
+                        'Un nouveau projet "%s" a ete ajoute et il est visible pour les freelancers.',
+                        $projet->getTitre()
+                    ),
+                    '/freelancer/projets'
+                );
+            }
+
             $em->flush();
 
             $this->addFlash('success', 'Projet créé avec succès.');
@@ -81,6 +110,26 @@ class ProjetController extends AbstractController
         return $this->render('admin/projets/new.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    private function createProjectNotifications(
+        EntityManagerInterface $em,
+        array $users,
+        string $title,
+        string $message,
+        ?string $link = null
+    ): void {
+        foreach ($users as $user) {
+            $notification = new Notification();
+            $notification
+                ->setUser($user)
+                ->setTitre($title)
+                ->setMessage($message)
+                ->setLien($link)
+                ->setIsRead(false);
+
+            $em->persist($notification);
+        }
     }
 
     #[Route('/{id}/edit', name: 'admin_projets_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]

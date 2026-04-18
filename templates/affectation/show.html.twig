@@ -130,11 +130,21 @@
         <div class="detail-stat-cell">
             <div class="stat-cell-label">Taux horaire</div>
             <div class="stat-cell-value" style="color: var(--accent-green);">{{ affectation.tauxHoraire ? affectation.tauxHoraire ~ ' DT/h' : '—' }}</div>
+            {% if affectation.tauxHoraire and rates is defined %}
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                    ≈ {{ (affectation.tauxHoraire * rates.EUR)|number_format(2) }} EUR/h · {{ (affectation.tauxHoraire * rates.USD)|number_format(2) }} USD/h
+                </div>
+            {% endif %}
         </div>
         <div class="detail-stat-cell">
             <div class="stat-cell-label">Coût estimé</div>
             {% set cout = affectation.calculerCoutEstime() %}
             <div class="stat-cell-value" style="color: var(--accent-blue);">{{ cout is not null ? cout|number_format(2, '.', ' ') ~ ' DT' : '—' }}</div>
+            {% if cout is not null and rates is defined %}
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                    ≈ {{ (cout * rates.EUR)|number_format(2, '.', ' ') }} EUR · {{ (cout * rates.USD)|number_format(2, '.', ' ') }} USD
+                </div>
+            {% endif %}
         </div>
     </div>
 

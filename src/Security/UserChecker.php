@@ -29,6 +29,12 @@ class UserChecker implements UserCheckerInterface
                 'Votre compte est désactivé.'
             );
         }
+
+        if ($user->getBlockedUntil() && $user->getBlockedUntil() > new \DateTime()) {
+            throw new CustomUserMessageAccountStatusException(
+                'Votre compte est bloqué pour activité suspecte. Réessayez dans 1 heure.'
+            );
+        }
     }
 
     public function checkPostAuth(UserInterface $user): void

@@ -69,7 +69,7 @@ class MailerService
     public function sendResetPasswordEmail(string $to, string $nom, string $code): void
     {
         $email = (new Email())
-            ->from('noreply@tonapp.com')
+            ->from('amenamri80@gmail.com')
             ->to($to)
             ->subject('Réinitialisation de mot de passe')
             ->html("
@@ -80,4 +80,23 @@ class MailerService
 
         $this->mailer->send($email);
     }
+
+    public function sendSecurityAlertEmail(string $to, string $nom, string $ip, string $country): void
+{
+    $email = (new Email())
+        ->from('amenamri80@gmail.com')
+        ->to($to)
+        ->subject('Alerte sécurité - connexion suspecte')
+        ->html("
+            <h2>Bonjour {$nom},</h2>
+            <p>Une connexion suspecte a été détectée sur votre compte.</p>
+            <ul>
+                <li>IP : {$ip}</li>
+                <li>Pays : {$country}</li>
+            </ul>
+            <p>Votre compte est temporairement bloqué pendant 1 heure.</p>
+        ");
+
+    $this->mailer->send($email);
+}
 }

@@ -3,12 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Message;
+use App\Entity\Equipe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Message>
- */
 class MessageRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +14,33 @@ class MessageRepository extends ServiceEntityRepository
         parent::__construct($registry, Message::class);
     }
 
-//    /**
-//     * @return Message[] Returns an array of Message objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findMessagesByTeam(Equipe $equipe, int $limit = 50): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.equipe = :equipe')
+            ->andWhere('m.estSupprime = :estSupprime')
+            ->setParameter('equipe', $equipe)
+            ->setParameter('estSupprime', false)
+            ->orderBy('m.dateEnvoi', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Message
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findRecentMessagesByTeam(Equipe $equipe, int $lastMessageId = null): array
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->andWhere('m.equipe = :equipe')
+            ->andWhere('m.estSupprime = :estSupprime')
+            ->setParameter('equipe', $equipe)
+            ->setParameter('estSupprime', false)
+            ->orderBy('m.dateEnvoi', 'ASC');
+        
+        if ($lastMessageId) {
+            $qb->andWhere('m.idMessage > :lastId')
+               ->setParameter('lastId', $lastMessageId);
+        }
+        
+        return $qb->getQuery()->getResult();
+    }
 }

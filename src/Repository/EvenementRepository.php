@@ -66,4 +66,33 @@ class EvenementRepository extends ServiceEntityRepository
         $qb->orderBy('e.date_debut', 'ASC');
         return $qb->getQuery()->getResult();
     }
+
+    public function getStatisticsForAI(): array
+    {
+        $qb = $this->createQueryBuilder('e');
+        
+        $totalEvenements = (int) $qb->select('COUNT(e.id_evenement)')->getQuery()->getSingleScalarResult();
+        
+        $typesData = $this->createQueryBuilder('e')
+            ->select('e.type_evenement, COUNT(e.id_evenement) as count')
+            ->groupBy('e.type_evenement')
+            ->getQuery()
+            ->getResult();
+            
+        $avgFillRate = 0;
+        if ($totalEvenements > 0) {
+            $avgFillRateResult = $this->createQueryBuilder('e')
+                ->select('AVG(e.nombre_actuel / e.capacite_max) * 100')
+                ->where('e.capacite_max > 0')
+                ->getQuery()
+                ->getSingleScalarResult();
+            $avgFillRate = $avgFillRateResult ? round((float)$avgFillRateResult, 2) : 0;
+        }
+
+        return [
+            'total_evenements' => $totalEvenements,
+            'repartition_types' => $typesData,
+            'taux_remplissage_moyen_pourcentage' => $avgFillRate,
+        ];
+    }
 }

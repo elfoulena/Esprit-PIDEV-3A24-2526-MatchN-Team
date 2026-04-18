@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\MembreEquipeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MembreEquipeRepository::class)]
 #[ORM\Table(name: 'membre_equipe')]
@@ -22,21 +21,18 @@ class MembreEquipe
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false)]
-    #[Assert\NotNull(message: 'L\'User est obligatoire.')]
     private ?User $user = null;
 
     #[ORM\Column(name: 'role_equipe', type: Types::STRING, length: 30)]
     private ?string $roleEquipe = 'Membre';
 
     #[ORM\Column(name: 'date_affectation', type: Types::DATE_MUTABLE)]
-    #[Assert\NotNull(message: 'La date d\'affectation est obligatoire.')]
     private ?\DateTimeInterface $dateAffectation = null;
 
     #[ORM\Column(name: 'date_fin', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(name: 'taux_participation', type: Types::DECIMAL, precision: 5, scale: 2)]
-    #[Assert\Range(min: 0, max: 100)]
     private string $tauxParticipation = '100.00';
 
     #[ORM\Column(name: 'statut_membre', type: Types::STRING, length: 20)]
@@ -61,14 +57,12 @@ class MembreEquipe
         $this->updatedAt = new \DateTime();
     }
 
-    // Getters and setters
+    // Getters and setters...
     public function getIdMembre(): ?int { return $this->idMembre; }
     public function getEquipe(): ?Equipe { return $this->equipe; }
     public function setEquipe(?Equipe $equipe): self { $this->equipe = $equipe; return $this; }
-    
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): self { $this->user = $user; return $this; }
-    
     public function getRoleEquipe(): ?string { return $this->roleEquipe; }
     public function setRoleEquipe(?string $roleEquipe): self { $this->roleEquipe = $roleEquipe; return $this; }
     public function getDateAffectation(): ?\DateTimeInterface { return $this->dateAffectation; }

@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -18,3 +17,81 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+config/google_service_account.json
+
+###> symfony/phpunit-bridge ###
+/.phpunit.result.cache
+/phpunit.xml.dist
+###< symfony/phpunit-bridge ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+
+###> phpstan/phpstan ###
+/phpstan.neon
+/phpstan.neon.dist
+/phpstan.neon.local
+###< phpstan/phpstan ###
+
+###> IDE ###
+/.idea/
+/.vscode/
+/.vs/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+###< IDE ###
+
+###> Project specific ###
+/.php-cs-fixer.php
+/phpcs.xml
+/psalm.xml
+/psalm.xml.dist
+/behat.yml
+/behat.yml.dist
+/.php-version
+/phpinfo.php
+/test.php
+###< Project specific ###
+
+###> Docker ###
+/docker-compose.override.yml
+/.docker/
+/data/
+###< Docker ###
+
+###> Logs ###
+*.log
+/var/log/
+###< Logs ###
+
+###> Uploads & User files ###
+/public/uploads/
+/var/uploads/
+/uploads/
+###< Uploads & User files ###
+
+###> Composer ###
+composer.phar
+/composer.lock
+/.composer/
+###< Composer ###
+
+###> Node & NPM (if using Webpack/Encore) ###
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+/.yarn/
+/package-lock.json
+/yarn.lock
+/webpack.config.js
+###< Node & NPM ###
+
+###> Database ###
+/*.sql
+/*.sqlite
+/*.db
+###< Database ###

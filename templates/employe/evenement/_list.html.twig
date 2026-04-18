@@ -1,0 +1,220 @@
+<style>
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+}
+.event-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+.event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+.event-card-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.event-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+.type-workshop { background: rgba(14,165,233,0.1); color: var(--accent-blue); }
+.type-meetup { background: rgba(20,184,166,0.1); color: var(--accent-teal); }
+.type-conference { background: rgba(139,92,246,0.1); color: var(--accent-purple); }
+.type-formation { background: rgba(16,185,129,0.1); color: var(--accent-green); }
+.type-seminaire { background: rgba(245,158,11,0.1); color: var(--accent-orange); }
+.type-teambuilding { background: rgba(239,68,68,0.1); color: var(--accent-red); }
+.type-networking { background: rgba(236,72,153,0.1); color: #ec4899; }
+.type-autre { background: rgba(100,116,139,0.1); color: var(--text-secondary); }
+
+/* Fallback for any other type */
+.event-type-badge {
+    background: rgba(14,165,233,0.08);
+    color: var(--accent-blue);
+}
+
+.event-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+.event-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+.event-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.event-info-item i {
+    width: 16px;
+    color: #94a3b8;
+}
+
+.participation-bar-wrap {
+    margin-top: auto;
+    margin-bottom: 16px;
+}
+.participation-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+.progress-container {
+    height: 6px;
+    background: var(--bg-surface);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.event-actions {
+    display: flex;
+    gap: 10px;
+}
+.btn-action {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: all var(--transition);
+    border: none;
+    cursor: pointer;
+}
+.btn-participate { background: var(--accent-blue); color: #fff; }
+.btn-cancel { background: rgba(239,68,68,0.08); color: var(--accent-red); }
+.btn-info {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+
+<div class="event-grid">
+    {% for event in evenements %}
+        {% set isJoined = event.idEvenement in participating_ids %}
+        {% set isFull = event.nombreActuel >= event.capaciteMax %}
+        {% set isFinished = event.dateFin < date() %}
+        {% set percent = (event.nombreActuel / event.capaciteMax * 100)|round %}
+
+        <div class="event-card">
+            <div class="event-card-body">
+                <span class="event-type-badge type-{{ event.typeEvenement|lower }}">
+                    {{ event.typeEvenement }}
+                </span>
+                <h3 class="event-title">{{ event.titre }}</h3>
+                
+                <ul class="event-info-list">
+                    <li class="event-info-item">
+                        <i class="bi bi-calendar3"></i>
+                        {{ event.dateDebut|date('d/m/Y H:i') }}
+                    </li>
+                    <li class="event-info-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ event.lieu|url_encode }}" target="_blank" style="color: inherit; text-decoration: none;" onmouseover="this.style.textDecoration='underline'; this.style.color='var(--accent-blue)'" onmouseout="this.style.textDecoration='none'; this.style.color='inherit'">
+                            {{ event.lieu }}
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="participation-bar-wrap">
+                    <div class="participation-label">
+                        <span>Participants</span>
+                        <span>{{ event.nombreActuel }} / {{ event.capaciteMax }}</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-fill" style="width: {{ percent }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="event-actions">
+                    {% if isFinished %}
+                        <button class="btn-action" style="background: var(--bg-surface); color: var(--text-secondary); cursor: not-allowed;" disabled>
+                            Terminé
+                        </button>
+                    {% elseif isJoined %}
+                        <form action="{{ path('employe_evenement_desister', {id_evenement: event.idEvenement}) }}" method="POST" style="flex: 1;">
+                            <button type="submit" class="btn-action btn-cancel w-100">
+                                Se désister
+                            </button>
+                        </form>
+                        {% if user_jetons[event.idEvenement] is defined and user_jetons[event.idEvenement] is not empty %}
+                            <a href="{{ path('employe_evenement_ticket', {jeton: user_jetons[event.idEvenement]}) }}" target="_blank" class="btn-action" style="flex: 1; text-align: center; background: rgba(14,165,233,0.1); color: var(--accent-blue);">
+                                <i class="bi bi-ticket-perforated"></i> Billet
+                            </a>
+                        {% endif %}
+                    {% elseif isFull %}
+                        <button class="btn-action" style="background: rgba(239,68,68,0.05); color: var(--accent-red); opacity: 0.6;" disabled>
+                            Complet
+                        </button>
+                    {% else %}
+                        <form action="{{ path('employe_evenement_participer', {id_evenement: event.idEvenement}) }}" method="POST" style="flex: 1;">
+                            <button type="submit" class="btn-action btn-participate w-100">
+                                Participer
+                            </button>
+                        </form>
+                    {% endif %}
+                    
+                    <button class="btn-action btn-info" 
+                            type="button"
+                            data-id="{{ event.idEvenement }}"
+                            data-title="{{ event.titre }}"
+                            data-type="{{ event.typeEvenement }}"
+                            data-date="{{ event.dateDebut|date('d/m/Y H:i') }} - {{ event.dateFin|date('H:i') }}"
+                            data-lieu="{{ event.lieu }}"
+                            data-desc="{{ event.description|default('Aucune description supplémentaire.') }}"
+                            data-capacity="{{ event.nombreActuel }} / {{ event.capaciteMax }}"
+                            data-joined="{{ isJoined ? '1' : '0' }}"
+                            data-jeton="{{ user_jetons[event.idEvenement]|default('') }}"
+                            data-full="{{ isFull ? '1' : '0' }}"
+                            data-finished="{{ isFinished ? '1' : '0' }}"
+                            title="Plus d'infos">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+            <i class="bi bi-calendar-x" style="font-size: 40px; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
+            Aucun événement trouvé pour votre recherche.
+        </div>
+    {% endfor %}
+</div>

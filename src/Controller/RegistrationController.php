@@ -3,9 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\CompetenceF;
 use App\Enum\Role;
+use App\Service\HCaptchaService;
 use App\Form\RegistrationFormType;
 use App\Service\MailerService;
+use App\Service\SkillExtractor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,10 +25,18 @@ public function register(
     UserPasswordHasherInterface $hasher,
     EntityManagerInterface $em,
     MailerService $mailer,
-    ValidatorInterface $validator
+    ValidatorInterface $validator,
+    SkillExtractor $skillExtractor,
+    HCaptchaService $hCaptchaService
 ): Response {
 
     if ($request->isMethod('POST')) {
+
+    $captchaToken = $request->request->get('h-captcha-response');
+    if (!$captchaToken || !$hCaptchaService->verify($captchaToken)) {
+            $this->addFlash('error', 'Captcha invalide. Veuillez réessayer.');
+            return $this->redirectToRoute('app_register');
+        }
 
         $nom            = trim($request->request->get('nom', ''));
         $prenom         = trim($request->request->get('prenom', ''));
@@ -91,6 +102,8 @@ public function register(
             return $this->redirectToRoute('app_register');
         }
 
+
+
         try {
             $user = new User();
             $user->setNom($nom);
@@ -102,6 +115,17 @@ public function register(
             $user->setPassword($hasher->hashPassword($user, $password));
             $user->setRole(Role::FREELANCER);
             $user->setVerified(false);
+
+            $skillsNames = $skillExtractor->extract($description);
+
+            $competenceRepo = $em->getRepository(CompetenceF::class);
+
+            foreach($skillsNames as $name){
+                $competence = $competenceRepo->findOneBy(['nom'=>ucfirst(strtolower($name))]);
+                if ($competence) {
+                    $user->addCompetence($competence);
+                }
+            }
 
             $code  = (string) random_int(100000, 999999);
             $expiry = new \DateTime('+24 hours');
@@ -116,8 +140,7 @@ public function register(
             return $this->redirectToRoute('app_verify_pending', ['email' => $user->getEmail()]);
 
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Une erreur est survenue. Veuillez réessayer.');
-            return $this->redirectToRoute('app_register');
+            dd($e->getMessage());
         }
     }
 

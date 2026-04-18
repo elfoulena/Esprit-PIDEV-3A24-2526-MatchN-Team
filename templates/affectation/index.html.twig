@@ -189,7 +189,14 @@
                             <span class="badge-status">{{ a.statut }}</span>
                         {% endif %}
                     </td>
-                    <td style="font-weight: 600; color: var(--accent-green);">{{ a.tauxHoraire ? a.tauxHoraire ~ ' DT/h' : '—' }}</td>
+                    <td style="font-weight: 600;">
+                        <div style="color: var(--accent-green);">{{ a.tauxHoraire ? a.tauxHoraire ~ ' DT/h' : '—' }}</div>
+                        {% if a.tauxHoraire and rates is defined %}
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+                                ≈ {{ (a.tauxHoraire * rates.EUR)|number_format(2) }} EUR · {{ (a.tauxHoraire * rates.USD)|number_format(2) }} USD
+                            </div>
+                        {% endif %}
+                    </td>
                     <td>
                         <div style="display: flex; gap: 6px; justify-content: flex-end;">
                             <a href="{{ path('app_affectation_show', {'id': a.id}) }}" class="action-btn view" title="Voir">

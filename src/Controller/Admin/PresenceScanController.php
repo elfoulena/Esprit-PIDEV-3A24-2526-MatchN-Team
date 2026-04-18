@@ -51,24 +51,26 @@ class PresenceScanController extends AbstractController
             ]);
         }
 
-        // Marquer la présence
-        $logger->info('Marquage de la présence en BDD...');
+        // Marquer la présence en BDD (Priorité absolue)
+        $logger->info('Mise à jour BDD (flush)...');
         $participation->setPresence(true);
         $em->flush();
-        $logger->info('BDD mise à jour (flush réussi).');
+        $logger->info('BDD mise à jour avec succès.');
 
-        // Envoyer l'email
+        // Les appels externes suivants sont secondaires et ne doivent pas bloquer l'utilisateur
+        
+        // 1. Envoyer l'email (Transport: Mailjet)
         try {
-            $logger->info('Appel MailerService...');
+            $logger->info('Step: Mailer Start');
             $mailerService->sendPresenceConfirmation($participation);
-            $logger->info('MailerService a terminé.');
+            $logger->info('Step: Mailer End');
         } catch (\Throwable $e) {
-            $logger->error('Erreur MailerService: ' . $e->getMessage());
+            $logger->error('Step: Mailer Failed - ' . $e->getMessage());
         }
 
-        // Ajouter dans Google Sheets
+        // 2. Ajouter dans Google Sheets
         try {
-            $logger->info('Appel SheetsService...');
+            $logger->info('Step: Sheets Start');
             $success = $sheetsService->appendParticipationInfo(
                 $employe->getNom(),
                 $employe->getPrenom(),
@@ -76,9 +78,9 @@ class PresenceScanController extends AbstractController
                 $evenement->getTitre(),
                 new \DateTime()
             );
-            $logger->info('SheetsService a terminé. Succès: ' . ($success ? 'OUI' : 'NON'));
+            $logger->info('Step: Sheets End - Success: ' . ($success ? 'YES' : 'NO'));
         } catch (\Throwable $e) {
-            $logger->error('Erreur SheetsService: ' . $e->getMessage());
+            $logger->error('Step: Sheets Failed - ' . $e->getMessage());
         }
 
         return $this->render('admin/evenement/scan_result.html.twig', [

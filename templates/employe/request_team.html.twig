@@ -1,0 +1,159 @@
+{% extends 'back/base_employe.html.twig' %}
+
+{% block title %}Demander à rejoindre {{ team.nomEquipe }} — MatchNTeam{% endblock %}
+{% block page_title %}Demande d'adhésion{% endblock %}
+
+{% block extra_styles %}
+.request-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.request-header {
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05));
+    border-bottom: 1px solid var(--border-color);
+}
+.team-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.team-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.request-body {
+    padding: 28px;
+}
+.form-group {
+    margin-bottom: 24px;
+}
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    color: var(--text-primary);
+    background: #fff;
+    font-family: inherit;
+}
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+}
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-cancel {
+    padding: 10px 22px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+.btn-submit {
+    padding: 10px 24px;
+    background: var(--accent-blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.btn-submit:hover {
+    background: #2563eb;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="request-card">
+    <div class="request-header">
+        <div class="team-info">
+            <div class="team-avatar" style="background: {{ team.couleurEquipe }}22;">
+                <span style="font-size: 24px; font-weight: 800; color: {{ team.couleurEquipe }};">
+                    {{ team.nomEquipe|slice(0,1)|upper }}
+                </span>
+            </div>
+            <div>
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+                    {{ team.nomEquipe }}
+                </h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+                    {{ team.departement ?? 'Département non défini' }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="request-body">
+        <form method="post">
+            <div class="form-group">
+                <label class="form-label">📝 Message de motivation</label>
+                <textarea name="message" class="form-control" placeholder="Dites-nous pourquoi vous souhaitez rejoindre cette équipe et ce que vous pouvez apporter..."></textarea>
+                <small style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; display: block;">
+                    Ce message sera envoyé à l'administrateur.
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">🎯 Rôle souhaité</label>
+                <select name="requestedRole" class="form-select">
+                    <option value="Membre">Membre</option>
+                    <option value="Développeur">Développeur</option>
+                    <option value="Designer">Designer</option>
+                    <option value="Chef de projet">Chef de projet</option>
+                    <option value="Analyste">Analyste</option>
+                    <option value="Testeur">Testeur</option>
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ path('employe_available_teams') }}" class="btn-cancel">
+                    Annuler
+                </a>
+                <button type="submit" class="btn-submit">
+                    Envoyer la demande
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

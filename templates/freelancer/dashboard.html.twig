@@ -7,7 +7,7 @@
 .welcome-banner::before { content:''; position:absolute; top:-60px; right:-60px; width:260px; height:260px; border-radius:50%; background:rgba(255,255,255,0.06); }
 .welcome-title { font-size:26px; font-weight:800; margin-bottom:6px; }
 .welcome-sub { font-size:14px; opacity:0.75; }
-.quick-actions { display:grid; grid-template-columns: repeat(2,1fr); gap:16px; }
+.quick-actions { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
 .action-card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:24px; display:flex; align-items:center; gap:16px; text-decoration:none; color:var(--text-primary); transition: all var(--transition); box-shadow: var(--shadow-sm); }
 .action-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
 .action-icon { width:48px; height:48px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -39,6 +39,15 @@
         <div>
             <div class="action-label">Mes candidatures</div>
             <div class="action-sub">Suivez le statut de vos demandes de participation</div>
+        </div>
+    </a>
+    <a href="{{ path('app_freelancer_leaderboard') }}" class="action-card">
+        <div class="action-icon" style="background: rgba(245,158,11,0.12); color: #d97706;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div>
+            <div class="action-label">Leaderboard</div>
+            <div class="action-sub">Classement des freelancers par score et performance</div>
         </div>
     </a>
 </div>

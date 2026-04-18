@@ -5,8 +5,12 @@ namespace App\Controller;
 use App\Entity\AffectationProjet;
 use App\Form\AffectationProjetType;
 use App\Repository\AffectationProjetRepository;
+use App\Service\CurrencyExchangeService;
+use App\Service\MatchingService;
+use App\Repository\ProjetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,8 +21,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AffectationProjetController extends AbstractController
 {
     #[Route('', name: 'app_affectation_index', methods: ['GET'])]
-    public function index(Request $request, AffectationProjetRepository $repo): Response
+    public function index(Request $request, AffectationProjetRepository $repo, CurrencyExchangeService $currencyService): Response
     {
+        $repo->updateExpiredAffectations();
+
         $search  = $request->query->get('search', '');
         $statut  = $request->query->get('statut', '');
         $sortBy  = $request->query->get('sortBy', 'date_debut');
@@ -49,6 +55,26 @@ class AffectationProjetController extends AbstractController
             'statut'       => $statut,
             'sortBy'       => $sortBy,
             'sortDir'      => $sortDir,
+            'rates'        => $currencyService->getRates(),
+        ]);
+    }
+
+    #[Route('/api/matching/{projetId}', name: 'app_affectation_matching', methods: ['GET'])]
+    public function getMatchingRecommendations(
+        int $projetId,
+        ProjetRepository $projetRepo,
+        MatchingService $matchingService
+    ): JsonResponse {
+        $projet = $projetRepo->find($projetId);
+        if (!$projet) {
+            return $this->json(['error' => 'Projet introuvable'], 404);
+        }
+
+        $recommendations = $matchingService->getRecommendations($projet);
+
+        return $this->json([
+            'projet' => $projet->getTitre(),
+            'recommendations' => $recommendations,
         ]);
     }
 
@@ -80,7 +106,7 @@ class AffectationProjetController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_affectation_show', methods: ['GET'])]
-    public function show(int $id, AffectationProjetRepository $repo): Response
+    public function show(int $id, AffectationProjetRepository $repo, CurrencyExchangeService $currencyService): Response
     {
         $affectation = $repo->find($id);
         if (!$affectation) {
@@ -89,6 +115,7 @@ class AffectationProjetController extends AbstractController
 
         return $this->render('affectation/show.html.twig', [
             'affectation' => $affectation,
+            'rates'       => $currencyService->getRates(),
         ]);
     }
 

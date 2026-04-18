@@ -117,6 +117,56 @@ textarea.form-control { min-height: 96px; resize: vertical; }
     </div>
 </div>
 
+{# ── AI Matching Recommendation Panel ── #}
+<div id="matching-panel" style="display:none; margin-top: 20px; max-width: 700px;">
+    <style>
+    .matching-card-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(59,130,246,0.04));
+        display: flex; align-items: center; gap: 10px;
+    }
+    .matching-card-header h3 {
+        font-size: 12px; font-weight: 700;
+        color: var(--accent-purple);
+        text-transform: uppercase; letter-spacing: 1px; margin: 0;
+    }
+    .matching-card-body { padding: 20px 24px; }
+    .rec-card {
+        padding: 14px 18px; margin-bottom: 10px;
+        border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        cursor: pointer; transition: all 0.15s ease;
+        background: #fff;
+    }
+    .rec-card:hover { border-color: var(--accent-blue); box-shadow: 0 2px 8px rgba(59,130,246,0.1); transform: translateY(-1px); }
+    .rec-card.selected { border-color: var(--accent-green); background: rgba(16,185,129,0.04); }
+    .rec-score-bar {
+        height: 4px; border-radius: 2px; background: #e2e8f0;
+        width: 100%; margin-top: 8px; overflow: hidden;
+    }
+    .rec-score-fill { height: 4px; border-radius: 2px; transition: width 0.3s ease; }
+    .rec-badge {
+        display: inline-flex; align-items: center; gap: 3px;
+        padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700;
+    }
+    .rec-badge.green { background: rgba(16,185,129,0.12); color: #059669; }
+    .rec-badge.red { background: rgba(239,68,68,0.10); color: #dc2626; }
+    .rec-badge.blue { background: rgba(59,130,246,0.10); color: #3b82f6; }
+    .rec-badge.purple { background: rgba(139,92,246,0.10); color: #7c3aed; }
+    </style>
+
+    <div class="form-card">
+        <div class="matching-card-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <h3>Recommandations IA</h3>
+            <span id="matching-loading" style="display:none; margin-left:auto; font-size: 11px; color: var(--text-secondary);">
+                Analyse en cours...
+            </span>
+        </div>
+        <div class="matching-card-body" id="matching-results"></div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('affectation_form');
@@ -151,5 +201,94 @@ document.addEventListener('DOMContentLoaded', function () {
         form.querySelectorAll('.form-control').forEach(f => { if (!validateField(f)) valid = false; });
         if (!valid) e.preventDefault();
     });
+
+    // ── AI Matching Logic ──
+    const projetSelect = document.getElementById('affectation_projet_projet');
+    const userSelect = document.getElementById('affectation_projet_User');
+    const matchingPanel = document.getElementById('matching-panel');
+    const matchingResults = document.getElementById('matching-results');
+    const matchingLoading = document.getElementById('matching-loading');
+
+    if (projetSelect && matchingPanel) {
+        projetSelect.addEventListener('change', function() {
+            const projetId = this.value;
+            if (!projetId) {
+                matchingPanel.style.display = 'none';
+                return;
+            }
+
+            matchingPanel.style.display = 'block';
+            matchingLoading.style.display = 'inline';
+            matchingResults.innerHTML = '';
+
+            fetch('/admin/affectation/api/matching/' + projetId)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    matchingLoading.style.display = 'none';
+
+                    if (!data.recommendations || data.recommendations.length === 0) {
+                        matchingResults.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;text-align:center;padding:20px;">Aucun freelancer disponible pour ce projet.</p>';
+                        return;
+                    }
+
+                    var html = '';
+                    data.recommendations.forEach(function(r, idx) {
+                        var scoreColor = r.totalScore >= 60 ? '#059669' : (r.totalScore >= 30 ? '#b45309' : '#dc2626');
+                        var scoreBarColor = r.totalScore >= 60 ? '#10b981' : (r.totalScore >= 30 ? '#f59e0b' : '#ef4444');
+
+                        html += '<div class="rec-card" data-user-id="' + r.userId + '">'
+                            + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                            + '  <div>'
+                            + '    <strong style="font-size:14px;color:var(--text-primary);">' + r.prenom + ' ' + r.nom + '</strong>'
+                            + (idx < 3 ? ' <span class="rec-badge purple">#' + (idx + 1) + '</span>' : '')
+                            + '    <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">' + r.email + '</div>'
+                            + '  </div>'
+                            + '  <div style="text-align:right;">'
+                            + '    <div style="font-size:20px;font-weight:800;color:' + scoreColor + ';">' + Math.round(r.totalScore) + '%</div>'
+                            + '    <div style="font-size:10px;color:var(--text-secondary);">Score global</div>'
+                            + '  </div>'
+                            + '</div>'
+                            + '<div class="rec-score-bar"><div class="rec-score-fill" style="width:' + Math.round(r.totalScore) + '%;background:' + scoreBarColor + ';"></div></div>'
+                            + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">'
+                            + '  <span class="rec-badge blue">Compétences ' + Math.round(r.matchPercent) + '%</span>'
+                            + '  <span class="rec-badge ' + (r.available ? 'green' : 'red') + '">' + (r.available ? 'Disponible' : 'Occupé') + '</span>'
+                            + '  <span class="rec-badge ' + (r.budgetFit ? 'green' : 'red') + '">Budget ' + (r.budgetFit ? 'OK' : 'Dépassé') + '</span>'
+                            + (r.leaderboardScore > 0 ? '  <span class="rec-badge purple">Score LB: ' + r.leaderboardScore + '</span>' : '')
+                            + '</div>';
+
+                        if (r.matchedCompetences && r.matchedCompetences.length > 0) {
+                            html += '<div style="font-size:11px;color:var(--text-secondary);margin-top:6px;">Compétences matchées : <strong>' + r.matchedCompetences.join(', ') + '</strong></div>';
+                        }
+
+                        if (r.aiExplanation) {
+                            html += '<div style="font-size:12px;color:var(--accent-purple);margin-top:8px;font-style:italic;padding:8px 12px;background:rgba(139,92,246,0.04);border-radius:6px;border-left:3px solid var(--accent-purple);">'
+                                + r.aiExplanation
+                                + '</div>';
+                        }
+
+                        html += '</div>';
+                    });
+
+                    matchingResults.innerHTML = html;
+
+                    // Click to auto-select freelancer
+                    matchingResults.querySelectorAll('.rec-card').forEach(function(card) {
+                        card.addEventListener('click', function() {
+                            var userId = card.dataset.userId;
+                            if (userSelect) {
+                                userSelect.value = userId;
+                                // Visual feedback
+                                matchingResults.querySelectorAll('.rec-card').forEach(function(c) { c.classList.remove('selected'); });
+                                card.classList.add('selected');
+                            }
+                        });
+                    });
+                })
+                .catch(function() {
+                    matchingLoading.style.display = 'none';
+                    matchingResults.innerHTML = '<p style="color:var(--accent-red);font-size:13px;text-align:center;padding:20px;">Erreur lors du chargement des recommandations.</p>';
+                });
+        });
+    }
 });
 </script>

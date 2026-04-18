@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Billet - {{ evenement.titre }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+        }
+        .wrapper {
+            max-width: 700px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .header {
+            background-color: #0ea5e9; /* accent-blue */
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .row {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .column {
+            display: inline-block;
+            vertical-align: top;
+        }
+        .left-column {
+            width: 65%;
+        }
+        .right-column {
+            width: 30%;
+            text-align: right;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-size: 16px;
+            color: #0f172a;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .qr-code {
+            max-width: 150px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            border-top: 1px dashed #cbd5e1;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <h1>TICKET D'ENTRÉE</h1>
+            <p>Présentez ce billet (imprimé ou sur smartphone) le jour de l'événement.</p>
+        </div>
+        
+        <div class="content">
+            <div class="row">
+                <div class="column left-column">
+                    <div class="badge">{{ evenement.typeEvenement }}</div>
+                    
+                    <div class="info-label">Événement</div>
+                    <div class="info-value" style="font-size: 22px; color: #0284c7;">{{ evenement.titre }}</div>
+                    
+                    <div class="info-label">Participant</div>
+                    <div class="info-value">{{ utilisateur.prenom }} {{ utilisateur.nom }} ({{ utilisateur.email }})</div>
+                    
+                    <div class="info-label">Date et Heure</div>
+                    <div class="info-value">Le {{ evenement.dateDebut|date('d/m/Y') }} à {{ evenement.dateDebut|date('H:i') }}</div>
+                    
+                    <div class="info-label">Lieu</div>
+                    <div class="info-value">{{ evenement.lieu }}</div>
+                    
+                    <div class="info-label">Référence du Billet</div>
+                    <div class="info-value" style="font-family: monospace; font-size: 14px; color: #475569;">{{ participation.jeton }}</div>
+                </div>
+                
+                <div class="column right-column">
+                    <div class="info-label">QR CODE UNIQUE</div>
+                    <img src="{{ qrCode }}" alt="QR Code SCAN" class="qr-code">
+                    <p style="font-size: 10px; color: #94a3b8; text-align: center; margin-top: 8px;">Réservé à l'administration</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>MatchNTeam — Reconnectez vos collaborateurs aux moments importants.</p>
+            <p style="margin-top: 5px; opacity: 0.7;">Généré le {{ 'now'|date('d/m/Y à H:i') }}</p>
+        </div>
+    </div>
+</body>
+</html>

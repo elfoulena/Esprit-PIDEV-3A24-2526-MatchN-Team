@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\TicketPdfService;
 
 #[Route('/employe/evenement')]
 #[IsGranted('ROLE_EMPLOYE')]
@@ -30,15 +31,16 @@ class EvenementController extends AbstractController
 
         $participatingIds = [];
         $qb = $entityManager->createQueryBuilder();
-        $participatingIdsRaw = $qb->select('e.id_evenement')
+        $participatingIdsRaw = $qb->select('e.id_evenement, p.jeton')
             ->from(ParticipationEvenement::class, 'p')
             ->join('p.evenement', 'e')
             ->where('p.utilisateur = :user')
             ->setParameter('user', $user)
             ->getQuery()
             ->getScalarResult();
-        
+
         $participatingIds = array_column($participatingIdsRaw, 'id_evenement');
+        $userJetons = array_column($participatingIdsRaw, 'jeton', 'id_evenement');
 
         return $this->render('employe/evenement/index.html.twig', [
             'evenements' => $evenements,
@@ -47,6 +49,7 @@ class EvenementController extends AbstractController
             'sort' => $sort,
             'current_filter' => $filter,
             'participating_ids' => $participatingIds,
+            'user_jetons' => $userJetons,
         ]);
     }
 
@@ -63,26 +66,28 @@ class EvenementController extends AbstractController
         $evenements = $evenementRepository->findByEmployeFilters($q, $type, $sort, $filter, $user->getId());
 
         $qb = $entityManager->createQueryBuilder();
-        $participatingIdsRaw = $qb->select('e.id_evenement')
+        $participatingIdsRaw = $qb->select('e.id_evenement, p.jeton')
             ->from(ParticipationEvenement::class, 'p')
             ->join('p.evenement', 'e')
             ->where('p.utilisateur = :user')
             ->setParameter('user', $user)
             ->getQuery()
             ->getScalarResult();
-        
+
         $participatingIds = array_column($participatingIdsRaw, 'id_evenement');
+        $userJetons = array_column($participatingIdsRaw, 'jeton', 'id_evenement');
 
         return $this->render('employe/evenement/_list.html.twig', [
             'evenements' => $evenements,
             'participating_ids' => $participatingIds,
+            'user_jetons' => $userJetons,
         ]);
     }
 
     #[Route('/{id_evenement}/participer', name: 'employe_evenement_participer', methods: ['POST'])]
     public function participer(
-        int $id_evenement, 
-        EvenementRepository $evenementRepository, 
+        int $id_evenement,
+        EvenementRepository $evenementRepository,
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
@@ -119,6 +124,7 @@ class EvenementController extends AbstractController
         $participation->setEvenement($evenement);
         $participation->setUtilisateur($user);
         $participation->setDateInscription(new \DateTime());
+        $participation->setJeton(bin2hex(random_bytes(16)));
 
         $evenement->setNombre_actuel($currentParticipants + 1);
 
@@ -135,8 +141,8 @@ class EvenementController extends AbstractController
 
     #[Route('/{id_evenement}/desister', name: 'employe_evenement_desister', methods: ['POST'])]
     public function desister(
-        int $id_evenement, 
-        EvenementRepository $evenementRepository, 
+        int $id_evenement,
+        EvenementRepository $evenementRepository,
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
@@ -155,16 +161,43 @@ class EvenementController extends AbstractController
 
         if ($participation) {
             $entityManager->remove($participation);
-            
+
             // Décrémenter le compteur
             if ($evenement->getNombre_actuel() > 0) {
                 $evenement->setNombre_actuel($evenement->getNombre_actuel() - 1);
             }
-            
+
             $entityManager->flush();
             $this->addFlash('success', 'Votre participation a été annulée.');
         }
 
         return $this->redirectToRoute('employe_evenement_index');
+    }
+
+    #[Route('/ticket/{jeton}', name: 'employe_evenement_ticket', methods: ['GET'])]
+    public function ticket(
+        string $jeton,
+        EntityManagerInterface $entityManager,
+        TicketPdfService $pdfService
+    ): Response {
+        $user = $this->getUser();
+
+        $repoParticipation = $entityManager->getRepository(ParticipationEvenement::class);
+        $participation = $repoParticipation->findOneBy([
+            'jeton' => $jeton,
+            'utilisateur' => $user
+        ]);
+
+        if (!$participation) {
+            $this->addFlash('error', 'Billet introuvable ou vous n\'avez pas accès.');
+            return $this->redirectToRoute('employe_evenement_index');
+        }
+
+        $pdfContent = $pdfService->generateTicketPdf($participation);
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="ticket_' . $jeton . '.pdf"'
+        ]);
     }
 }

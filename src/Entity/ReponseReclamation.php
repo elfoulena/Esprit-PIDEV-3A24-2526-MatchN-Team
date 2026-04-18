@@ -1,13 +1,8 @@
 <?php
-
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 use App\Repository\ReponseReclamationRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReponseReclamationRepository::class)]
 #[ORM\Table(name: 'reponse_reclamation')]
@@ -15,115 +10,35 @@ class ReponseReclamation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id_reponse = null;
+    #[ORM\Column(name: 'id_reponse')]
+    private ?int $id = null;
 
-    public function getId_reponse(): ?int
-    {
-        return $this->id_reponse;
-    }
+    #[ORM\Column(name: 'id_user', nullable: true)]   // ← corrigé
+    private ?int $utilisateurId = null;
 
-    public function setId_reponse(int $id_reponse): self
-    {
-        $this->id_reponse = $id_reponse;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $id_reclamation = null;
-
-    public function getId_reclamation(): ?int
-    {
-        return $this->id_reclamation;
-    }
-
-    public function setId_reclamation(int $id_reclamation): self
-    {
-        $this->id_reclamation = $id_reclamation;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $id_User = null;
-
-    public function getId_User(): ?int
-    {
-        return $this->id_User;
-    }
-
-    public function setId_User(int $id_User): self
-    {
-        $this->id_User = $id_User;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'text', nullable: false)]
+    #[ORM\Column(type: 'text')]
     private ?string $message = null;
 
-    public function getMessage(): ?string
+    #[ORM\Column(name: 'date_reponse', type: 'datetime')]
+    private ?\DateTimeInterface $dateReponse = null;
+
+    #[ORM\ManyToOne(targetEntity: Reclamation::class, inversedBy: 'reponses')]
+    #[ORM\JoinColumn(name: 'id_reclamation', referencedColumnName: 'id_reclamation')]
+    private ?Reclamation $reclamation = null;
+
+    public function __construct()
     {
-        return $this->message;
+        $this->dateReponse = new \DateTime();
     }
 
-    public function setMessage(string $message): self
-    {
-        $this->message = $message;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $date_reponse = null;
-
-    public function getDate_reponse(): ?\DateTimeInterface
-    {
-        return $this->date_reponse;
-    }
-
-    public function setDate_reponse(\DateTimeInterface $date_reponse): self
-    {
-        $this->date_reponse = $date_reponse;
-        return $this;
-    }
-
-    public function getIdReponse(): ?int
-    {
-        return $this->id_reponse;
-    }
-
-    public function getIdReclamation(): ?int
-    {
-        return $this->id_reclamation;
-    }
-
-    public function setIdReclamation(int $id_reclamation): static
-    {
-        $this->id_reclamation = $id_reclamation;
-
-        return $this;
-    }
-
-    public function getIdUser(): ?int
-    {
-        return $this->id_User;
-    }
-
-    public function setIdUser(int $id_User): static
-    {
-        $this->id_User = $id_User;
-
-        return $this;
-    }
-
-    public function getDateReponse(): ?\DateTime
-    {
-        return $this->date_reponse;
-    }
-
-    public function setDateReponse(\DateTime $date_reponse): static
-    {
-        $this->date_reponse = $date_reponse;
-
-        return $this;
-    }
-
+    public function getId(): ?int { return $this->id; }
+    public function getUtilisateurId(): ?int { return $this->utilisateurId; }
+    public function setUtilisateurId(?int $id): self { $this->utilisateurId = $id; return $this; }
+    public function getMessage(): ?string { return $this->message; }
+    public function setMessage(string $message): self { $this->message = $message; return $this; }
+    public function getDateReponse(): ?\DateTimeInterface { return $this->dateReponse; }
+    public function getReclamation(): ?Reclamation { return $this->reclamation; }
+    public function setReclamation(?Reclamation $r): self { $this->reclamation = $r; return $this; }
+    public function getContenu(): ?string { return $this->message; }
+    public function setContenu(string $contenu): self { return $this->setMessage($contenu); }
 }

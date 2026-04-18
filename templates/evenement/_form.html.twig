@@ -90,6 +90,43 @@ textarea.form-control {
 
 /* Remove default symfony help/errors raw output styling */
 .invalid-feedback { color: #ef4444; font-size: 12px; margin-top: 4px; font-weight: 500; }
+/* AI Button Styling */
+.ai-improve-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(109,40,217,0.25);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+.ai-improve-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(109,40,217,0.35);
+    filter: brightness(1.1);
+}
+.ai-improve-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #94a3b8;
+}
+.ai-improve-btn .sparkle-icon { width: 14px; height: 14px; }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
 </style>
 
 <div class="custom-form-container">
@@ -149,7 +186,13 @@ textarea.form-control {
         </div>
 
         <div class="form-group">
-            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                <button type="button" id="btn-ai-improve" class="ai-improve-btn" title="Améliorer la description avec l'IA">
+                    <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                    <span>Améliorer avec l'IA</span>
+                </button>
+            </div>
             {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Décrivez l\'événement...'}}) }}
             {{ form_errors(form.description) }}
         </div>
@@ -287,6 +330,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!valid) e.preventDefault();
     });
+
+    // ── AI Improvement Logic ──
+    const aiBtn = document.getElementById('btn-ai-improve');
+    const descField = getField('description');
+
+    if (aiBtn && descField) {
+        aiBtn.addEventListener('click', async function() {
+            const originalText = descField.value.trim();
+            if (!originalText) {
+                alert('Veuillez saisir un début de texte pour que l\'IA puisse l\'améliorer.');
+                return;
+            }
+
+            const originalBtnContent = aiBtn.innerHTML;
+            aiBtn.disabled = true;
+            aiBtn.innerHTML = `
+                <svg class="sparkle-icon loading-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                <span>Analyse en cours...</span>
+            `;
+
+            try {
+                const response = await fetch('{{ path("app_evenement_ai_improve") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: originalText })
+                });
+
+                if (!response.ok) throw new Error('Erreur API');
+
+                const data = await response.json();
+                
+                // Animating text change
+                descField.style.transition = 'opacity 0.3s ease';
+                descField.style.opacity = '0.4';
+                
+                setTimeout(() => {
+                    descField.value = data.improved_text;
+                    descField.style.opacity = '1';
+                }, 300);
+
+            } catch (err) {
+                console.error(err);
+                alert('Désolé, l\'amélioration par IA a échoué. Vérifiez votre clé API dans le .env');
+            } finally {
+                aiBtn.disabled = false;
+                aiBtn.innerHTML = originalBtnContent;
+            }
+        });
+    }
 });
 
 function resetErrors() {

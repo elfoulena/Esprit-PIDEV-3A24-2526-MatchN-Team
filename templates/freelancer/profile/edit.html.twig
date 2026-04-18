@@ -1,0 +1,31 @@
+{% extends 'back/base_freelancer.html.twig' %}
+{% block page_title %}Modifier mon profil{% endblock %}
+
+{% block content %}
+<div style="max-width:620px;">
+    <a href="{{ path('freelancer_profile') }}" style="font-size:13px;color:#64748b;text-decoration:none;display:inline-flex;align-items:center;gap:5px;margin-bottom:20px;">← Retour</a>
+
+    {{ form_start(form, {'attr': {'style': 'background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:14px;padding:28px;display:flex;flex-direction:column;gap:18px;'}}) }}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>{{ form_label(form.nom) }}{{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.nom) }}</div>
+            <div>{{ form_label(form.prenom) }}{{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.prenom) }}</div>
+        </div>
+
+        <div>{{ form_label(form.email) }}{{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.email) }}</div>
+        <div>{{ form_label(form.telephone) }}{{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}</div>
+        <div>{{ form_label(form.adresse) }}{{ form_widget(form.adresse, {'attr': {'class': 'form-control'}}) }}</div>
+        <div>{{ form_label(form.description) }}{{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}}) }}</div>
+
+        <hr style="border:none;border-top:1px solid rgba(0,0,0,0.08);margin:4px 0;">
+        <p style="font-size:12px;color:#94a3b8;margin:0;">Laisser vide pour ne pas changer le mot de passe</p>
+        <div>{{ form_label(form.plainPassword.first) }}{{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.plainPassword) }}</div>
+        <div>{{ form_label(form.plainPassword.second) }}{{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-control'}}) }}</div>
+
+        <button type="submit" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;align-self:flex-start;">
+            Sauvegarder
+        </button>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}

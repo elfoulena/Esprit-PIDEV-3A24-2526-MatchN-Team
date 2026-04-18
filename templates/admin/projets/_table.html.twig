@@ -57,6 +57,41 @@
                     <a href="{{ path('admin_projets_edit', {'id': p.idProjet}) }}" class="action-btn edit" title="Modifier">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </a>
+                    {% if p.repository %}
+                        <button type="button" class="action-btn repo-setup disabled" title="Repo déjà configuré" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 18l6-6-6-6"/>
+                                <path d="M8 6l-6 6 6 6"/>
+                            </svg>
+                        </button>
+                    {% else %}
+                        <form method="post" action="{{ path('admin_projets_repo_configure', {'id': p.idProjet}) }}" style="margin:0;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('configure_repo_'~p.idProjet) }}">
+                            <button type="submit" class="action-btn repo-setup" title="Configurer repo GitHub">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 18l6-6-6-6"/>
+                                    <path d="M8 6l-6 6 6 6"/>
+                                </svg>
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if p.repository and p.repository.urlRepo %}
+                        <a href="{{ p.repository.urlRepo }}" target="_blank" rel="noopener noreferrer" class="action-btn repo-visit" title="Visiter le repo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                        </a>
+                    {% else %}
+                        <button type="button" class="action-btn repo-visit disabled" title="Aucun repo" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                        </button>
+                    {% endif %}
                     <form method="post" action="{{ path('admin_projets_delete', {'id': p.idProjet}) }}" style="margin:0;" onsubmit="return confirm('Supprimer ce projet ?')">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete_projet_'~p.idProjet) }}">
                         <button type="submit" class="action-btn delete" title="Supprimer">

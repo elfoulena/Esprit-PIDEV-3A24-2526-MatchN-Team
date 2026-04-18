@@ -1,0 +1,330 @@
+{% extends 'back/base_admin.html.twig' %}
+
+{% block title %}Statistiques IA — Événements{% endblock %}
+{% block page_title %}Statistiques & Analyse IA{% endblock %}
+
+{% block extra_styles %}
+:root {
+    --ai-purple: #8b5cf6;
+    --ai-purple2: #6d28d9;
+    --ai-blue: #3b82f6;
+    --ai-teal: #14b8a6;
+    --ai-green: #10b981;
+    --ai-orange: #f59e0b;
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition);
+}
+.back-btn:hover { background: #f1f5f9; color: var(--text-primary); }
+
+.page-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(109,40,217,0.07));
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ai-purple);
+}
+
+/* KPI Cards */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+}
+.kpi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); }
+.kpi-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+}
+.kpi-icon.purple { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(109,40,217,0.08)); }
+.kpi-icon.blue   { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.08)); }
+.kpi-icon.green  { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.08)); }
+.kpi-label { font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.kpi-value { font-size: 30px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.kpi-subtitle { font-size: 11.5px; color: var(--text-secondary); margin-top: 5px; }
+
+/* Type Distribution */
+.section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.section-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+.section-header svg { width: 18px; height: 18px; color: var(--ai-purple); }
+.section-body { padding: 20px 24px; }
+
+.type-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+.type-row:last-child { margin-bottom: 0; }
+.type-label { font-size: 13.5px; font-weight: 600; color: var(--text-primary); min-width: 130px; }
+.type-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 6px; height: 10px; overflow: hidden; }
+.type-bar { height: 10px; border-radius: 6px; transition: width 0.7s ease; }
+.type-count { font-size: 12px; font-weight: 700; color: var(--text-secondary); min-width: 40px; text-align: right; }
+
+/* AI Analysis */
+.ai-section {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.ai-section::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(139,92,246,0.35), transparent 70%);
+    border-radius: 50%;
+}
+.ai-section::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(109,40,217,0.3), transparent 70%);
+    border-radius: 50%;
+}
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+}
+.ai-avatar {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 16px rgba(109,40,217,0.4);
+    flex-shrink: 0;
+}
+.ai-title { font-size: 18px; font-weight: 800; color: #fff; }
+.ai-subtitle { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.ai-content {
+    position: relative;
+    z-index: 1;
+    color: rgba(255,255,255,0.9);
+    font-size: 14.5px;
+    line-height: 1.85;
+    white-space: pre-line;
+}
+.ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+}
+.dot-pulse {
+    display: inline-flex;
+    gap: 4px;
+}
+.dot-pulse span {
+    width: 6px; height: 6px;
+    background: #a78bfa;
+    border-radius: 50%;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+.dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+
+.fill-bar-container {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    height: 10px;
+    width: 100%;
+    margin-top: 10px;
+    overflow: hidden;
+}
+.fill-bar-inner {
+    height: 10px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #8b5cf6, #14b8a6);
+    transition: width 1s ease;
+}
+
+{% block extra_styles_inner %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+{# ── Header ── #}
+<div class="stats-header">
+    <div>
+        <h2 style="font-size:22px; font-weight:800; color:var(--text-primary);">Tableau de Bord IA — Événements</h2>
+        <p style="font-size:13px; color:var(--text-secondary); margin-top:3px;">Analyse intelligente de vos événements propulsée par Groq LLM</p>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+        <span class="page-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+            IA Groq · Llama 3.3
+        </span>
+        <a href="{{ path('app_evenement_index') }}" class="back-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+            Retour aux événements
+        </a>
+    </div>
+</div>
+
+{# ── KPI Cards ── #}
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon purple">📅</div>
+        <div>
+            <div class="kpi-label">Total Événements</div>
+            <div class="kpi-value">{{ stats.total_evenements }}</div>
+            <div class="kpi-subtitle">dans la base de données</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon blue">📊</div>
+        <div>
+            <div class="kpi-label">Taux de Remplissage</div>
+            <div class="kpi-value">{{ stats.taux_remplissage_moyen_pourcentage }}%</div>
+            <div class="kpi-subtitle">moyenne globale</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon green">🗂️</div>
+        <div>
+            <div class="kpi-label">Types Différents</div>
+            <div class="kpi-value">{{ stats.repartition_types|length }}</div>
+            <div class="kpi-subtitle">catégories d'événements</div>
+        </div>
+    </div>
+</div>
+
+{# ── Type Distribution ── #}
+{% if stats.repartition_types|length > 0 %}
+{% set max_count = max(stats.repartition_types|map(t => t.count)) %}
+{% set type_colors = {
+    'WORKSHOP': '#3b82f6',
+    'MEETUP': '#14b8a6',
+    'CONFERENCE': '#8b5cf6',
+    'FORMATION': '#10b981',
+    'SEMINAIRE': '#f59e0b',
+    'TEAMBUILDING': '#ef4444',
+    'NETWORKING': '#ec4899',
+    'AUTRE': '#94a3b8'
+} %}
+<div class="section-card">
+    <div class="section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Répartition par Type d'Événement
+    </div>
+    <div class="section-body">
+        {% for item in stats.repartition_types %}
+        {% set color = type_colors[item.type_evenement] ?? '#8b5cf6' %}
+        {% set pct = max_count > 0 ? (item.count / max_count * 100)|round : 0 %}
+        <div class="type-row">
+            <div class="type-label">{{ item.type_evenement|capitalize }}</div>
+            <div class="type-bar-wrap">
+                <div class="type-bar" style="width:{{ pct }}%; background:{{ color }};"></div>
+            </div>
+            <div class="type-count">{{ item.count }}</div>
+        </div>
+        {% endfor %}
+
+        {% if stats.taux_remplissage_moyen_pourcentage > 0 %}
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:13px; font-weight:700; color:var(--text-primary);">Taux de Remplissage Moyen Global</span>
+                <span style="font-size:18px; font-weight:800; color:var(--ai-purple);">{{ stats.taux_remplissage_moyen_pourcentage }}%</span>
+            </div>
+            <div class="fill-bar-container">
+                <div class="fill-bar-inner" style="width:{{ stats.taux_remplissage_moyen_pourcentage|round }}%;"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{# ── AI Analysis ── #}
+<div class="ai-section">
+    <div class="ai-header">
+        <div class="ai-avatar">🤖</div>
+        <div>
+            <div class="ai-title">Analyse Stratégique par l'IA</div>
+            <div class="ai-subtitle">Rapport généré par Groq · Llama 3.3-70b-versatile</div>
+        </div>
+    </div>
+    <div class="ai-content">
+        {% if analyse and analyse != 'Analyse indisponible.' %}
+            {{ analyse }}
+        {% else %}
+            <div class="ai-loading">
+                <div class="dot-pulse">
+                    <span></span><span></span><span></span>
+                </div>
+                Analyse indisponible. Vérifiez votre clé GROQ_API_KEY dans le fichier .env
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

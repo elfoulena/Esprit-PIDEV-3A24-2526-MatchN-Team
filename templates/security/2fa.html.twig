@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-5">
+    <h2>2FA Verification</h2>
+
+    <form action="{{ path('2fa_login_check') }}" method="post">
+
+        <input type="text"
+               name="{{ two_factor_code_parameter() }}"
+               class="form-control"
+               maxlength="6"
+               required>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('2fa') }}">
+
+        <button class="btn btn-primary mt-3">Verify</button>
+    </form>
+</div>
+{% endblock %}

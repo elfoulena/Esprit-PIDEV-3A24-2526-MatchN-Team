@@ -5,11 +5,14 @@ namespace App\Controller;
 use App\Entity\Evenement;
 use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
+use App\Service\GroqService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/evenement')]
 final class EvenementController extends AbstractController
@@ -44,6 +47,35 @@ final class EvenementController extends AbstractController
         return $this->render('evenement/new.html.twig', [
             'evenement' => $evenement,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/ai/improve-description', name: 'app_evenement_ai_improve', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function aiImproveDescription(Request $request, GroqService $groqService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $text = $data['text'] ?? '';
+
+        if (empty($text)) {
+            return new JsonResponse(['error' => 'Texte vide'], 400);
+        }
+
+        $improvedText = $groqService->ameliorer($text, 'Événement d\'entreprise MatchNTeam');
+
+        return new JsonResponse(['improved_text' => $improvedText]);
+    }
+
+    #[Route('/statistiques-ai', name: 'app_evenement_stats', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function stats(EvenementRepository $evenementRepository, GroqService $groqService): Response
+    {
+        $donneesBrutes = $evenementRepository->getStatisticsForAI();
+        $analyseAI     = $groqService->analyserStatistiquesEvenements($donneesBrutes);
+
+        return $this->render('evenement/stats.html.twig', [
+            'stats'     => $donneesBrutes,
+            'analyse'   => $analyseAI,
         ]);
     }
 
@@ -83,4 +115,5 @@ final class EvenementController extends AbstractController
 
         return $this->redirectToRoute('app_evenement_index', [], Response::HTTP_SEE_OTHER);
     }
+
 }

@@ -355,6 +355,60 @@
     justify-content: space-between;
     align-items: center;
 }
+
+.location-link:hover {
+    color: #0369a1;
+    text-decoration: underline;
+}
+
+/* Social Sharing Styles */
+.share-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+}
+.share-heading {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.share-heading i {
+    color: var(--accent-blue);
+    font-size: 18px;
+}
+.share-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.share-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.share-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    color: #fff;
+}
+.share-fb { background: #1877F2; }
+.share-x { background: #000000; }
+.share-linkedin { background: #0A66C2; }
+.share-whatsapp { background: #25D366; }
 {% endblock %}
 
 {% block content %}
@@ -429,7 +483,10 @@
                 <div class="info-bullet" style="border-color: var(--accent-teal);"></div>
                 <div class="info-content">
                     <span class="info-label">Lieu de rendez-vous</span>
-                    <span class="info-value" id="drawer-lieu">...</span>
+                    <a href="#" id="drawer-lieu-link" target="_blank" class="info-value location-link">
+                        <i class="bi bi-geo-alt-fill mr-1"></i>
+                        <span id="drawer-lieu">...</span>
+                    </a>
                 </div>
             </div>
             <div class="info-row">
@@ -452,6 +509,27 @@
             <h3 class="description-heading">À propos de l'événement</h3>
             <div class="description-text" id="drawer-description">
                 ...
+            </div>
+        </div>
+
+        <div class="share-section">
+            <h3 class="share-heading">
+                <i class="bi bi-share-fill"></i>
+                Partager l'événement
+            </h3>
+            <div class="share-grid">
+                <a href="#" id="share-fb" class="share-btn share-fb" target="_blank" title="Partager sur Facebook">
+                    <i class="bi bi-facebook"></i>
+                </a>
+                <a href="#" id="share-x" class="share-btn share-x" target="_blank" title="Partager sur X">
+                    <i class="bi bi-twitter-x"></i>
+                </a>
+                <a href="#" id="share-linkedin" class="share-btn share-linkedin" target="_blank" title="Partager sur LinkedIn">
+                    <i class="bi bi-linkedin"></i>
+                </a>
+                <a href="#" id="share-whatsapp" class="share-btn share-whatsapp" target="_blank" title="Partager sur WhatsApp">
+                    <i class="bi bi-whatsapp"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -529,6 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('drawer-date').textContent = ds.date;
         document.getElementById('drawer-lieu').textContent = ds.lieu;
+        document.getElementById('drawer-lieu-link').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ds.lieu)}`;
         document.getElementById('drawer-capacity').textContent = ds.capacity;
         document.getElementById('drawer-description').textContent = ds.desc;
 
@@ -552,6 +631,18 @@ document.addEventListener('DOMContentLoaded', function() {
             cancelBtn.action = `{{ path('employe_evenement_desister', {id_evenement: 0}) }}`.replace('0', ds.id);
             cancelBtn.innerHTML = '<button type="submit" class="btn-action btn-cancel px-4">Se désister</button>';
             actionsWrap.appendChild(cancelBtn);
+
+            if (ds.jeton) {
+                const ticketBtn = document.createElement('a');
+                ticketBtn.href = `{{ path('employe_evenement_ticket', {jeton: 'JT_TOKEN'}) }}`.replace('JT_TOKEN', ds.jeton);
+                ticketBtn.target = '_blank';
+                ticketBtn.className = 'btn-action px-4 ml-2';
+                ticketBtn.style.background = 'rgba(14,165,233,0.1)';
+                ticketBtn.style.color = 'var(--accent-blue)';
+                ticketBtn.style.marginLeft = '10px';
+                ticketBtn.innerHTML = '<i class="bi bi-ticket-perforated"></i> Billet';
+                actionsWrap.appendChild(ticketBtn);
+            }
         } else if (ds.full === '1') {
             statusVal.textContent = 'Complet';
             statusBullet.style.borderColor = 'var(--accent-orange)';
@@ -571,6 +662,16 @@ document.addEventListener('DOMContentLoaded', function() {
         drawer.classList.add('active');
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+
+        // Sharing Logic
+        const shareUrl = `${window.location.origin}/evenement/${ds.id}`;
+        const shareText = encodeURIComponent(`🚀 Rejoignez-nous pour "${ds.title}" !\n\n📂 Type : ${ds.type}\n📅 Date : ${ds.date}\n\nPlus d'infos ici :`);
+        const encodedUrl = encodeURIComponent(shareUrl);
+
+        document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        document.getElementById('share-x').href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${shareText}`;
+        document.getElementById('share-linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${shareText}%20${encodedUrl}`;
     }
 
     function closeDrawerFunc() {

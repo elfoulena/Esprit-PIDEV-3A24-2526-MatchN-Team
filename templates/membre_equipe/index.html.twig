@@ -19,6 +19,154 @@
 .action-btn:hover { filter: brightness(0.9); }
 .action-btn.edit { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
 .action-btn.del  { background: rgba(239,68,68,0.10); color: var(--accent-red); }
+.action-btn.whatsapp { background: rgba(37,211,102,0.12); color: #25D366; }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-container {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-body {
+    padding: 20px;
+}
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.whatsapp-preview {
+    background: #f0fdf4;
+    border-left: 4px solid #25D366;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 13px;
+}
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent-blue);
+    animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.notification-progress {
+    margin-top: 15px;
+}
+.checkbox-group {
+    margin: 10px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+}
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.checkbox-item:hover {
+    background: #f8fafc;
+}
+.checkbox-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+.btn-whatsapp {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-whatsapp:hover {
+    background: #128C7E;
+}
+.btn-secondary {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn-primary {
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13px;
+}
+.form-group textarea,
+.form-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+}
+.form-group textarea:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
 {% endblock %}
 
 {% block content %}
@@ -40,6 +188,12 @@
         <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">Équipe : <strong>{{ equipe.nomEquipe }}</strong> — {{ equipe.departement ?? 'Sans département' }}</p>
     </div>
     <div style="display: flex; gap: 10px;">
+        <button type="button" onclick="openWhatsAppModal()" class="btn-whatsapp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+            WhatsApp
+        </button>
         <a href="{{ path('app_equipe_show', {'id_equipe': equipe.idEquipe}) }}"
            style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-secondary); font-size: 13px; font-weight: 600;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -58,6 +212,9 @@
         <table class="data-table">
             <thead>
                 <tr>
+                    <th style="width: 30px;">
+                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                    </th>
                     <th>Membre</th>
                     <th>Rôle</th>
                     <th>Date Affectation</th>
@@ -71,6 +228,9 @@
             <tbody>
             {% for membre in membres %}
                 <tr>
+                    <td>
+                        <input type="checkbox" class="member-checkbox" value="{{ membre.idMembre }}" data-name="{{ membre.user ? membre.user.nom ~ ' ' ~ membre.user.prenom : 'Membre ' ~ membre.idMembre }}" data-phone="{{ membre.user ? membre.user.telephone : '' }}">
+                    </td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: {{ equipe.couleurEquipe }}33; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: {{ equipe.couleurEquipe }}; flex-shrink: 0;">
@@ -125,7 +285,7 @@
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 50px; color: var(--text-secondary);">
+                    <td colspan="9" style="text-align: center; padding: 50px; color: var(--text-secondary);">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity: 0.3; display: block; margin: 0 auto 12px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         Aucun membre dans cette équipe
                     </td>
@@ -135,5 +295,234 @@
         </table>
     </div>
 </div>
+
+<!-- WhatsApp Modal -->
+<div id="whatsappModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+                Notification WhatsApp
+            </h3>
+            <button onclick="closeWhatsAppModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Envoyer à :</label>
+                <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="sendTo" value="all" checked onchange="toggleMemberSelection()"> Tous les membres actifs
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="sendTo" value="selected" onchange="toggleMemberSelection()"> Membres sélectionnés
+                    </label>
+                </div>
+            </div>
+
+            <div id="memberSelection" style="display: none;">
+                <div class="form-group">
+                    <label>Sélectionner les membres :</label>
+                    <div class="checkbox-group" id="memberList">
+                        {% for membre in membres %}
+                            {% if membre.statutMembre == 'Actif' and membre.user and membre.user.telephone %}
+                                <div class="checkbox-item">
+                                    <input type="checkbox" class="modal-member-checkbox" value="{{ membre.idMembre }}" data-name="{{ membre.user.nom ~ ' ' ~ membre.user.prenom }}" data-phone="{{ membre.user.telephone }}">
+                                    <span>{{ membre.user.nom }} {{ membre.user.prenom }}</span>
+                                    <span style="margin-left: auto; font-size: 11px; color: var(--text-secondary);">{{ membre.user.telephone }}</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Message :</label>
+                <textarea id="whatsappMessage" rows="4" placeholder="Entrez votre message ici..." style="width: 100%;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Caractères : <span id="charCount">0</span></label>
+            </div>
+
+            <div class="whatsapp-preview">
+                <strong style="display: block; margin-bottom: 8px;">📱 Aperçu du message :</strong>
+                <div id="messagePreview" style="font-size: 12px; color: #064e3b;"></div>
+            </div>
+
+            <div id="notificationProgress" style="display: none;" class="notification-progress">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="loading-spinner"></div>
+                    <span>Envoi en cours...</span>
+                </div>
+                <div id="progressDetails" style="margin-top: 10px; font-size: 12px;"></div>
+            </div>
+
+            <div id="notificationResults" style="display: none; margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                <div style="font-weight: 600; margin-bottom: 8px;">Résultats :</div>
+                <div id="resultsList"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeWhatsAppModal()">Annuler</button>
+            <button type="button" class="btn-whatsapp" onclick="sendWhatsAppNotification()">Envoyer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedMembers = [];
+
+function openWhatsAppModal() {
+    document.getElementById('whatsappModal').classList.add('active');
+    updateCharCount();
+    updateMessagePreview();
+}
+
+function closeWhatsAppModal() {
+    document.getElementById('whatsappModal').classList.remove('active');
+    document.getElementById('whatsappMessage').value = '';
+    document.getElementById('notificationProgress').style.display = 'none';
+    document.getElementById('notificationResults').style.display = 'none';
+    document.getElementById('memberSelection').style.display = 'none';
+    document.querySelector('input[name="sendTo"][value="all"]').checked = true;
+    document.getElementById('whatsappMessage').value = '';
+    updateCharCount();
+    updateMessagePreview();
+}
+
+function toggleMemberSelection() {
+    const sendToSelected = document.querySelector('input[name="sendTo"]:checked').value === 'selected';
+    document.getElementById('memberSelection').style.display = sendToSelected ? 'block' : 'none';
+}
+
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.member-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function updateCharCount() {
+    const message = document.getElementById('whatsappMessage').value;
+    document.getElementById('charCount').innerText = message.length;
+}
+
+function updateMessagePreview() {
+    const message = document.getElementById('whatsappMessage').value;
+    const preview = document.getElementById('messagePreview');
+    if (message.trim() === '') {
+        preview.innerHTML = '<span style="color: #9ca3af;">Le message apparaîtra ici...</span>';
+    } else {
+        preview.innerHTML = message.replace(/\n/g, '<br>');
+    }
+}
+
+document.getElementById('whatsappMessage').addEventListener('input', function() {
+    updateCharCount();
+    updateMessagePreview();
+});
+
+async function sendWhatsAppNotification() {
+    const message = document.getElementById('whatsappMessage').value.trim();
+    if (!message) {
+        alert('Veuillez entrer un message.');
+        return;
+    }
+
+    const sendTo = document.querySelector('input[name="sendTo"]:checked').value;
+    let memberIds = [];
+    
+    if (sendTo === 'selected') {
+        const selectedCheckboxes = document.querySelectorAll('.modal-member-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('Veuillez sélectionner au moins un membre.');
+            return;
+        }
+        memberIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    }
+
+    // Show progress
+    document.getElementById('notificationProgress').style.display = 'block';
+    document.getElementById('notificationResults').style.display = 'none';
+    document.getElementById('progressDetails').innerHTML = 'Préparation de l\'envoi...';
+
+    try {
+        const response = await fetch('{{ path('app_membre_equipe_send_whatsapp', {'id_equipe': equipe.idEquipe}) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                sendToAll: sendTo === 'all',
+                memberIds: memberIds
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Display results
+            document.getElementById('progressDetails').innerHTML = `
+                <div style="padding: 10px; background: #f0fdf4; border-radius: 6px;">
+                    <strong>✅ Envoi terminé !</strong><br>
+                    Total: ${data.total} | Envoyés: ${data.sent} | Échoués: ${data.failed}
+                </div>
+            `;
+            
+            // Show detailed results
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            data.results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.style.padding = '8px';
+                resultDiv.style.margin = '5px 0';
+                resultDiv.style.borderRadius = '6px';
+                resultDiv.style.fontSize = '12px';
+                
+                if (result.status === 'success') {
+                    resultDiv.style.background = '#f0fdf4';
+                    resultDiv.style.color = '#166534';
+                    resultDiv.innerHTML = `✅ ${result.member} - Message envoyé`;
+                } else {
+                    resultDiv.style.background = '#fef2f2';
+                    resultDiv.style.color = '#991b1b';
+                    resultDiv.innerHTML = `❌ ${result.member} - ${result.error}`;
+                }
+                resultsList.appendChild(resultDiv);
+            });
+            
+            document.getElementById('notificationResults').style.display = 'block';
+            
+            // Close modal after 3 seconds
+            setTimeout(() => {
+                closeWhatsAppModal();
+            }, 5000);
+        } else {
+            document.getElementById('progressDetails').innerHTML = `
+                <div style="padding: 10px; background: #fef2f2; border-radius: 6px; color: #991b1b;">
+                    ❌ Erreur: ${data.error}
+                </div>
+            `;
+        }
+    } catch (error) {
+        document.getElementById('progressDetails').innerHTML = `
+            <div style="padding: 10px; background: #fef2f2; border-radius: 6px; color: #991b1b;">
+                ❌ Erreur de connexion: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Initialize message preview on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateCharCount();
+    updateMessagePreview();
+});
+</script>
 
 {% endblock %}

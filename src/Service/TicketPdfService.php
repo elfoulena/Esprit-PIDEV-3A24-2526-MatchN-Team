@@ -16,18 +16,19 @@ class TicketPdfService
 {
     private UrlGeneratorInterface $router;
     private Environment $twig;
+    private string $scanBaseUrl;
 
-    public function __construct(UrlGeneratorInterface $router, Environment $twig)
+    public function __construct(UrlGeneratorInterface $router, Environment $twig, string $scanBaseUrl)
     {
         $this->router = $router;
         $this->twig = $twig;
+        $this->scanBaseUrl = $scanBaseUrl;
     }
 
     public function generateTicketPdf(ParticipationEvenement $participation): string
     {
-        // Configuration spéciale pour le scan via Smartphone (sur le réseau local)
-        // IP de l'ordinateur : 192.168.1.57 (Assure-toi que le téléphone est sur le même Wi-Fi)
-        $scanUrl = sprintf('http://192.168.1.57:8000/p/scan/%s', $participation->getJeton());
+        // Utilisation de l'URL de base configurée dans .env (ex: http://IP_LOCALE:8000)
+        $scanUrl = sprintf('%s/p/scan/%s', rtrim($this->scanBaseUrl, '/'), $participation->getJeton());
 
         $qrCode = new \Endroid\QrCode\QrCode(
             data: $scanUrl,

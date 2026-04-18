@@ -38,14 +38,11 @@ class GroqService
                 'model'    => self::MODEL,
                 'messages' => $messages,
             ]),
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_CONNECTTIMEOUT => 10
         ]);
         $result = curl_exec($ch);
         curl_close($ch);
         return json_decode($result, true) ?? [];
     }
-
     public function traduire(string $texte, string $langue): string
     {
         $systemPrompt = "Tu es un traducteur professionnel. Traduis uniquement le texte fourni, sans explication ni commentaire.";
@@ -58,7 +55,6 @@ class GroqService
 
         return $response['choices'][0]['message']['content'] ?? 'Traduction indisponible.';
     }
-
     public function ameliorer(string $texte, string $contexte = ''): string
     {
         $systemPrompt = 'Tu es un expert en redaction professionnelle. Ameliore le texte fourni pour le rendre plus clair, professionnel et persuasif. Retourne uniquement le texte ameliore, sans explication.';

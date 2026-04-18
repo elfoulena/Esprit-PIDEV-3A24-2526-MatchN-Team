@@ -6,6 +6,7 @@
 parameters:
     app.google_sheets_credentials_path: '%kernel.project_dir%/config/google_service_account.json'
     app.google_sheet_id: '%env(GOOGLE_SHEET_ID)%'
+    app.scan_base_url: '%env(SCAN_BASE_URL)%'
     hcaptcha.secret: '%env(HCAPTCHA_SECRET)%'
 
 services:
@@ -44,3 +45,7 @@ services:
             $githubToken: '%env(string:GITHUB_TOKEN)%'
             $githubOwner: '%env(string:GITHUB_OWNER)%'
             $githubRepoPrivate: '%env(bool:GITHUB_REPO_PRIVATE)%'
+
+    App\Service\TicketPdfService:
+        arguments:
+            $scanBaseUrl: '%app.scan_base_url%'

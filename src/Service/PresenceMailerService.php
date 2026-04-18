@@ -23,7 +23,7 @@ class PresenceMailerService
 
         // Notification uniquement à l'admin (bochra.damak@esprit.tn)
         $email = (new TemplatedEmail())
-            ->from(new Address('bochra.damak@esprit.tn', 'MatchNTeam Admin')) // Assurez-vous que cet e-mail est celui configuré dans MAILER_DSN
+            ->from(new Address('bochra.damak@esprit.tn', 'MatchNTeam Admin'))
             ->to('bochra.damak@esprit.tn')
             ->subject('Nouveau scan de présence : ' . $employe->getPrenom() . ' ' . $employe->getNom())
             ->htmlTemplate('email/presence_confirmee.html.twig')
@@ -32,6 +32,9 @@ class PresenceMailerService
                 'evenement' => $evenement,
                 'dateScan' => new \DateTime(),
             ]);
+
+        // Forcer l'utilisation du transport 'event' (Mailjet)
+        $email->getHeaders()->addTextHeader('X-Transport', 'event');
 
         try {
             $this->mailer->send($email);

@@ -98,11 +98,30 @@
         <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Équipes</h2>
         <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">{{ equipes|length }} équipe(s) trouvée(s)</p>
     </div>
-    <a href="{{ path('app_equipe_new') }}" class="btn-primary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nouvelle équipe
+    <div style="display: flex; gap: 8px;">
+        <a href="{{ path('app_equipe_new') }}" class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nouvelle équipe
+        </a>
+        <a href="{{ path('app_export_equipes_pdf', app.request.query.all) }}" style="display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: #dc2626; color: #fff; border-radius: var(--radius-md); text-decoration: none; font-size: 13px; font-weight: 700; transition: all var(--transition);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export PDF
+        </a>
+        <a href="{{ path('app_email_report_equipes_list', app.request.query.all) }}" 
+       style="display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: #10b981; color: #fff; border-radius: var(--radius-md); text-decoration: none; font-size: 13px; font-weight: 700; transition: all var(--transition);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-10 7L2 7"/>
+        </svg>
+        Envoyer liste par email
     </a>
+    </div>
 </div>
+
 
 {# ── Filters ── #}
 <div class="filter-card">

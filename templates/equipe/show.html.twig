@@ -236,6 +236,23 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Modifier
         </a>
+        <a href="{{ path('app_export_equipe_pdf', {'id_equipe': equipe.idEquipe}) }}"
+   style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #dc2626; color: white; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Export PDF
+</a>
+<a href="{{ path('app_email_report_equipe', {'id_equipe': equipe.idEquipe}) }}"
+   style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(59,130,246,0.10); color: #3b82f6; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; font-weight: 600;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="m22 7-10 7L2 7"/>
+    </svg>
+    Envoyer par email
+</a>
         <form method="post" action="{{ path('app_equipe_delete', {'id_equipe': equipe.idEquipe}) }}"
               onsubmit="return confirm('Supprimer l\'équipe « {{ equipe.nomEquipe }} » ?');" style="margin:0;">
             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipe.idEquipe) }}">

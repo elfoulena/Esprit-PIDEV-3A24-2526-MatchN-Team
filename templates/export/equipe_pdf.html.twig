@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche Équipe - {{ equipe.nomEquipe }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #1e293b;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 5px;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .info-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .info-header {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .info-body {
+            padding: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            width: 150px;
+            font-weight: bold;
+            color: #64748b;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #1e293b;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .badge-active { background: #10b98120; color: #059669; }
+        .badge-paused { background: #f59e0b20; color: #b45309; }
+        .badge-inactive { background: #ef444420; color: #dc2626; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .members-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .members-table th,
+        .members-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .members-table th {
+            background: #f1f5f9;
+            font-weight: bold;
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">MatchNTeam</div>
+    <div class="title">Fiche d'équipe</div>
+    <div style="font-size: 11px; color: #64748b;">Généré le {{ generated_at|date('d/m/Y à H:i') }}</div>
+</div>
+
+<div class="info-card">
+    <div class="info-header">
+        Informations générales
+    </div>
+    <div class="info-body">
+        <div class="info-row">
+            <div class="info-label">Nom de l'équipe</div>
+            <div class="info-value">{{ equipe.nomEquipe }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Département</div>
+            <div class="info-value">{{ equipe.departement ?? 'Non défini' }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Description</div>
+            <div class="info-value">{{ equipe.description ?: 'Aucune description' }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Statut</div>
+            <div class="info-value">
+                {% if equipe.statut == 'Active' %}
+                    <span class="badge badge-active">● Active</span>
+                {% elseif equipe.statut == 'En pause' %}
+                    <span class="badge badge-paused">● En pause</span>
+                {% else %}
+                    <span class="badge badge-inactive">● Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Date de création</div>
+            <div class="info-value">{{ equipe.dateCreation ? equipe.dateCreation|date('d/m/Y') : 'Non définie' }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-number">{{ equipe.nbMembresActuel }} / {{ equipe.nbMembresMax }}</div>
+        <div class="stat-label">Membres</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ equipe.budget ? equipe.budget ~ ' DT' : '—' }}</div>
+        <div class="stat-label">Budget</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">
+            <div style="width: 30px; height: 30px; background: {{ equipe.couleurEquipe }}; border-radius: 8px; margin: 0 auto;"></div>
+        </div>
+        <div class="stat-label">Couleur</div>
+    </div>
+</div>
+
+{% if equipe.membres|length > 0 %}
+<div class="info-card">
+    <div class="info-header">
+        Membres de l'équipe ({{ equipe.membres|length }})
+    </div>
+    <div class="info-body">
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th>Membre</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Date d'adhésion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membre in equipe.membres %}
+                <tr>
+                    <td>{{ membre.user.nom }} {{ membre.user.prenom }}</td>
+                    <td>{{ membre.roleEquipe }}</td>
+                    <td>{{ membre.statutMembre }}</td>
+                    <td>{{ membre.dateAdhesion ? membre.dateAdhesion|date('d/m/Y') : '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="footer">
+    <p>MatchNTeam - Gestion d'équipes professionnelle</p>
+    <p>Ce document a été généré automatiquement et ne nécessite pas de signature.</p>
+</div>
+
+</body>
+</html>

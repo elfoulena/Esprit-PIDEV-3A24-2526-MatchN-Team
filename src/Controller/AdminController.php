@@ -25,6 +25,7 @@ class AdminController extends AbstractController
         $totalEquipes   = $equipeRepo->count([]);
         $equipesActives = $equipeRepo->count(['statut' => 'Active']);
 
+        // Count members across all teams
         $totalMembres = 0;
         foreach ($equipeRepo->findAll() as $eq) {
             $totalMembres += $eq->getNbMembresActuel();

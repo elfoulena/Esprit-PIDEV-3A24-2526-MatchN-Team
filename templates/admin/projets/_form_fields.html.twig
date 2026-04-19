@@ -2,6 +2,15 @@
 {# Expects: form (FormView) #}
 {% set errIcon %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{% endset %}
 
+<div class="ai-assist-box">
+    <div class="ai-assist-title">Assistant IA - Pre-remplir depuis un PDF</div>
+    <div class="ai-assist-row">
+        <input type="file" id="projectPdfInput" class="form-control" accept="application/pdf,.pdf" style="display:none;">
+        <button type="button" id="projectPdfPickBtn" class="ai-btn">Choisir un PDF et remplir</button>
+    </div>
+    <div id="projectPdfStatus" class="ai-status">Cliquez sur le bouton, choisissez un PDF, puis le remplissage se fait automatiquement.</div>
+</div>
+
 <div class="form-section">
     <div class="form-section-title">Informations générales</div>
     <div class="form-grid">
@@ -180,4 +189,122 @@ function toggleComp(el) {
     const cb = el.querySelector('input[type=checkbox]');
     cb.checked = !cb.checked;
 }
+
+(() => {
+    const pdfInput = document.getElementById('projectPdfInput');
+    const pickBtn = document.getElementById('projectPdfPickBtn');
+    const statusBox = document.getElementById('projectPdfStatus');
+
+    if (!pdfInput || !pickBtn || !statusBox) {
+        return;
+    }
+
+    const field = (name) => document.getElementById(`projet_${name}`);
+    const norm = (v) => String(v || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+
+    function setInputValue(name, value) {
+        if (value === undefined || value === null || value === '') return;
+        const el = field(name);
+        if (el) el.value = value;
+    }
+
+    function setCheckbox(name, value) {
+        if (typeof value !== 'boolean') return;
+        const el = field(name);
+        if (!el) return;
+        el.checked = value;
+    }
+
+    function applyCompetenceKeywords(keywords) {
+        if (!Array.isArray(keywords) || keywords.length === 0) return 0;
+
+        const normalizedKeywords = keywords.map(norm).filter(Boolean);
+        const items = document.querySelectorAll('#compGrid .comp-item');
+        let matched = 0;
+
+        items.forEach((item) => {
+            const labelText = norm(item.querySelector('span')?.textContent || '');
+            const checkbox = item.querySelector('input[type=checkbox]');
+            if (!checkbox || !labelText) return;
+
+            const hasMatch = normalizedKeywords.some((kw) => labelText.includes(kw) || kw.includes(labelText));
+            checkbox.checked = hasMatch;
+            item.classList.toggle('selected', hasMatch);
+            if (hasMatch) matched++;
+        });
+
+        return matched;
+    }
+
+    async function uploadAndFill() {
+        const file = pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
+        if (!file) {
+            statusBox.textContent = 'Aucun PDF choisi.';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('pdf', file);
+
+        const initialLabel = pickBtn.textContent;
+        pickBtn.disabled = true;
+        pickBtn.textContent = 'Analyse...';
+        statusBox.textContent = 'Analyse du PDF en cours...';
+
+        try {
+            const response = await fetch('{{ path('admin_projets_ai_extract_pdf') }}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const rawText = await response.text();
+            let payload = {};
+            try {
+                payload = rawText ? JSON.parse(rawText) : {};
+            } catch (parseError) {
+                throw new Error('Erreur serveur: reponse non JSON. Verifiez les logs Symfony.');
+            }
+
+            if (!response.ok) {
+                throw new Error(payload.error || 'Erreur d analyse du PDF.');
+            }
+
+            const data = payload.data || {};
+            setInputValue('titre', data.titre);
+            setInputValue('description', data.description);
+            setInputValue('statut', data.statut);
+            setInputValue('priorite', data.priorite);
+            setInputValue('dateDebut', data.dateDebut);
+            setInputValue('dateFin', data.dateFin);
+            setInputValue('dateLivraison', data.dateLivraison);
+            setInputValue('budgetTotal', data.budgetTotal);
+            setInputValue('budgetInterne', data.budgetInterne);
+            setInputValue('budgetFreelance', data.budgetFreelance);
+            setCheckbox('visibleEmploye', data.visibleEmploye);
+            setCheckbox('visibleFreelancer', data.visibleFreelancer);
+
+            const matched = applyCompetenceKeywords(data.competenceKeywords);
+            statusBox.textContent = `Pre-remplissage termine. ${matched} competence(s) detectee(s). Verifiez puis ajustez avant de sauvegarder.`;
+        } catch (e) {
+            statusBox.textContent = e.message || 'Erreur pendant le pre-remplissage.';
+        } finally {
+            pickBtn.disabled = false;
+            pickBtn.textContent = initialLabel;
+        }
+    }
+
+    pickBtn.addEventListener('click', () => {
+        pdfInput.value = '';
+        pdfInput.click();
+    });
+
+    pdfInput.addEventListener('change', () => {
+        uploadAndFill();
+    });
+})();
 </script>

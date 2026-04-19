@@ -66,6 +66,10 @@
         </select>
     </div>
     <div style="display:flex; gap:10px;">
+        <a href="{{ path('admin_projets_stats') }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 16px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); color:var(--accent-blue); border-radius:var(--radius-md); font-size:13px; font-weight:700; text-decoration:none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21H3"/><path d="M7 14v4"/><path d="M12 10v8"/><path d="M17 6v12"/></svg>
+            Statistiques
+        </a>
         <a href="{{ path('admin_projets_demandes') }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 16px; background:var(--bg-surface); border:1px solid var(--border-color); color:var(--text-secondary); border-radius:var(--radius-md); font-size:13px; font-weight:600; text-decoration:none;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             Demandes

@@ -1,340 +1,125 @@
-{# templates/front/base_front.html.twig #}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MatchNTeam{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>{% block title %}KnightOne - Matchup{% endblock %}</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
 
-        :root {
-            --bg-main:       #f8fafc;
-            --card-bg:       #ffffff;
-            --border-color:  rgba(0,0,0,0.08);
-            --text-primary:  #0f172a;
-            --text-secondary:#64748b;
-            --accent-blue:   #3b82f6;
-            --accent-purple: #8b5cf6;
-            --accent-green:  #10b981;
-            --radius-sm:     8px;
-            --radius-md:     12px;
-            --radius-lg:     16px;
-            --radius-xl:     24px;
-            --shadow-sm:     0 1px 4px rgba(0,0,0,0.06);
-            --shadow-md:     0 4px 20px rgba(0,0,0,0.08);
-            --shadow-lg:     0 12px 40px rgba(0,0,0,0.10);
-            --transition:    0.18s ease;
-            --navbar-h:      68px;
-        }
+  <!-- Favicons -->
+  <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
 
-        body {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: var(--bg-main);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-        /* ══════════════════ NAVBAR ══════════════════ */
-        .navbar {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            height: var(--navbar-h);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-sm);
-        }
-        .navbar-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 24px;
-        }
+  <!-- Vendor CSS Files -->
+  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
 
-        /* Brand */
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            flex-shrink: 0;
-        }
-        .brand-icon {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            border-radius: var(--radius-sm);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 800; color: #fff;
-        }
-        .brand-text {
-            font-size: 17px; font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            -webkit-background-clip: text; background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Nav links */
-        .navbar-links {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            list-style: none;
-        }
-        .navbar-links a {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all var(--transition);
-        }
-        .navbar-links a:hover, .navbar-links a.active {
-            color: var(--accent-blue);
-            background: rgba(59,130,246,0.07);
-        }
-        .navbar-links a svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-        /* Auth actions */
-        .navbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-        .btn-outline {
-            padding: 8px 18px;
-            border: 1.5px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 13.5px; font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all var(--transition);
-            background: var(--card-bg);
-        }
-        .btn-outline:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-        }
-        .btn-cta {
-            padding: 8px 20px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            border-radius: var(--radius-md);
-            font-size: 13.5px; font-weight: 700;
-            color: #fff;
-            text-decoration: none;
-            transition: opacity var(--transition);
-        }
-        .btn-cta:hover { opacity: 0.88; }
-
-        /* User avatar in navbar (when logged in) */
-        .navbar-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .navbar-avatar {
-            width: 34px; height: 34px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 800; color: #fff;
-        }
-        .navbar-username {
-            font-size: 13.5px; font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        /* Mobile hamburger (visible < 768px) */
-        .navbar-toggle {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 6px;
-        }
-        .navbar-toggle span {
-            width: 22px; height: 2px;
-            background: var(--text-primary);
-            border-radius: 2px;
-            transition: all var(--transition);
-        }
-
-        /* ══════════════════ PAGE CONTENT ══════════════════ */
-        .page-content {
-            flex: 1;
-        }
-
-        /* ══════════════════ FLASH MESSAGES ══════════════════ */
-        .flash-container {
-            max-width: 1200px;
-            margin: 16px auto 0;
-            padding: 0 24px;
-        }
-        .flash-success {
-            background: rgba(16,185,129,0.09);
-            border: 1px solid rgba(16,185,129,0.25);
-            color: #065f46;
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            font-size: 13.5px; font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .flash-error {
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.2);
-            color: #991b1b;
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            font-size: 13.5px; font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        /* ══════════════════ FOOTER ══════════════════ */
-        .footer {
-            background: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            padding: 28px 24px;
-            margin-top: auto;
-        }
-        .footer-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .footer-brand { display: flex; align-items: center; gap: 8px; }
-        .footer-copy { font-size: 12.5px; color: var(--text-secondary); }
-        .footer-links { display: flex; gap: 16px; }
-        .footer-links a {
-            font-size: 12.5px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color var(--transition);
-        }
-        .footer-links a:hover { color: var(--accent-blue); }
-
-        @media (max-width: 768px) {
-            .navbar-links, .navbar-actions { display: none; }
-            .navbar-toggle { display: flex; }
-        }
-
-        {% block extra_styles %}{% endblock %}
-    </style>
-    {% block stylesheets %}{% endblock %}
+  <!-- Main CSS File -->
+  <link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
+  {% block stylesheets %}{% endblock %}
 </head>
-<body>
 
-{# ══════════════ NAVBAR ══════════════ #}
-<nav class="navbar">
-    <div class="navbar-inner">
+<body class="{% block body_class %}starter-page-page{% endblock %}">
 
-        <a href="{{ path('home') }}" class="navbar-brand">
-            <div class="brand-icon">MN</div>
-            <span class="brand-text">MatchNTeam</span>
-        </a>
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
 
-        <ul class="navbar-links">
+      <a href="{{ path('home') }}" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">Matchup</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{{ path('home') }}">Home</a></li>
+          {% if is_granted('ROLE_EMPLOYE') %}
+            <li><a href="{{ path('app_front_evenement_index') }}">Événements</a></li>
+          {% else %}
             <li>
-                <a href="{{ path('home') }}"
-                   class="{% if app.request.attributes.get('_route') == 'home' %}active{% endif %}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    Accueil
-                </a>
+              <a href="{{ path('app_login') }}"
+                 title="Vous devez être connecté en tant qu'employé pour accéder aux événements"
+                 style="opacity: 0.65; cursor: not-allowed;"
+                 onclick="alert('Veuillez vous connecter avec un compte employé pour accéder aux événements.'); return false;">
+                Événements 🔒
+              </a>
             </li>
-            <li>
-                <a href="{{ path('app_front_evenement_index') }}"
-                   class="{% if app.request.attributes.get('_route') starts with 'app_front_evenement' %}active{% endif %}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Événements
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    Équipes
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                    Freelancers
-                </a>
-            </li>
+          {% endif %}
+          <li><a href="#about">About</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
 
-        <div class="navbar-actions">
-            {% if app.user %}
-                <div class="navbar-user">
-                    <div class="navbar-avatar">
-                        {{ (app.user.nom|slice(0,1) ~ app.user.prenom|slice(0,1))|upper }}
-                    </div>
-                    <span class="navbar-username">{{ app.user.prenom }}</span>
-                    <a href="{{ path('app_logout') }}" class="btn-outline" style="font-size:12px; padding:6px 14px;">
-                        Déconnexion
-                    </a>
-                </div>
-            {% else %}
-                <a href="{{ path('app_login') }}" class="btn-outline">Se connecter</a>
-                <a href="{{ path('app_register') }}" class="btn-cta">S'inscrire</a>
-            {% endif %}
-        </div>
+      {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+        <a class="cta-btn" href="{{ path('app_login') }}">Se connecter</a>
+      {% elseif is_granted('ROLE_ADMIN') %}
+        <a class="cta-btn" href="{{ path('admin_dashboard') }}">Dashboard Admin</a>
+      {% elseif is_granted('ROLE_EMPLOYE') %}
+        <a class="cta-btn" href="{{ path('employe_dashboard') }}">Mon Compte</a>
+      {% else %}
+        <a class="cta-btn" href="{{ path('app_logout') }}">Se déconnecter</a>
+      {% endif %}
 
-        <button class="navbar-toggle" aria-label="Menu">
-            <span></span><span></span><span></span>
-        </button>
     </div>
-</nav>
+  </header>
 
-{# Flash messages #}
-<div class="flash-container">
-    {% for msg in app.flashes('success') %}
-        <div class="flash-success">✓ {{ msg }}</div>
-    {% endfor %}
-    {% for msg in app.flashes('error') %}
-        <div class="flash-error">{{ msg }}</div>
-    {% endfor %}
-</div>
+  <main class="main">
+    {% block body %}{% endblock %}
+  </main>
 
-{# ══════════════ PAGE CONTENT ══════════════ #}
-<div class="page-content">
-    {% block content %}{% endblock %}
-</div>
-
-{# ══════════════ FOOTER ══════════════ #}
-<footer class="footer">
-    <div class="footer-inner">
-        <div class="footer-brand">
-            <div class="brand-icon" style="width:28px;height:28px;font-size:10px;">MN</div>
-            <span class="footer-copy">&copy; {{ "now"|date("Y") }} MatchNTeam. Tous droits réservés.</span>
+  <footer id="footer" class="footer dark-background">
+    <div class="container">
+      <h3 class="sitename">Matchup</h3>
+      <p>Et aut eum quis fuga eos sunt ipsa nihil. Labore corporis magni eligendi fuga maxime saepe commodi placeat.</p>
+      <div class="social-links d-flex justify-content-center">
+        <a href=""><i class="bi bi-twitter-x"></i></a>
+        <a href=""><i class="bi bi-facebook"></i></a>
+        <a href=""><i class="bi bi-instagram"></i></a>
+        <a href=""><i class="bi bi-skype"></i></a>
+        <a href=""><i class="bi bi-linkedin"></i></a>
+      </div>
+      <div class="container">
+        <div class="copyright">
+          <span>Copyright</span> <strong class="px-1 sitename">Matchup</strong> <span>All Rights Reserved</span>
         </div>
-        <div class="footer-links">
-            <a href="#">À propos</a>
-            <a href="#">Contact</a>
-            <a href="#">Confidentialité</a>
+        <div class="credits">
+          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a>
         </div>
+      </div>
     </div>
-</footer>
+  </footer>
 
-{% block javascripts %}{% endblock %}
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+  <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+  <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
+  <script src="{{ asset('assets/vendor/imagesloaded/imagesloaded.pkgd.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+
+  <!-- Main JS File -->
+  <script src="{{ asset('assets/js/main.js') }}"></script>
+  {% block modals %}{% endblock %}
+  {% block javascripts %}{% endblock %}
+
 </body>
+
 </html>

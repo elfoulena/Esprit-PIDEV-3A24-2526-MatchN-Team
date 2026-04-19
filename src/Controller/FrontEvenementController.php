@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Evenement;
 use App\Entity\ParticipationEvenement;
-use App\Entity\User;
 use App\Repository\EvenementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,35 +17,29 @@ class FrontEvenementController extends AbstractController
     #[Route('/', name: 'app_front_evenement_index', methods: ['GET'])]
     public function index(EvenementRepository $evenementRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('warning', 'Vous devez être connecté pour accéder aux événements.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $q = $request->query->get('q', '');
         $type = $request->query->get('type', 'ALL');
         $sort = $request->query->get('sort', 'date_asc');
 
         $evenements = $evenementRepository->findByFilters($q, $type, $sort);
 
-        $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test (évite l'erreur SQL sur mot_de_passe)
-        if (!$user) {
-            try {
-                $user = $entityManager->getReference(User::class, 10);
-            } catch (\Exception $e) {
-                $user = null;
-            }
-        }
-
         $participatingIds = [];
-        if ($user) {
-            $qb = $entityManager->createQueryBuilder();
-            $participatingIdsRaw = $qb->select('e.id_evenement')
-                ->from(ParticipationEvenement::class, 'p')
-                ->join('p.evenement', 'e')
-                ->where('p.utilisateur = :user')
-                ->setParameter('user', $user)
-                ->getQuery()
-                ->getScalarResult();
-            
-            $participatingIds = array_column($participatingIdsRaw, 'id_evenement');
-        }
+        $qb = $entityManager->createQueryBuilder();
+        $participatingIdsRaw = $qb->select('e.id_evenement')
+            ->from(ParticipationEvenement::class, 'p')
+            ->join('p.evenement', 'e')
+            ->where('p.utilisateur = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getScalarResult();
+        
+        $participatingIds = array_column($participatingIdsRaw, 'id_evenement');
 
         return $this->render('front/evenement/index.html.twig', [
             'evenements' => $evenements,
@@ -60,35 +53,27 @@ class FrontEvenementController extends AbstractController
     #[Route('/search', name: 'app_front_evenement_search', methods: ['GET'])]
     public function search(EvenementRepository $evenementRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
         $q = $request->query->get('q', '');
         $type = $request->query->get('type', 'ALL');
         $sort = $request->query->get('sort', 'date_asc');
 
         $evenements = $evenementRepository->findByFilters($q, $type, $sort);
 
-        $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test
-        if (!$user) {
-            try {
-                $user = $entityManager->getReference(User::class, 10);
-            } catch (\Exception $e) {
-                $user = null;
-            }
-        }
-
-        $participatingIds = [];
-        if ($user) {
-            $qb = $entityManager->createQueryBuilder();
-            $participatingIdsRaw = $qb->select('e.id_evenement')
-                ->from(ParticipationEvenement::class, 'p')
-                ->join('p.evenement', 'e')
-                ->where('p.utilisateur = :user')
-                ->setParameter('user', $user)
-                ->getQuery()
-                ->getScalarResult();
-            
-            $participatingIds = array_column($participatingIdsRaw, 'id_evenement');
-        }
+        $qb = $entityManager->createQueryBuilder();
+        $participatingIdsRaw = $qb->select('e.id_evenement')
+            ->from(ParticipationEvenement::class, 'p')
+            ->join('p.evenement', 'e')
+            ->where('p.utilisateur = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getScalarResult();
+        
+        $participatingIds = array_column($participatingIdsRaw, 'id_evenement');
 
         return $this->render('front/evenement/_list.html.twig', [
             'evenements' => $evenements,
@@ -102,25 +87,16 @@ class FrontEvenementController extends AbstractController
         EvenementRepository $evenementRepository, 
         EntityManagerInterface $entityManager
     ): Response {
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('warning', 'Vous devez être connecté pour participer à un événement.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $evenement = $evenementRepository->find($id_evenement);
 
         if (!$evenement) {
             $this->addFlash('error', 'Événement non trouvé.');
-            return $this->redirectToRoute('app_front_evenement_index');
-        }
-
-        $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test
-        if (!$user) {
-            try {
-                $user = $entityManager->getReference(User::class, 10);
-            } catch (\Exception $e) {
-                $user = null;
-            }
-        }
-
-        if (!$user) {
-            $this->addFlash('error', 'Aucun utilisateur trouvé en base de données.');
             return $this->redirectToRoute('app_front_evenement_index');
         }
 
@@ -170,24 +146,15 @@ class FrontEvenementController extends AbstractController
         EvenementRepository $evenementRepository, 
         EntityManagerInterface $entityManager
     ): Response {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
         $evenement = $evenementRepository->find($id_evenement);
 
         if (!$evenement) {
             $this->addFlash('error', 'Événement non trouvé.');
-            return $this->redirectToRoute('app_front_evenement_index');
-        }
-
-        $user = $this->getUser();
-        // TEMPORAIRE: Fallback sur l'utilisateur ID 10 pour le test
-        if (!$user) {
-            try {
-                $user = $entityManager->getReference(User::class, 10);
-            } catch (\Exception $e) {
-                $user = null;
-            }
-        }
-
-        if (!$user) {
             return $this->redirectToRoute('app_front_evenement_index');
         }
 

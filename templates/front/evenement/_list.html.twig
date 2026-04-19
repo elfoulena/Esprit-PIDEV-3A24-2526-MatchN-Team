@@ -1,0 +1,74 @@
+<div class="row gy-4">
+    {% for event in evenements %}
+    <div class="col-xl-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; transition: transform 0.3s;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                {{ event.typeEvenement }}
+            </span>
+            <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i> {{ event.lieu }}</span>
+            </div>
+            
+            <h4 class="card-title fw-bold mb-3" style="color: #1a1f2e;">{{ event.titre }}</h4>
+            
+            <p class="card-text text-muted small mb-4" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ event.description|default('Rejoignez-nous pour cet événement exceptionnel !') }}
+            </p>
+
+            <div class="d-flex flex-column gap-2 mb-4">
+            <div class="d-flex align-items-center text-secondary small">
+                <i class="bi bi-calendar3 me-2"></i>
+                {{ event.dateDebut|date('d F Y à H:i') }}
+            </div>
+            <div class="d-flex align-items-center text-secondary small">
+                <i class="bi bi-people me-2"></i>
+                {{ event.nombreActuel }} / {{ event.capaciteMax }} Participants
+            </div>
+            </div>
+
+            {% set isFinished = event.dateFin < date() %}
+            {% set isFull = event.nombreActuel >= event.capaciteMax %}
+            {% set joinedIds = participating_ids|default([]) %}
+            {% set isJoined = event.idEvenement in joinedIds %}
+
+            <div class="d-flex flex-column gap-2 mt-auto">
+                {% if isFinished %}
+                    <button class="btn btn-secondary w-100 disabled py-2 px-4 rounded-pill">Événement Terminé</button>
+                {% elseif isJoined %}
+                    <form action="{{ path('app_front_evenement_unparticiper', {'id_evenement': event.idEvenement}) }}" method="POST">
+                        <button type="submit" class="btn btn-outline-danger w-100 py-2 px-4 rounded-pill" style="font-weight: 600;">
+                            Annuler Participation
+                        </button>
+                    </form>
+                {% elseif isFull %}
+                    <button class="btn btn-danger w-100 disabled py-2 px-4 rounded-pill">Complet</button>
+                {% else %}
+                    <form action="{{ path('app_front_evenement_participer', {'id_evenement': event.idEvenement}) }}" method="POST">
+                        <button type="submit" class="btn btn-primary w-100 py-2 px-4 rounded-pill" style="background: #3b82f6; border: none; font-weight: 600; transition: background 0.3s;">
+                            Participer
+                        </button>
+                    </form>
+                {% endif %}
+
+                <button class="btn btn-link text-decoration-none text-muted w-100 py-1" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#eventDetailModal"
+                        data-title="{{ event.titre }}"
+                        data-type="{{ event.typeEvenement }}"
+                        data-date="{{ event.dateDebut|date('d F Y à H:i') }} - {{ event.dateFin|date('H:i') }}"
+                        data-lieu="{{ event.lieu }}"
+                        data-desc="{{ event.description|default('Aucune description supplémentaire.') }}"
+                        data-capacity="{{ event.nombreActuel }} / {{ event.capaciteMax }}">
+                    <i class="bi bi-info-circle me-1"></i> Plus d'infos
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted">Aucun événement ne correspond à votre recherche.</p>
+    </div>
+    {% endfor %}
+</div>

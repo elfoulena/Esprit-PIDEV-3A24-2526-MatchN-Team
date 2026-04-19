@@ -5,6 +5,7 @@
 {% block extra_styles %}
 {% include 'admin/projets/_form_styles.html.twig' %}
 {% endblock %}
+
 {% block content %}
 <div style="margin-bottom:20px;">
     <a href="{{ path('admin_projets_index') }}" style="color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
@@ -12,17 +13,142 @@
         Retour aux projets
     </a>
 </div>
+
 <div class="form-card">
     <div class="form-card-header">
-        <h3>Créer un nouveau projet</h3>
-        <p>Remplissez les informations du projet et sélectionnez les compétences requises.</p>
+        <h3>Creer un nouveau projet</h3>
+        <p>Remplissez les informations du projet et selectionnez les competences requises.</p>
+        <div style="margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button type="button" id="btnImportPdf" style="display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border:none; border-radius:10px; background:rgba(59,130,246,0.12); color:#1d4ed8; font-weight:700; font-size:13px; cursor:pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importer un PDF
+            </button>
+            <input type="file" id="pdfInput" accept="application/pdf,.pdf" style="display:none;">
+            <span id="pdfImportStatus" style="font-size:12px; color:var(--text-secondary);"></span>
+        </div>
     </div>
+
     {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
         {% include 'admin/projets/_form_fields.html.twig' with {form: form} %}
         <div class="form-actions">
-            <button type="submit" class="btn-submit">Créer le projet</button>
+            <button type="submit" class="btn-submit">Creer le projet</button>
             <a href="{{ path('admin_projets_index') }}" class="btn-cancel">Annuler</a>
         </div>
     {{ form_end(form) }}
 </div>
+
+<script>
+(function () {
+    const btn = document.getElementById('btnImportPdf');
+    const input = document.getElementById('pdfInput');
+    const status = document.getElementById('pdfImportStatus');
+
+    function setFieldValue(id, value) {
+        if (value === null || value === undefined || value === '') {
+            return;
+        }
+        const el = document.getElementById(id);
+        if (!el) {
+            return;
+        }
+        el.value = value;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function normalize(text) {
+        return (text || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim();
+    }
+
+    function setCompetences(keywords) {
+        if (!Array.isArray(keywords) || keywords.length === 0) {
+            return;
+        }
+
+        const normalizedKeywords = keywords.map(normalize).filter(Boolean);
+        const items = document.querySelectorAll('#compGrid .comp-item');
+
+        items.forEach((item) => {
+            const labelEl = item.querySelector('span');
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            if (!labelEl || !checkbox) {
+                return;
+            }
+
+            const label = normalize(labelEl.textContent);
+            const matched = normalizedKeywords.some((kw) => label.includes(kw) || kw.includes(label));
+
+            checkbox.checked = matched;
+            item.classList.toggle('selected', matched);
+        });
+    }
+
+    btn.addEventListener('click', function () {
+        input.click();
+    });
+
+    input.addEventListener('change', async function () {
+        if (!input.files || !input.files[0]) {
+            return;
+        }
+
+        const file = input.files[0];
+        status.textContent = 'Analyse du PDF en cours...';
+        btn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('pdf', file);
+
+            const res = await fetch('{{ path('admin_projets_extract_pdf') }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const payload = await res.json();
+            if (!res.ok || !payload.ok) {
+                throw new Error(payload.error || 'Import impossible');
+            }
+
+            const data = payload.data || {};
+            setFieldValue('projet_titre', data.titre);
+            setFieldValue('projet_description', data.description);
+            setFieldValue('projet_statut', data.statut);
+            setFieldValue('projet_priorite', data.priorite);
+            setFieldValue('projet_dateDebut', data.dateDebut);
+            setFieldValue('projet_dateFin', data.dateFin);
+            setFieldValue('projet_dateLivraison', data.dateLivraison);
+            setFieldValue('projet_budgetTotal', data.budgetTotal);
+            setFieldValue('projet_budgetInterne', data.budgetInterne);
+            setFieldValue('projet_budgetFreelance', data.budgetFreelance);
+
+            if (typeof data.visibleEmploye === 'boolean') {
+                const e = document.getElementById('projet_visibleEmploye');
+                if (e) {
+                    e.checked = data.visibleEmploye;
+                }
+            }
+            if (typeof data.visibleFreelancer === 'boolean') {
+                const f = document.getElementById('projet_visibleFreelancer');
+                if (f) {
+                    f.checked = data.visibleFreelancer;
+                }
+            }
+
+            setCompetences(data.competenceKeywords || []);
+            status.textContent = 'Champs remplis automatiquement depuis le PDF.';
+        } catch (err) {
+            status.textContent = 'Erreur: ' + err.message;
+        } finally {
+            btn.disabled = false;
+            input.value = '';
+        }
+    });
+})();
+</script>
 {% endblock %}
+

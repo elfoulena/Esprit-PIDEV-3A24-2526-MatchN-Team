@@ -13,12 +13,15 @@ use App\Form\ProjetType;
 use App\Repository\CompetenceRepository;
 use App\Repository\ProjetRepository;
 use App\Repository\UserRepository;
+use App\Service\GeminiService;
 use App\Service\GitHubRepositoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -26,6 +29,52 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/admin/projets')]
 class ProjetController extends AbstractController
 {
+    #[Route('/extract-from-pdf', name: 'admin_projets_extract_pdf', methods: ['POST'])]
+    public function extractFromPdf(Request $request, GeminiService $geminiService): JsonResponse
+    {
+        $file = $request->files->get('pdf');
+        if (!$file instanceof UploadedFile) {
+            return $this->json(['ok' => false, 'error' => 'Aucun fichier PDF fourni.'], 400);
+        }
+
+        $allowedMimeTypes = [
+            'application/pdf',
+            'application/x-pdf',
+            'application/acrobat',
+        ];
+
+        $mimeType = (string) $file->getMimeType();
+        if ($file->getClientOriginalExtension() !== 'pdf' && !in_array($mimeType, $allowedMimeTypes, true)) {
+            return $this->json(['ok' => false, 'error' => 'Le fichier doit etre un PDF.'], 400);
+        }
+
+        try {
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf = $parser->parseFile($file->getPathname());
+            $text = trim($pdf->getText());
+        } catch (\Throwable $e) {
+            return $this->json(['ok' => false, 'error' => 'Impossible de lire ce PDF.'], 422);
+        }
+
+        if ($text === '') {
+            return $this->json(['ok' => false, 'error' => 'Le PDF ne contient pas de texte exploitable.'], 422);
+        }
+
+        if (mb_strlen($text) > 18000) {
+            $text = mb_substr($text, 0, 18000);
+        }
+
+        $extracted = $geminiService->extractProjectDataFromText($text);
+        if ($extracted === []) {
+            return $this->json(['ok' => false, 'error' => 'Extraction IA indisponible pour ce document.'], 422);
+        }
+
+        return $this->json([
+            'ok' => true,
+            'data' => $extracted,
+        ]);
+    }
+
     #[Route('', name: 'admin_projets_index', methods: ['GET'])]
     public function index(Request $request, ProjetRepository $repo, CompetenceRepository $compRepo): Response
     {
@@ -51,18 +100,51 @@ class ProjetController extends AbstractController
         }
 
         $projets = $qb->getQuery()->getResult();
+        $stats = $this->buildProjectStats($projets);
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('admin/projets/_table.html.twig', ['projets' => $projets]);
+            return new JsonResponse([
+                'html' => $this->renderView('admin/projets/_table.html.twig', ['projets' => $projets]),
+                'stats' => $stats,
+            ]);
         }
 
         return $this->render('admin/projets/index.html.twig', [
             'projets'     => $projets,
+            'stats'       => $stats,
             'q'           => $q,
             'statut'      => $statut,
             'visib'       => $visib,
             'competences' => $compRepo->findAll(),
         ]);
+    }
+
+    private function buildProjectStats(array $projets): array
+    {
+        $stats = [
+            'total' => count($projets),
+            'EN_COURS' => 0,
+            'PLANIFIE' => 0,
+            'TERMINE' => 0,
+            'EN_PAUSE' => 0,
+            'ANNULE' => 0,
+            'AUTRE' => 0,
+        ];
+
+        foreach ($projets as $projet) {
+            if (!$projet instanceof Projet) {
+                continue;
+            }
+
+            $status = (string) $projet->getStatut();
+            if (isset($stats[$status])) {
+                $stats[$status]++;
+            } else {
+                $stats['AUTRE']++;
+            }
+        }
+
+        return $stats;
     }
 
     #[Route('/new', name: 'admin_projets_new', methods: ['GET', 'POST'])]

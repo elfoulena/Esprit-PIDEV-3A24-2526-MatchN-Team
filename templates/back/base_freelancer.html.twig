@@ -1,4 +1,4 @@
-{# templates/back/base_freelancer.html.twig #}
+﻿{# templates/back/base_freelancer.html.twig #}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -129,7 +129,7 @@
         </a>
         <a href="{{ path('freelancer_mes_evaluations') }}" class="nav-item {% if app.request.attributes.get('_route') == 'freelancer_mes_evaluations' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Mes évaluations
+            Mes Ã©valuations
         </a>
         <a href="{{ path('app_freelancer_leaderboard') }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_freelancer_leaderboard' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -140,12 +140,12 @@
         <a href="{{ path('freelancer_reclamation_index') }}"
            class="nav-item {% if app.request.attributes.get('_route') starts with 'freelancer_reclamation' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Réclamations
+            RÃ©clamations
 </a>
         <div class="nav-divider"></div>
         <a href="#" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-            Paramètres
+            ParamÃ¨tres
         </a>
     </nav>
     <div class="sidebar-footer">
@@ -160,7 +160,7 @@
 </div>
         <a href="{{ path('app_logout') }}" class="logout-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Déconnexion
+            DÃ©connexion
         </a>
     </div>
 </aside>
@@ -172,7 +172,7 @@
             <span class="topbar-badge">Freelancer</span>
         </div>
     </header>
-    {% for msg in app.flashes('success') %}<div class="flash-wrap"><div class="flash-success">✓ {{ msg }}</div></div>{% endfor %}
+    {% for msg in app.flashes('success') %}<div class="flash-wrap"><div class="flash-success">âœ“ {{ msg }}</div></div>{% endfor %}
     {% for msg in app.flashes('error') %}<div class="flash-wrap"><div class="flash-error">{{ msg }}</div></div>{% endfor %}
     <div class="page-body">{% block content %}{% endblock %}</div>
 </div>
@@ -197,3 +197,4 @@
 {% block javascripts %}{% endblock %}
 </body>
 </html>
+

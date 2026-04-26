@@ -114,7 +114,8 @@ class AffectationProjet
         return $this;
     }
 
-    #[ORM\OneToMany(targetEntity: EvaluationPartTime::class, mappedBy: 'affectationProjet')]
+    /** @var Collection<int, EvaluationPartTime> */
+    #[ORM\OneToMany(targetEntity: EvaluationPartTime::class, mappedBy: 'affectationProjet', cascade: ['persist', 'remove'])]
     private Collection $evaluationPartTimes;
 
     public function __construct()
@@ -127,9 +128,6 @@ class AffectationProjet
      */
     public function getEvaluationPartTimes(): Collection
     {
-        if (!$this->evaluationPartTimes instanceof Collection) {
-            $this->evaluationPartTimes = new ArrayCollection();
-        }
         return $this->evaluationPartTimes;
     }
 
@@ -147,24 +145,24 @@ class AffectationProjet
         return $this;
     }
 
-    public function getDateDebut(): ?\DateTime
+    public function getDateDebut(): ?\DateTimeInterface
     {
         return $this->date_debut;
     }
 
-    public function setDateDebut(\DateTime $date_debut): static
+    public function setDateDebut(\DateTimeInterface $date_debut): static
     {
         $this->date_debut = $date_debut;
 
         return $this;
     }
 
-    public function getDateFin(): ?\DateTime
+    public function getDateFin(): ?\DateTimeInterface
     {
         return $this->date_fin;
     }
 
-    public function setDateFin(?\DateTime $date_fin): static
+    public function setDateFin(?\DateTimeInterface $date_fin): static
     {
         $this->date_fin = $date_fin;
 

@@ -95,3 +95,4 @@ composer.phar
 /*.sqlite
 /*.db
 ###< Database ###
+.claude/settings.local.json

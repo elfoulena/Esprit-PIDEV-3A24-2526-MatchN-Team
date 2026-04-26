@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer require *)"
+      "Bash(composer require *)",
+      "Bash(php bin/phpunit tests/Unit/Entity/AffectationProjetTest.php tests/Unit/Entity/EvaluationPartTimeTest.php)"
     ]
   }
 }

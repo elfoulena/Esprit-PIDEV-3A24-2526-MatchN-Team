@@ -159,7 +159,7 @@ class AffectationProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if ($this->isCsrfTokenValid('delete' . $id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $id, (string) $request->request->get('_token'))) {
             if ($affectation->getEvaluationPartTimes()->count() > 0) {
                 $this->addFlash('error', 'Impossible de supprimer cette affectation car elle possède des évaluations.');
                 return $this->redirectToRoute('app_affectation_show', ['id' => $id]);
@@ -187,7 +187,7 @@ class AffectationProjetController extends AbstractController
             return $this->redirectToRoute('app_affectation_show', ['id' => $id]);
         }
 
-        if ($this->isCsrfTokenValid('statut' . $id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('statut' . $id, (string) $request->request->get('_token'))) {
             $affectation->setStatut($statut);
             $em->flush();
             $this->addFlash('success', 'Statut mis à jour.');

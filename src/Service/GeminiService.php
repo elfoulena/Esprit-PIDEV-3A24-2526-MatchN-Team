@@ -10,6 +10,7 @@ class GeminiService
     private const API_URL  = 'https://api.groq.com/openai/v1/chat/completions';
     private const MODEL    = 'llama-3.1-8b-instant';
 
+   
     public function __construct(private readonly HttpClientInterface $httpClient) {}
 
     public function genererDescriptionCompetence(string $nomCompetence): string

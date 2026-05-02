@@ -19,28 +19,28 @@ class EquipeController extends AbstractController
     #[Route('', name: 'app_equipe_index', methods: ['GET'])]
     public function index(Request $request, EquipeRepository $repo): Response
     {
-        $search      = $request->query->get('search', '');
-        $statut      = $request->query->get('statut', '');
-        $departement = $request->query->get('departement', '');
-        $sortBy      = $request->query->get('sortBy', 'dateCreation');
-        $sortDir     = $request->query->get('sortDir', 'DESC');
+        $search      = (string) $request->query->get('search', '');
+        $statut      = (string) $request->query->get('statut', '');
+        $departement = (string) $request->query->get('departement', '');
+        $sortBy      = (string) $request->query->get('sortBy', 'dateCreation');
+        $sortDir     = (string) $request->query->get('sortDir', 'DESC');
 
         $allowedSorts = ['dateCreation', 'nomEquipe', 'nbMembresActuel', 'budget', 'statut'];
-        if (!in_array($sortBy, $allowedSorts)) {
+        if (!in_array($sortBy, $allowedSorts, true)) {
             $sortBy = 'dateCreation';
         }
         $sortDir = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
 
         $qb = $repo->createQueryBuilder('e');
 
-        if ($search) {
+        if ($search !== '') {
             $qb->andWhere('e.nomEquipe LIKE :s OR e.description LIKE :s')
                ->setParameter('s', '%' . $search . '%');
         }
-        if ($statut) {
+        if ($statut !== '') {
             $qb->andWhere('e.statut = :statut')->setParameter('statut', $statut);
         }
-        if ($departement) {
+        if ($departement !== '') {
             $qb->andWhere('e.departement = :dep')->setParameter('dep', $departement);
         }
 
@@ -127,7 +127,8 @@ class EquipeController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if ($this->isCsrfTokenValid('delete' . $id_equipe, $request->request->get('_token'))) {
+        $token = (string) $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete' . $id_equipe, $token)) {
             $em->remove($equipe);
             $em->flush();
             $this->addFlash('success', "L'équipe a été supprimée.");

@@ -64,6 +64,9 @@ class Equipe
     #[ORM\Column(name: 'updated_at', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    /**
+     * @var Collection<int, MembreEquipe>
+     */
     #[ORM\OneToMany(mappedBy: 'equipe', targetEntity: MembreEquipe::class, cascade: ['persist', 'remove'])]
     private Collection $membres;
 
@@ -109,7 +112,11 @@ class Equipe
     public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
     public function setUpdatedAt(\DateTimeInterface $updatedAt): static { $this->updatedAt = $updatedAt; return $this; }
 
+    /**
+     * @return Collection<int, MembreEquipe>
+     */
     public function getMembres(): Collection { return $this->membres; }
+
     public function addMembre(MembreEquipe $membre): static
     {
         if (!$this->membres->contains($membre)) {
@@ -118,6 +125,7 @@ class Equipe
         }
         return $this;
     }
+
     public function removeMembre(MembreEquipe $membre): static
     {
         if ($this->membres->removeElement($membre)) {

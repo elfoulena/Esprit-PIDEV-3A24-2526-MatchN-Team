@@ -1,6 +1,10 @@
 parameters:
-    level: 2
+    level: 8
     paths:
+        - bin/
+        - config/
+        - public/
+        - src/
         - src/Entity/Projet.php
         - src/Entity/Notification.php
         - src/Controller/Admin/ProjetController.php

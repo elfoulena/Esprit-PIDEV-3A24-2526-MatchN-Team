@@ -15,6 +15,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
 
+/**
+ * @extends AbstractType<AffectationProjet>
+ */
 class AffectationProjetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

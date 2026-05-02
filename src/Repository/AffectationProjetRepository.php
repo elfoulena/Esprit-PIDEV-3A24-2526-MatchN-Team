@@ -33,6 +33,9 @@ class AffectationProjetRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return list<array{statut: string|null, total: int|string}>
+     */
     public function countByStatut(): array
     {
         return $this->createQueryBuilder('a')
@@ -42,15 +45,6 @@ class AffectationProjetRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * Returns leaderboard data: freelancers ranked by score.
-     * Score = (avgNote * 6) + (finishedProjects * 4)
-     *
-     * Uses Doctrine QueryBuilder (DQL) instead of raw SQL
-     * to stay database-agnostic and leverage entity mappings.
-     *
-     * @return array<array{id: int, nom: string, prenom: string, email: string, avgNote: float, finishedProjects: int, score: float}>
-     */
     public function updateExpiredAffectations(): int
     {
         return $this->createQueryBuilder('a')
@@ -66,6 +60,12 @@ class AffectationProjetRepository extends ServiceEntityRepository
             ->execute();
     }
 
+    /**
+     * Returns leaderboard data: freelancers ranked by score.
+     * Score = (avgNote * 6) + (finishedProjects * 4)
+     *
+     * @return array<array{id: int, nom: string, prenom: string, email: string, avgNote: float, finishedProjects: int, score: float}>
+     */
     public function getLeaderboardData(): array
     {
         $em = $this->getEntityManager();

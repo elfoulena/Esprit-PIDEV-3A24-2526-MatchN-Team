@@ -13,6 +13,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
 
+/**
+ * @extends AbstractType<EvaluationPartTime>
+ */
 class EvaluationPartTimeType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

@@ -24,8 +24,18 @@ class GoogleSheetsService
 
     public function appendParticipationInfo(string $nom, string $prenom, string $email, string $evenementTitre, \DateTimeInterface $date): bool
     {
-        if (!$this->credentialsPath || !file_exists($this->credentialsPath) || !$this->sheetId) {
-            $this->logger->error('Google Sheets Service not configured properly (missing file or ID).');
+        if (!$this->credentialsPath || !$this->sheetId) {
+            $this->logger->error('Google Sheets: Missing credentials path or sheet ID in config.');
+            return false;
+        }
+
+        if (!file_exists($this->credentialsPath)) {
+            $this->logger->error('Google Sheets: Credentials file NOT FOUND at: ' . $this->credentialsPath);
+            return false;
+        }
+
+        if (!is_readable($this->credentialsPath)) {
+            $this->logger->error('Google Sheets: Credentials file exists but is NOT READABLE: ' . $this->credentialsPath);
             return false;
         }
 
@@ -62,7 +72,7 @@ class GoogleSheetsService
                 'json' => [
                     'values' => $values
                 ],
-                'timeout' => 5 // Prevent hanging
+                'timeout' => 2 // Prevent hanging
             ]);
 
             $statusCode = $response->getStatusCode();
@@ -103,7 +113,7 @@ class GoogleSheetsService
                     'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
                     'assertion' => $jwt
                 ],
-                'timeout' => 5 // Prevent hanging
+                'timeout' => 2 // Prevent hanging
             ]);
 
             if ($response->getStatusCode() !== 200) {

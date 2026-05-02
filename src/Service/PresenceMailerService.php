@@ -21,6 +21,10 @@ class PresenceMailerService
         $employe = $participation->getUtilisateur();
         $evenement = $participation->getEvenement();
 
+        if (!$employe) {
+            return;
+        }
+
         // Notification uniquement à l'admin (bochra.damak@esprit.tn)
         $email = (new TemplatedEmail())
             ->from(new Address('bochra.damak@esprit.tn', 'MatchNTeam Admin'))

@@ -4,18 +4,24 @@
 namespace App\Controller\Admin;
 
 use App\Entity\AffectationProjet;
+use App\Entity\CommitHistory;
 use App\Entity\DemandeParticipation;
+use App\Entity\EvaluationPartTime;
 use App\Entity\Notification;
 use App\Entity\Projet;
+use App\Entity\RepoAccess;
 use App\Entity\Repository as ProjetRepositoryEntity;
 use App\Enum\Role;
 use App\Form\ProjetType;
 use App\Repository\CompetenceRepository;
 use App\Repository\ProjetRepository;
 use App\Repository\UserRepository;
+use App\Service\GeminiService;
 use App\Service\GitHubRepositoryService;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,6 +68,95 @@ class ProjetController extends AbstractController
             'statut'      => $statut,
             'visib'       => $visib,
             'competences' => $compRepo->findAll(),
+        ]);
+    }
+
+    #[Route('/ai/extract-pdf', name: 'admin_projets_ai_extract_pdf', methods: ['POST'])]
+    public function aiExtractPdf(Request $request, GeminiService $geminiService): JsonResponse
+    {
+        $file = $request->files->get('pdf');
+        if (!$file) {
+            return $this->json(['error' => 'Fichier PDF manquant.'], 400);
+        }
+
+        $originalName = (string) $file->getClientOriginalName();
+        $extension = strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));
+        if ($extension !== 'pdf') {
+            return $this->json(['error' => 'Veuillez choisir un fichier PDF valide.'], 400);
+        }
+
+        $path = $file->getRealPath();
+        if (!is_string($path) || $path === '') {
+            return $this->json(['error' => 'Impossible de lire le fichier.'], 400);
+        }
+
+        $rawData = $geminiService->extractProjectDataFromPdfPath($path);
+        if ($rawData === []) {
+            $rawData = [
+                'titre' => pathinfo($originalName, PATHINFO_FILENAME),
+                'description' => 'Extraction automatique limitee pour ce PDF. Merci de completer les champs manuellement.',
+            ];
+        }
+
+        $payload = [
+            'data' => $this->normalizeAiProjectData($rawData),
+        ];
+
+        $response = new JsonResponse();
+        $response->setEncodingOptions(
+            $response->getEncodingOptions() | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+        );
+        $response->setData($this->sanitizeUtf8Recursive($payload));
+
+        return $response;
+    }
+
+    #[Route('/stats', name: 'admin_projets_stats', methods: ['GET'])]
+    public function stats(ProjetRepository $repo): Response
+    {
+        $statusRows = $repo->createQueryBuilder('p')
+            ->select('COALESCE(p.statut, :unknown) AS statut, COUNT(p.id_projet) AS total')
+            ->setParameter('unknown', 'NON_DEFINI')
+            ->groupBy('p.statut')
+            ->orderBy('total', 'DESC')
+            ->getQuery()
+            ->getArrayResult();
+
+        $priorityRows = $repo->createQueryBuilder('p')
+            ->select('COALESCE(p.priorite, :unknown) AS priorite, COUNT(p.id_projet) AS total')
+            ->setParameter('unknown', 'NON_DEFINI')
+            ->groupBy('p.priorite')
+            ->orderBy('total', 'DESC')
+            ->getQuery()
+            ->getArrayResult();
+
+        $visibilityRows = $repo->createQueryBuilder('p')
+            ->select(
+                "SUM(CASE WHEN p.visibleEmploye = 1 THEN 1 ELSE 0 END) AS employe_total,
+                 SUM(CASE WHEN p.visibleFreelancer = 1 THEN 1 ELSE 0 END) AS freelancer_total,
+                 SUM(CASE WHEN p.visibleEmploye = 1 AND p.visibleFreelancer = 1 THEN 1 ELSE 0 END) AS both_total"
+            )
+            ->getQuery()
+            ->getOneOrNullResult() ?? [
+                'employe_total' => 0,
+                'freelancer_total' => 0,
+                'both_total' => 0,
+            ];
+
+        $totalProjects = (int) $repo->createQueryBuilder('p')
+            ->select('COUNT(p.id_projet)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $this->render('admin/projets/stats.html.twig', [
+            'total_projects' => $totalProjects,
+            'status_rows' => $statusRows,
+            'priority_rows' => $priorityRows,
+            'visibility' => [
+                'employe' => (int) ($visibilityRows['employe_total'] ?? 0),
+                'freelancer' => (int) ($visibilityRows['freelancer_total'] ?? 0),
+                'both' => (int) ($visibilityRows['both_total'] ?? 0),
+            ],
         ]);
     }
 
@@ -257,8 +352,44 @@ class ProjetController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        // Delete dependent rows first to respect foreign key constraints.
+        $affectations = $em->getRepository(AffectationProjet::class)->findBy(['projet' => $projet]);
+        foreach ($affectations as $affectation) {
+            $evaluations = $em->getRepository(EvaluationPartTime::class)->findBy(['affectationProjet' => $affectation]);
+            foreach ($evaluations as $evaluation) {
+                $em->remove($evaluation);
+            }
+            $em->remove($affectation);
+        }
+
+        $demandes = $em->getRepository(DemandeParticipation::class)->findBy(['projet' => $projet]);
+        foreach ($demandes as $demande) {
+            $em->remove($demande);
+        }
+
+        $repository = $projet->getRepository();
+        if ($repository !== null) {
+            $repoAccesses = $em->getRepository(RepoAccess::class)->findBy(['repository' => $repository]);
+            foreach ($repoAccesses as $repoAccess) {
+                $em->remove($repoAccess);
+            }
+
+            $commitHistory = $em->getRepository(CommitHistory::class)->findOneBy(['repository' => $repository]);
+            if ($commitHistory !== null) {
+                $em->remove($commitHistory);
+            }
+
+            $projet->setRepository(null);
+            $em->remove($repository);
+        }
+
         $em->remove($projet);
-        $em->flush();
+        try {
+            $em->flush();
+        } catch (ForeignKeyConstraintViolationException) {
+            $this->addFlash('error', 'Impossible de supprimer ce projet car il est encore lie a d autres donnees.');
+            return $this->redirectToRoute('admin_projets_index');
+        }
 
         $this->addFlash('success', 'Projet supprimé.');
         return $this->redirectToRoute('admin_projets_index');
@@ -308,4 +439,109 @@ class ProjetController extends AbstractController
 
         return $this->redirectToRoute('admin_projets_index');
     }
+
+    private function normalizeAiProjectData(array $raw): array
+    {
+        $allowedStatus = ['PLANIFIE', 'EN_COURS', 'EN_PAUSE', 'TERMINE', 'ANNULE'];
+        $allowedPriority = ['HAUTE', 'MOYENNE', 'BASSE'];
+
+        $status = strtoupper((string) ($raw['statut'] ?? ''));
+        $priority = strtoupper((string) ($raw['priorite'] ?? ''));
+
+        $dateDebut = $this->normalizeDate($raw['dateDebut'] ?? null);
+        $dateFin = $this->normalizeDate($raw['dateFin'] ?? null);
+        $dateLivraison = $this->normalizeDate($raw['dateLivraison'] ?? null);
+
+        if ($dateDebut !== null && $dateFin !== null && $dateFin < $dateDebut) {
+            $dateFin = $dateDebut;
+        }
+        if ($dateDebut !== null && $dateLivraison !== null && $dateLivraison < $dateDebut) {
+            $dateLivraison = $dateDebut;
+        }
+
+        $keywords = [];
+        if (isset($raw['competenceKeywords']) && is_array($raw['competenceKeywords'])) {
+            foreach ($raw['competenceKeywords'] as $item) {
+                $item = trim((string) $item);
+                if ($item !== '') {
+                    $keywords[] = $item;
+                }
+            }
+            $keywords = array_slice(array_values(array_unique($keywords)), 0, 10);
+        }
+
+        return array_filter([
+            'titre' => isset($raw['titre']) ? trim((string) $raw['titre']) : null,
+            'description' => isset($raw['description']) ? trim((string) $raw['description']) : null,
+            'statut' => in_array($status, $allowedStatus, true) ? $status : null,
+            'priorite' => in_array($priority, $allowedPriority, true) ? $priority : null,
+            'dateDebut' => $dateDebut,
+            'dateFin' => $dateFin,
+            'dateLivraison' => $dateLivraison,
+            'budgetTotal' => $this->normalizeNumber($raw['budgetTotal'] ?? null),
+            'budgetInterne' => $this->normalizeNumber($raw['budgetInterne'] ?? null),
+            'budgetFreelance' => $this->normalizeNumber($raw['budgetFreelance'] ?? null),
+            'visibleEmploye' => filter_var($raw['visibleEmploye'] ?? null, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            'visibleFreelancer' => filter_var($raw['visibleFreelancer'] ?? null, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            'competenceKeywords' => $keywords,
+        ], static fn ($v): bool => $v !== null);
+    }
+
+    private function normalizeDate(mixed $value): ?string
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        try {
+            return (new \DateTimeImmutable($value))->format('Y-m-d');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function normalizeNumber(mixed $value): ?float
+    {
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        $n = (float) $value;
+        if ($n < 0) {
+            return null;
+        }
+
+        return round($n, 2);
+    }
+
+    private function sanitizeUtf8Recursive(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            $clean = [];
+            foreach ($value as $k => $v) {
+                $clean[$k] = $this->sanitizeUtf8Recursive($v);
+            }
+            return $clean;
+        }
+
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $text = $value;
+        if (!mb_check_encoding($text, 'UTF-8')) {
+            $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252, ASCII');
+        }
+
+        $fixed = @iconv('UTF-8', 'UTF-8//IGNORE', $text);
+        if (is_string($fixed) && $fixed !== '') {
+            $text = $fixed;
+        }
+
+        $text = preg_replace('/[^\P{C}\n\t]/u', ' ', $text) ?? $text;
+
+        return $text;
+    }
 }
+
+

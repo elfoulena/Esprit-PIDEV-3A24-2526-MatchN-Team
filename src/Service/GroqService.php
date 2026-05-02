@@ -38,6 +38,8 @@ class GroqService
                 'model'    => self::MODEL,
                 'messages' => $messages,
             ]),
+            CURLOPT_TIMEOUT        => 20, // Timeout total
+            CURLOPT_CONNECTTIMEOUT => 10, // Timeout de connexion
         ]);
         $result = curl_exec($ch);
         curl_close($ch);

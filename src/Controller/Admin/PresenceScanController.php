@@ -68,7 +68,7 @@ class PresenceScanController extends AbstractController
             $logger->error('Step: Mailer Failed - ' . $e->getMessage());
         }
 
-        // 2. Ajouter dans Google Sheets
+        // 2. Ajouter dans Google Sheets (Timeout réduit de 2s géré dans le service)
         try {
             $logger->info('Step: Sheets Start');
             $success = $sheetsService->appendParticipationInfo(
@@ -78,9 +78,14 @@ class PresenceScanController extends AbstractController
                 $evenement->getTitre(),
                 new \DateTime()
             );
-            $logger->info('Step: Sheets End - Success: ' . ($success ? 'YES' : 'NO'));
+            
+            if ($success) {
+                $logger->info('Step: Sheets End - Success: YES');
+            } else {
+                $logger->warning('Step: Sheets End - Success: NO (See service logs for details)');
+            }
         } catch (\Throwable $e) {
-            $logger->error('Step: Sheets Failed - ' . $e->getMessage());
+            $logger->error('Step: Sheets CRITICAL FAILURE - ' . $e->getMessage());
         }
 
         return $this->render('admin/evenement/scan_result.html.twig', [

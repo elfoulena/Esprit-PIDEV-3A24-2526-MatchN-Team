@@ -1,0 +1,106 @@
+{% extends 'back/base_admin.html.twig' %}
+{% block title %}Statistiques projets{% endblock %}
+{% block page_title %}Statistiques projets{% endblock %}
+
+{% block extra_styles %}
+.stats-wrap { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
+.kpi-card { grid-column:span 12; background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm); }
+.kpi-title { font-size:12px; text-transform:uppercase; letter-spacing:.7px; color:var(--text-secondary); font-weight:700; }
+.kpi-value { margin-top:8px; font-size:32px; font-weight:800; color:var(--text-primary); }
+.chart-card { grid-column:span 6; background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:18px; box-shadow:var(--shadow-sm); }
+.chart-title { font-size:14px; font-weight:700; margin-bottom:14px; }
+.chart-box { height:320px; position:relative; }
+.list-card { grid-column:span 12; background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:18px; box-shadow:var(--shadow-sm); }
+.status-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:10px; }
+.status-item { border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; background:#f8fafc; }
+.status-name { font-size:12px; color:var(--text-secondary); font-weight:700; }
+.status-val { font-size:20px; font-weight:800; margin-top:4px; }
+@media (max-width: 980px) {
+    .chart-card { grid-column:span 12; }
+}
+{% endblock %}
+
+{% block content %}
+<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+    <a href="{{ path('admin_projets_index') }}" style="color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour aux projets
+    </a>
+</div>
+
+<div class="stats-wrap">
+    <div class="kpi-card">
+        <div class="kpi-title">Total des projets</div>
+        <div class="kpi-value">{{ total_projects }}</div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-title">Répartition par statut (Pie)</div>
+        <div class="chart-box"><canvas id="statusPie"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-title">Répartition par priorité (Pie)</div>
+        <div class="chart-box"><canvas id="priorityPie"></canvas></div>
+    </div>
+
+    <div class="list-card">
+        <div class="chart-title">Visibilité des projets</div>
+        <div class="status-list">
+            <div class="status-item">
+                <div class="status-name">Visible Employés</div>
+                <div class="status-val">{{ visibility.employe }}</div>
+            </div>
+            <div class="status-item">
+                <div class="status-name">Visible Freelancers</div>
+                <div class="status-val">{{ visibility.freelancer }}</div>
+            </div>
+            <div class="status-item">
+                <div class="status-name">Visible aux deux</div>
+                <div class="status-val">{{ visibility.both }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+    const statusRows = {{ status_rows|json_encode|raw }};
+    const priorityRows = {{ priority_rows|json_encode|raw }};
+
+    const palette = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#64748b','#84cc16'];
+
+    function drawPie(canvasId, rows, labelKey) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const labels = rows.map(r => String(r[labelKey] || 'NON_DEFINI').replaceAll('_', ' '));
+        const values = rows.map(r => Number(r.total || 0));
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: labels.map((_, i) => palette[i % palette.length]),
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    drawPie('statusPie', statusRows, 'statut');
+    drawPie('priorityPie', priorityRows, 'priorite');
+})();
+</script>
+{% endblock %}

@@ -28,12 +28,6 @@ config/google_service_account.json
 /.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
 
-###> phpstan/phpstan ###
-/phpstan.neon
-/phpstan.neon.dist
-/phpstan.neon.local
-###< phpstan/phpstan ###
-
 ###> IDE ###
 /.idea/
 /.vscode/

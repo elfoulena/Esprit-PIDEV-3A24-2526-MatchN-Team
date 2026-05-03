@@ -1,0 +1,17 @@
+parameters:
+    level: 8
+    paths:
+        - src/Entity/AffectationProjet.php
+        - src/Entity/EvaluationPartTime.php
+        - src/Repository/AffectationProjetRepository.php
+        - src/Repository/EvaluationPartTimeRepository.php
+        - src/Controller/AffectationProjetController.php
+        - src/Controller/EvaluationPartTimeController.php
+        - src/Form/AffectationProjetType.php
+        - src/Form/EvaluationPartTimeType.php
+        - tests/Unit/Entity/AffectationProjetTest.php
+        - tests/Unit/Entity/EvaluationPartTimeTest.php
+
+includes:
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon

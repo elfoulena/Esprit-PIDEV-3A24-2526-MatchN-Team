@@ -11,6 +11,7 @@ class GeminiService
     private const MODEL    = 'llama-3.1-8b-instant';
 
 
+
     public function __construct(private readonly HttpClientInterface $httpClient) {}
 
     public function genererDescriptionCompetence(string $nomCompetence): string
@@ -286,10 +287,12 @@ PY;
     private function sanitizeExtractedText(string $text): string
     {
         if (!mb_check_encoding($text, 'UTF-8')) {
-            $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252, ASCII');
+            $converted = mb_convert_encoding($text, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252, ASCII');
+            if (is_string($converted)) {
+                $text = $converted;
+            }
         }
 
-        // Fix for iconv parameter type
         $fixed = @iconv('UTF-8', 'UTF-8//IGNORE', $text);
         if ($fixed !== false) {
             $text = $fixed;
@@ -302,7 +305,7 @@ PY;
         $result3 = preg_replace('/\n{3,}/', "\n\n", $text);
         $text = $result3 !== null ? $result3 : $text;
 
-        return trim($text ?? '');
+        return trim($text);
     }
 
     /** @return array<string, mixed> */
@@ -364,7 +367,10 @@ PY;
     {
         $normalized = $text;
         if (!mb_check_encoding($normalized, 'UTF-8')) {
-            $normalized = mb_convert_encoding($normalized, 'UTF-8', 'auto');
+            $converted = mb_convert_encoding($normalized, 'UTF-8', 'auto');
+            if (is_string($converted)) {
+                $normalized = $converted;
+            }
         }
 
         $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $normalized);
@@ -372,7 +378,6 @@ PY;
             $normalized = $ascii;
         }
 
-        // Fix for mb_strtolower parameter type
         $result = preg_replace_callback('/[\x80-\xFF]/', function (array $matches): string {
             return chr(ord($matches[0]));
         }, $normalized);

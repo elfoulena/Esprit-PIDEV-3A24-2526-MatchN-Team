@@ -5,30 +5,9 @@ namespace App\Service;
 
 use App\Entity\Equipe;
 use App\Entity\MembreEquipe;
-use App\Repository\EquipeRepository;
-use App\Repository\MembreEquipeRepository;
-use App\Repository\EvenementRepository;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\EntityManagerInterface;
 
 class AITeamAnalyticsService
 {
-    private EquipeRepository $equipeRepo;
-    private MembreEquipeRepository $membreRepo;
-    private EvenementRepository $evenementRepo;
-    private EntityManagerInterface $em;
-
-    public function __construct(
-        EquipeRepository $equipeRepo,
-        MembreEquipeRepository $membreRepo,
-        EvenementRepository $evenementRepo,
-        EntityManagerInterface $em
-    ) {
-        $this->equipeRepo = $equipeRepo;
-        $this->membreRepo = $membreRepo;
-        $this->evenementRepo = $evenementRepo;
-        $this->em = $em;
-    }
 
     /**
      * Calculate advanced team statistics with AI predictions
@@ -36,10 +15,7 @@ class AITeamAnalyticsService
      */
     public function getTeamAdvancedStats(Equipe $equipe): array
     {
-        $members = $equipe->getMembres();
-        
-        // Convert PersistentCollection to array if needed
-        $membersArray = $members instanceof Collection ? $members->toArray() : (is_array($members) ? $members : []);
+        $membersArray = $equipe->getMembres()->toArray();
         
         $totalMembers = count($membersArray);
         
@@ -215,12 +191,7 @@ class AITeamAnalyticsService
      */
     private function calculateGrowthPotential(Equipe $equipe): float
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $currentSize = count($members);
         
@@ -236,7 +207,7 @@ class AITeamAnalyticsService
         
         // Engagement factor (highly engaged teams grow faster)
         $engagementScore = $this->calculateEngagementScore($members);
-        $engagementValue = is_array($engagementScore) ? ($engagementScore['score'] ?? 0) : $engagementScore;
+        $engagementValue = $engagementScore['score'] ?? 0;
         $engagementFactor = $engagementValue / 100;
         
         // Budget factor (more budget = more growth resources)
@@ -267,9 +238,7 @@ class AITeamAnalyticsService
      */
     private function predictTeamPerformance(Equipe $equipe): array
     {
-        
-        $members = $equipe->getMembres();
-        $membersArray = $members instanceof Collection ? $members->toArray() : (is_array($members) ? $members : []);
+        $membersArray = $equipe->getMembres()->toArray();
         $teamSize = count($membersArray);
         
         // If team is empty, return default values
@@ -359,12 +328,7 @@ class AITeamAnalyticsService
     private function getOptimizationSuggestions(Equipe $equipe): array
     {
         $suggestions = [];
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $currentSize = count($members);
         $maxSize = $equipe->getNbMembresMax();
@@ -604,12 +568,7 @@ class AITeamAnalyticsService
         $budget = floatval($equipe->getBudget() ?? 0);
         if ($budget == 0) return 100;
         
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         if ($memberCount == 0) return 0;
@@ -632,7 +591,7 @@ class AITeamAnalyticsService
         if ($memberCount === 0) return 0;
         
         $engagementScore = $this->calculateEngagementScore($members);
-        $engagementValue = is_array($engagementScore) ? ($engagementScore['score'] ?? 0) : $engagementScore;
+        $engagementValue = $engagementScore['score'] ?? 0;
         
         $scores = [
             'engagement' => $engagementValue,
@@ -734,19 +693,14 @@ class AITeamAnalyticsService
 
     private function calculateSuccessProbability(Equipe $equipe): float
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         
         if ($memberCount === 0) return 0;
         
         $engagementScore = $this->calculateEngagementScore($members);
-        $engagementValue = is_array($engagementScore) ? ($engagementScore['score'] ?? 0) : $engagementScore;
+        $engagementValue = $engagementScore['score'] ?? 0;
         
         $factors = [
             'size_factor' => min(1, $memberCount / max(1, $equipe->getNbMembresMax())),
@@ -772,12 +726,7 @@ class AITeamAnalyticsService
     {
         // Simulate activity patterns based on member data
         $patterns = [];
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         foreach ($members as $member) {
             $updatedAt = $member->getUpdatedAt();
@@ -861,12 +810,7 @@ class AITeamAnalyticsService
 
     private function calculateProductivityIndex(Equipe $equipe): float
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         if ($memberCount === 0) return 0;
@@ -901,12 +845,7 @@ class AITeamAnalyticsService
 
     private function calculatePerformanceTrend(Equipe $equipe): string
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         if ($memberCount === 0) return 'stable';
@@ -922,12 +861,7 @@ class AITeamAnalyticsService
      */
     private function calculateExpectedImprovement(Equipe $equipe): array
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         if ($memberCount === 0) {
@@ -1019,12 +953,7 @@ class AITeamAnalyticsService
      */
     private function generateRecommendations(Equipe $equipe, array $optimizations, array $skillGaps): array
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         
@@ -1142,12 +1071,7 @@ class AITeamAnalyticsService
     private function identifyOpportunities(Equipe $equipe): array
     {
         $opportunities = [];
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $currentSize = count($members);
         $maxSize = $equipe->getNbMembresMax();
@@ -1197,12 +1121,7 @@ class AITeamAnalyticsService
      */
     private function getTimelineMetrics(Equipe $equipe): array
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         $memberCount = count($members);
         if ($memberCount === 0) {
@@ -1229,12 +1148,7 @@ class AITeamAnalyticsService
     private function getActivityHeatmap(Equipe $equipe): array
     {
         $heatmap = [];
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $members = $equipe->getMembres()->toArray();
         
         foreach ($members as $member) {
             $updatedAt = $member->getUpdatedAt();

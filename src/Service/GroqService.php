@@ -112,7 +112,7 @@ class GroqService
     {
         $repartitionText = '';
         foreach (($stats['repartition_types'] ?? []) as $item) {
-            $type = (isset($item['type_evenement']) && is_string($item['type_evenement'])) ? $item['type_evenement'] : 'Inconnu';
+            $type = $item['type_evenement'] ?? 'Inconnu';
             $count = $item['count'] ?? 0;
             $repartitionText .= "- {$type} : {$count} evenement(s)\n";
         }

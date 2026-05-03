@@ -93,9 +93,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(name: "description_freelancer", type: "text", nullable: true)]
     private ?string $description = null;
 
+    /** @var Collection<int, CompetenceF> */
     #[ORM\ManyToMany(targetEntity: CompetenceF::class, inversedBy: 'freelancers')]
     #[ORM\JoinTable(
-        name: 'freelancer_competence',     
+        name: 'freelancer_competence',
         joinColumns: [
             new ORM\JoinColumn(name: 'freelancer_id', referencedColumnName: 'id')
         ],
@@ -103,12 +104,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
             new ORM\JoinColumn(name: 'competence_id', referencedColumnName: 'id')
         ]
     )]
-    /** @var Collection<int, CompetenceF> */
-    private \Doctrine\Common\Collections\Collection $competences;
+    private Collection $competences;
 
-    #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     /** @var Collection<int, ParticipationEvenement> */
-    private \Doctrine\Common\Collections\Collection $participations;
+    #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $participations;
 
 
     #[ORM\Column(type: "datetime", nullable: true)]

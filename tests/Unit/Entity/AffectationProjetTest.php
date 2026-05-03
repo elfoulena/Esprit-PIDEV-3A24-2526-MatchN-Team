@@ -47,15 +47,6 @@ class AffectationProjetTest extends TestCase
         $this->assertFalse($affectation->peutEtreEvaluee());
     }
 
-    public function testCalculerCoutEstimeRetourneNullSansDateDebut(): void
-    {
-        $affectation = new AffectationProjet();
-        $affectation->setDate_fin(new \DateTime('2025-01-10'));
-        $affectation->setTaux_horaire(20.0);
-
-        $this->assertNull($affectation->calculerCoutEstime());
-    }
-
     public function testCalculerCoutEstimeRetourneNullSansDateFin(): void
     {
         $affectation = new AffectationProjet();

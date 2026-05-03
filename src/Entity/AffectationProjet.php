@@ -59,9 +59,9 @@ class AffectationProjet
     }
 
     #[ORM\Column(type: 'date', nullable: false)]
-    private ?\DateTimeInterface $date_debut = null;
+    private \DateTimeInterface $date_debut;
 
-    public function getDate_debut(): ?\DateTimeInterface
+    public function getDate_debut(): \DateTimeInterface
     {
         return $this->date_debut;
     }
@@ -145,7 +145,7 @@ class AffectationProjet
         return $this;
     }
 
-    public function getDateDebut(): ?\DateTimeInterface
+    public function getDateDebut(): \DateTimeInterface
     {
         return $this->date_debut;
     }
@@ -188,7 +188,7 @@ class AffectationProjet
 
     public function calculerCoutEstime(): ?float
     {
-        if (!$this->date_debut || !$this->date_fin || !$this->taux_horaire) {
+        if (!$this->date_fin || !$this->taux_horaire) {
             return null;
         }
         $days = $this->date_debut->diff($this->date_fin)->days;

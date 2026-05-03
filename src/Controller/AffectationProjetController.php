@@ -200,7 +200,7 @@ class AffectationProjetController extends AbstractController
     {
         $valid = true;
 
-        if ($affectation->getDateFin() && $affectation->getDateDebut()) {
+        if ($affectation->getDateFin()) {
             if ($affectation->getDateFin() <= $affectation->getDateDebut()) {
                 $this->addFlash('error', 'La date de fin doit être postérieure à la date de début.');
                 $valid = false;

@@ -129,6 +129,7 @@ class ProjetControllerConfigureRepositoryTest extends TestCase
 
 class TestableProjetController extends ProjetController
 {
+    /** @var list<array{string, string}> */
     public array $flashMessages = [];
     private bool $csrfValid = true;
 
@@ -147,6 +148,9 @@ class TestableProjetController extends ProjetController
         $this->flashMessages[] = [$type, (string) $message];
     }
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     protected function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
     {
         return new RedirectResponse('/test-route/' . $route, $status);

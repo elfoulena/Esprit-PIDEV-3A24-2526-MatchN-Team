@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,6 +31,9 @@ class TwoFactorController extends AbstractController
         Request $request
     ): Response {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
 
         if (!$user->getTotpSecret()) {
             $secret = $googleAuthenticator->generateSecret();
@@ -38,7 +42,7 @@ class TwoFactorController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
-            $code = $request->request->get('code');
+            $code = trim($request->request->getString('code'));
 
             if ($googleAuthenticator->checkCode($user, $code)) {
                 $user->setTotpEnabled(true);
@@ -63,6 +67,9 @@ class TwoFactorController extends AbstractController
     public function disable(EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $user->setTotpEnabled(false);
         $user->setTotpSecret(null);
         $em->flush();

@@ -29,22 +29,23 @@ class ProjetControllerNormalizationTest extends TestCase
 
         $normalized = $this->invokeNormalizeAiProjectData($controller, $raw);
 
-        self::assertSame('Migration ERP', $normalized['titre']);
-        self::assertSame('Projet de migration', $normalized['description']);
-        self::assertSame('EN_COURS', $normalized['statut']);
+        self::assertSame('Migration ERP', $normalized['titre'] ?? null);
+        self::assertSame('Projet de migration', $normalized['description'] ?? null);
+        self::assertSame('EN_COURS', $normalized['statut'] ?? null);
         self::assertArrayNotHasKey('priorite', $normalized);
-        self::assertSame('2026-05-20', $normalized['dateDebut']);
-        self::assertSame('2026-05-20', $normalized['dateFin']);
-        self::assertSame('2026-05-20', $normalized['dateLivraison']);
-        self::assertSame(100.56, $normalized['budgetTotal']);
-        self::assertSame(40.33, $normalized['budgetInterne']);
+        self::assertSame('2026-05-20', $normalized['dateDebut'] ?? null);
+        self::assertSame('2026-05-20', $normalized['dateFin'] ?? null);
+        self::assertSame('2026-05-20', $normalized['dateLivraison'] ?? null);
+        self::assertSame(100.56, $normalized['budgetTotal'] ?? null);
+        self::assertSame(40.33, $normalized['budgetInterne'] ?? null);
         self::assertArrayNotHasKey('budgetFreelance', $normalized);
-        self::assertTrue($normalized['visibleEmploye']);
-        self::assertFalse($normalized['visibleFreelancer']);
+        self::assertTrue($normalized['visibleEmploye'] ?? false);
+        self::assertFalse($normalized['visibleFreelancer'] ?? true);
 
-        self::assertCount(10, $normalized['competenceKeywords']);
-        self::assertSame('PHP', $normalized['competenceKeywords'][0]);
-        self::assertSame('API', $normalized['competenceKeywords'][9]);
+        $keywords = $normalized['competenceKeywords'] ?? [];
+        self::assertCount(10, $keywords);
+        self::assertSame('PHP', $keywords[0] ?? null);
+        self::assertSame('API', $keywords[9] ?? null);
     }
 
     public function testNormalizeAiProjectDataRejectsInvalidDateAndNumbers(): void
@@ -68,12 +69,45 @@ class ProjetControllerNormalizationTest extends TestCase
         self::assertArrayNotHasKey('visibleEmploye', $normalized);
     }
 
+    /**
+     * @param array<string, mixed> $raw
+     * @return array{
+     *   titre?: string,
+     *   description?: string,
+     *   statut?: string,
+     *   priorite?: string,
+     *   dateDebut?: string,
+     *   dateFin?: string,
+     *   dateLivraison?: string,
+     *   budgetTotal?: float,
+     *   budgetInterne?: float,
+     *   budgetFreelance?: float,
+     *   visibleEmploye?: bool,
+     *   visibleFreelancer?: bool,
+     *   competenceKeywords?: list<string>
+     * }
+     */
     private function invokeNormalizeAiProjectData(ProjetController $controller, array $raw): array
     {
         $method = new \ReflectionMethod(ProjetController::class, 'normalizeAiProjectData');
         $method->setAccessible(true);
 
-        /** @var array $result */
+        /** @var array{
+         *   titre?: string,
+         *   description?: string,
+         *   statut?: string,
+         *   priorite?: string,
+         *   dateDebut?: string,
+         *   dateFin?: string,
+         *   dateLivraison?: string,
+         *   budgetTotal?: float,
+         *   budgetInterne?: float,
+         *   budgetFreelance?: float,
+         *   visibleEmploye?: bool,
+         *   visibleFreelancer?: bool,
+         *   competenceKeywords?: list<string>
+         * } $result
+         */
         $result = $method->invoke($controller, $raw);
 
         return $result;

@@ -141,6 +141,7 @@ class Repository
         return $this;
     }
 
+    /** @var Collection<int, RepoAccess> */
     #[ORM\OneToMany(targetEntity: RepoAccess::class, mappedBy: 'repository')]
     private Collection $repoAccesss;
 
@@ -154,9 +155,6 @@ class Repository
      */
     public function getRepoAccesss(): Collection
     {
-        if (!$this->repoAccesss instanceof Collection) {
-            $this->repoAccesss = new ArrayCollection();
-        }
         return $this->repoAccesss;
     }
 
@@ -227,12 +225,12 @@ class Repository
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTime $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): static
     {
         $this->created_at = $created_at;
 

@@ -38,8 +38,8 @@ class DashboardController extends AbstractController
 
         // Check if current user has a team
         $userTeam = $membreRepo->findOneBy(['user' => $user, 'statutMembre' => 'Actif']);
-        $userHasTeam = $userTeam !== null;
-        $userTeamId = $userTeam ? $userTeam->getEquipe()->getIdEquipe() : null;
+        $userHasTeam = $userTeam instanceof \App\Entity\MembreEquipe;
+        $userTeamId = $userTeam instanceof \App\Entity\MembreEquipe ? $userTeam->getEquipe()?->getIdEquipe() : null;
 
         return $this->render('employe/dashboard.html.twig', [
             'employes'       => $employes,

@@ -29,13 +29,16 @@ class EmailReportController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
-            $email = $request->request->get('email');
+            $email = trim($request->request->getString('email'));
             $user = $this->getUser();
-            assert($user instanceof \App\Entity\User);
+            if ($email === '') {
+                $this->addFlash('error', 'Adresse email invalide.');
+                return $this->redirectToRoute('app_email_report_equipe', ['id_equipe' => $id_equipe]);
+            }
             
             // CORRECTION: Vérifier si l'utilisateur existe et utiliser les bons getters
             $adminName = 'Administrateur';
-            if ($user) {
+            if ($user instanceof \App\Entity\User) {
                 $prenom = $user->getPrenom();
                 $nom = $user->getNom();
                 if ($prenom && $nom) {
@@ -50,9 +53,13 @@ class EmailReportController extends AbstractController
             // Générer le PDF
             $pdfResponse = $pdfExport->generateEquipePdf($equipe, 'export/equipe_pdf.html.twig');
             $pdfContent = $pdfResponse->getContent();
+            if (!is_string($pdfContent) || $pdfContent === '') {
+                $this->addFlash('error', 'Impossible de générer le PDF.');
+                return $this->redirectToRoute('app_equipe_show', ['id_equipe' => $equipe->getIdEquipe()]);
+            }
             
             // Envoyer l'email
-            $mailer->sendEquipeReportPdf($email, $equipe->getNomEquipe(), $pdfContent, $adminName);
+            $mailer->sendEquipeReportPdf($email, $equipe->getNomEquipe() ?? 'Equipe', $pdfContent, $adminName);
             
             $this->addFlash('success', sprintf('Le rapport de l\'équipe "%s" a été envoyé à %s', $equipe->getNomEquipe(), $email));
             return $this->redirectToRoute('app_equipe_show', ['id_equipe' => $equipe->getIdEquipe()]);
@@ -72,17 +79,21 @@ class EmailReportController extends AbstractController
         MailerService $mailer
     ): Response {
         if ($request->isMethod('POST')) {
-            $email = $request->request->get('email');
+            $email = trim($request->request->getString('email'));
+            if ($email === '') {
+                $this->addFlash('error', 'Adresse email invalide.');
+                return $this->redirectToRoute('app_email_report_equipes_list');
+            }
             
             // Récupérer les filtres actuels
-            $search = $request->query->get('search', '');
-            $statut = $request->query->get('statut', '');
-            $departement = $request->query->get('departement', '');
-            $sortBy = $request->query->get('sortBy', 'dateCreation');
-            $sortDir = $request->query->get('sortDir', 'DESC');
+            $search = trim($request->query->getString('search'));
+            $statut = trim($request->query->getString('statut'));
+            $departement = trim($request->query->getString('departement'));
+            $sortBy = trim($request->query->getString('sortBy')) ?: 'dateCreation';
+            $sortDir = trim($request->query->getString('sortDir')) ?: 'DESC';
 
             $allowedSorts = ['dateCreation', 'nomEquipe', 'nbMembresActuel', 'budget', 'statut'];
-            if (!in_array($sortBy, $allowedSorts)) {
+            if (!in_array($sortBy, $allowedSorts, true)) {
                 $sortBy = 'dateCreation';
             }
             $sortDir = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
@@ -103,11 +114,10 @@ class EmailReportController extends AbstractController
             $equipes = $qb->orderBy('e.' . $sortBy, $sortDir)->getQuery()->getResult();
             
             $user = $this->getUser();
-            assert($user instanceof \App\Entity\User);
             
             // CORRECTION: Vérifier si l'utilisateur existe et utiliser les bons getters
             $adminName = 'Administrateur';
-            if ($user) {
+            if ($user instanceof \App\Entity\User) {
                 $prenom = $user->getPrenom();
                 $nom = $user->getNom();
                 if ($prenom && $nom) {
@@ -124,6 +134,10 @@ class EmailReportController extends AbstractController
                 'filters' => compact('search', 'statut', 'departement', 'sortBy', 'sortDir')
             ]);
             $pdfContent = $pdfResponse->getContent();
+            if (!is_string($pdfContent) || $pdfContent === '') {
+                $this->addFlash('error', 'Impossible de générer le PDF.');
+                return $this->redirectToRoute('app_equipe_index');
+            }
             
             // Envoyer l'email
             $mailer->sendEquipesListPdf($email, count($equipes), $pdfContent, $adminName);

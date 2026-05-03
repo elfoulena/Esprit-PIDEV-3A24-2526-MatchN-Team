@@ -3,8 +3,9 @@
 namespace App\Twig;
 
 use App\Entity\User;
+use App\Entity\Equipe;
+use App\Entity\Notification;
 use App\Repository\MembreEquipeRepository;
-use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\TeamRequestRepository;
 use Twig\Extension\AbstractExtension;
@@ -12,20 +13,17 @@ use Twig\TwigFunction;
 
 class AppExtension extends AbstractExtension
 {
-    private $teamRequestRepository;
-    private $membreEquipeRepository;
-    private $messageRepository;
-    private $notificationRepository;
+    private TeamRequestRepository $teamRequestRepository;
+    private MembreEquipeRepository $membreEquipeRepository;
+    private NotificationRepository $notificationRepository;
 
     public function __construct(
         TeamRequestRepository $teamRequestRepository,
         MembreEquipeRepository $membreEquipeRepository,
-        MessageRepository $messageRepository,
         NotificationRepository $notificationRepository
     ) {
         $this->teamRequestRepository = $teamRequestRepository;
         $this->membreEquipeRepository = $membreEquipeRepository;
-        $this->messageRepository = $messageRepository;
         $this->notificationRepository = $notificationRepository;
     }
 
@@ -45,7 +43,7 @@ class AppExtension extends AbstractExtension
         return $this->teamRequestRepository->countPendingRequests();
     }
 
-    public function getUserTeam(?User $user)
+    public function getUserTeam(?User $user): ?Equipe
     {
         if (!$user) {
             return null;
@@ -56,7 +54,7 @@ class AppExtension extends AbstractExtension
             'statutMembre' => 'Actif'
         ]);
         
-        return $membre ? $membre->getEquipe() : null;
+        return $membre instanceof \App\Entity\MembreEquipe ? $membre->getEquipe() : null;
     }
 
     public function getUnreadMessagesCount(?User $user, ?int $teamId): int
@@ -79,12 +77,15 @@ class AppExtension extends AbstractExtension
         return $this->notificationRepository->countUnreadForUser($user);
     }
 
+    /**
+     * @return list<Notification>
+     */
     public function getLatestNotifications(?User $user, int $limit = 6): array
     {
         if (!$user) {
             return [];
         }
 
-        return $this->notificationRepository->findLatestForUser($user, $limit);
+        return array_values($this->notificationRepository->findLatestForUser($user, $limit));
     }
 }

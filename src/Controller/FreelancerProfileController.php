@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Form\FreelancerProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,6 +35,10 @@ class FreelancerProfileController extends AbstractController
 
     ): Response {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
         $form = $this->createForm(FreelancerProfileType::class, $user);
         $form->handleRequest($request);
 
@@ -42,7 +47,7 @@ class FreelancerProfileController extends AbstractController
             if ($plainPassword) {
                 $user->setPassword($hasher->hashPassword($user, $plainPassword));
             }
-            $description = $user->getDescription();
+            $description = $user->getDescription() ?? '';
 
             $skillsNames = $skillExtractor->extract($description);
 

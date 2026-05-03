@@ -64,7 +64,7 @@ class GitHubRepositoryService
         }
 
         if ($statusCode !== 201) {
-            $message = is_array($data) ? ($data['message'] ?? 'Erreur GitHub inconnue.') : 'Erreur GitHub inconnue.';
+            $message = $data['message'] ?? 'Erreur GitHub inconnue.';
             throw new \RuntimeException((string) $message);
         }
 

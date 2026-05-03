@@ -16,8 +16,10 @@ class GoogleSheetsService
 
     public function __construct(ParameterBagInterface $params, LoggerInterface $logger, HttpClientInterface $httpClient)
     {
-        $this->credentialsPath = $params->get('app.google_sheets_credentials_path');
-        $this->sheetId = $params->get('app.google_sheet_id');
+        $credentialsPath = $params->get('app.google_sheets_credentials_path');
+        $sheetId = $params->get('app.google_sheet_id');
+        $this->credentialsPath = is_string($credentialsPath) ? $credentialsPath : null;
+        $this->sheetId = is_string($sheetId) ? $sheetId : null;
         $this->logger = $logger;
         $this->httpClient = $httpClient;
     }
@@ -93,8 +95,26 @@ class GoogleSheetsService
 
     private function getAccessToken(): ?string
     {
+        if ($this->credentialsPath === null) {
+            return null;
+        }
+
         try {
-            $json = json_decode(file_get_contents($this->credentialsPath), true);
+            $rawJson = file_get_contents($this->credentialsPath);
+            if (!is_string($rawJson) || $rawJson === '') {
+                return null;
+            }
+
+            $json = json_decode($rawJson, true);
+            if (
+                !is_array($json)
+                || !isset($json['client_email'], $json['private_key'])
+                || !is_string($json['client_email'])
+                || !is_string($json['private_key'])
+            ) {
+                return null;
+            }
+
             $now = time();
             
             $payload = [

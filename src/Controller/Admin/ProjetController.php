@@ -207,6 +207,9 @@ class ProjetController extends AbstractController
         ]);
     }
 
+    /**
+     * @param list<\App\Entity\User> $users
+     */
     private function createProjectNotifications(
         EntityManagerInterface $em,
         array $users,
@@ -292,7 +295,7 @@ class ProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('accept_demande_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('accept_demande_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
@@ -311,7 +314,7 @@ class ProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('refuse_demande_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('refuse_demande_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
@@ -348,7 +351,7 @@ class ProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('delete_projet_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete_projet_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
@@ -407,7 +410,7 @@ class ProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('configure_repo_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('configure_repo_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
@@ -440,6 +443,10 @@ class ProjetController extends AbstractController
         return $this->redirectToRoute('admin_projets_index');
     }
 
+    /**
+     * @param array<string, mixed> $raw
+     * @return array<string, bool|float|list<string>|string>
+     */
     private function normalizeAiProjectData(array $raw): array
     {
         $allowedStatus = ['PLANIFIE', 'EN_COURS', 'EN_PAUSE', 'TERMINE', 'ANNULE'];
@@ -514,6 +521,10 @@ class ProjetController extends AbstractController
         return round($n, 2);
     }
 
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
     private function sanitizeUtf8Recursive(mixed $value): mixed
     {
         if (is_array($value)) {
@@ -530,15 +541,21 @@ class ProjetController extends AbstractController
 
         $text = $value;
         if (!mb_check_encoding($text, 'UTF-8')) {
-            $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252, ASCII');
+            $converted = mb_convert_encoding($text, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252, ASCII');
+            if (is_string($converted)) {
+                $text = $converted;
+            }
         }
 
         $fixed = @iconv('UTF-8', 'UTF-8//IGNORE', $text);
-        if (is_string($fixed) && $fixed !== '') {
+        if (is_string($fixed)) {
             $text = $fixed;
         }
 
-        $text = preg_replace('/[^\P{C}\n\t]/u', ' ', $text) ?? $text;
+        $cleanText = preg_replace('/[^\P{C}\n\t]/u', ' ', $text);
+        if (is_string($cleanText)) {
+            $text = $cleanText;
+        }
 
         return $text;
     }

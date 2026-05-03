@@ -32,20 +32,20 @@ public function register(
 
     if ($request->isMethod('POST')) {
 
-    $captchaToken = $request->request->get('h-captcha-response');
+    $captchaToken = $request->request->getString('h-captcha-response');
     if (!$captchaToken || !$hCaptchaService->verify($captchaToken)) {
             $this->addFlash('error', 'Captcha invalide. Veuillez réessayer.');
             return $this->redirectToRoute('app_register');
         }
 
-        $nom            = trim($request->request->get('nom', ''));
-        $prenom         = trim($request->request->get('prenom', ''));
-        $email          = trim($request->request->get('email', ''));
-        $telephone      = trim($request->request->get('telephone', ''));
-        $adresse        = trim($request->request->get('adresse', ''));
-        $description    = trim($request->request->get('description', ''));
-        $password       = $request->request->get('plainPassword', '');
-        $confirmPwd     = $request->request->get('confirmPassword', '');
+        $nom = trim($request->request->getString('nom'));
+        $prenom = trim($request->request->getString('prenom'));
+        $email = trim($request->request->getString('email'));
+        $telephone = trim($request->request->getString('telephone'));
+        $adresse = trim($request->request->getString('adresse'));
+        $description = trim($request->request->getString('description'));
+        $password = $request->request->getString('plainPassword');
+        $confirmPwd = $request->request->getString('confirmPassword');
 
         if ($nom === '') {
             $this->addFlash('error', 'Le nom est obligatoire.');
@@ -135,7 +135,7 @@ public function register(
             $em->persist($user);
             $em->flush();
 
-            $mailer->sendConfirmationEmail($user->getEmail(), $user->getNom(), $code);
+            $mailer->sendConfirmationEmail($user->getEmail() ?? $email, $user->getNom() ?? $nom, $code);
 
             return $this->redirectToRoute('app_verify_pending', ['email' => $user->getEmail()]);
 
@@ -152,7 +152,7 @@ public function register(
     public function pending(Request $request): Response
     {
         return $this->render('registration/pending.html.twig', [
-            'email' => $request->query->get('email')
+            'email' => $request->query->getString('email')
         ]);
     }
 
@@ -162,8 +162,8 @@ public function register(
         Request $request,
         EntityManagerInterface $em
     ): Response {
-        $email = $request->request->get('email');
-        $code  = $request->request->get('code');
+        $email = trim($request->request->getString('email'));
+        $code = trim($request->request->getString('code'));
 
         $user = $em->getRepository(User::class)->findOneBy([
             'email'             => $email,
@@ -171,7 +171,7 @@ public function register(
             'verified'          => false,
         ]);
 
-        if (!$user || $user->getVerificationExpiry() < new \DateTime()) {
+        if (!$user instanceof User || !$user->getVerificationExpiry() || $user->getVerificationExpiry() < new \DateTime()) {
             $this->addFlash('error', 'Code invalide ou expiré.');
             return $this->redirectToRoute('app_verify_pending', ['email' => $email]);
         }

@@ -83,7 +83,7 @@ class MembreEquipeController extends AbstractController
         }
 
         $membre = $membreRepo->find($id_membre);
-        if (!$membre || $membre->getEquipe()->getIdEquipe() !== $equipe->getIdEquipe()) {
+        if (!$membre instanceof MembreEquipe || $membre->getEquipe()?->getIdEquipe() !== $equipe->getIdEquipe()) {
             throw $this->createNotFoundException('Membre introuvable dans cette équipe.');
         }
 
@@ -113,11 +113,11 @@ class MembreEquipeController extends AbstractController
         }
 
         $membre = $membreRepo->find($id_membre);
-        if (!$membre || $membre->getEquipe()->getIdEquipe() !== $equipe->getIdEquipe()) {
+        if (!$membre instanceof MembreEquipe || $membre->getEquipe()?->getIdEquipe() !== $equipe->getIdEquipe()) {
             throw $this->createNotFoundException('Membre introuvable dans cette équipe.');
         }
 
-        if ($this->isCsrfTokenValid('delete_membre' . $membre->getIdMembre(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_membre' . $membre->getIdMembre(), $request->request->getString('_token'))) {
             // Décrémenter le compteur de membres de l'équipe
             $equipe->setNbMembresActuel(max(0, $equipe->getNbMembresActuel() - 1));
             
@@ -143,10 +143,11 @@ class MembreEquipeController extends AbstractController
             return $this->json(['error' => 'Équipe introuvable'], 404);
         }
 
-        $data = json_decode($request->getContent(), true);
-        $message = $data['message'] ?? '';
-        $sendToAll = $data['sendToAll'] ?? true;
-        $memberIds = $data['memberIds'] ?? [];
+        $decoded = json_decode($request->getContent(), true);
+        $data = is_array($decoded) ? $decoded : [];
+        $message = isset($data['message']) && is_string($data['message']) ? trim($data['message']) : '';
+        $sendToAll = !isset($data['sendToAll']) || (bool) $data['sendToAll'];
+        $memberIds = isset($data['memberIds']) && is_array($data['memberIds']) ? $data['memberIds'] : [];
 
         if (empty($message)) {
             return $this->json(['error' => 'Le message ne peut pas être vide'], 400);
@@ -206,7 +207,7 @@ class MembreEquipeController extends AbstractController
                 $results[] = [
                     'member' => $user->getNom() . ' ' . $user->getPrenom(),
                     'status' => 'failed',
-                    'error' => $result['error']
+                    'error' => $result['error'] ?? 'Erreur inconnue'
                 ];
                 $failCount++;
             }

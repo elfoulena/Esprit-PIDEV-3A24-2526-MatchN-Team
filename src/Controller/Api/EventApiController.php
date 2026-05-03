@@ -17,11 +17,10 @@ class EventApiController extends AbstractController
     #[Route('', name: 'api_events_index', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {
-        $start = $request->query->get('start');
-        $end = $request->query->get('end');
-        $type = $request->query->get('type');
-        $status = $request->query->get('status');
-        $equipeId = $request->query->get('equipe_id');
+        $start = trim($request->query->getString('start'));
+        $end = trim($request->query->getString('end'));
+        $type = trim($request->query->getString('type'));
+        $status = trim($request->query->getString('status'));
 
         $qb = $this->eventRepository->createQueryBuilder('e');
 
@@ -47,12 +46,12 @@ class EventApiController extends AbstractController
 
         $events = $qb->getQuery()->getResult();
 
-        $formattedEvents = array_map(function(Evenement $event) {
+        $formattedEvents = array_map(function (Evenement $event): array {
             return [
                 'id' => $event->getIdEvenement(),
                 'title' => $event->getTitre(),
-                'start' => $event->getDateDebut()->format('Y-m-d\TH:i:s'),
-                'end' => $event->getDateFin()->format('Y-m-d\TH:i:s'),
+                'start' => $event->getDateDebut()?->format('Y-m-d\TH:i:s'),
+                'end' => $event->getDateFin()?->format('Y-m-d\TH:i:s'),
                 'description' => $event->getDescription(),
                 'lieu' => $event->getLieu(),
                 'type' => $event->getTypeEvenement(),
@@ -74,8 +73,8 @@ class EventApiController extends AbstractController
         return $this->json([
             'id' => $event->getIdEvenement(),
             'title' => $event->getTitre(),
-            'start' => $event->getDateDebut()->format('Y-m-d\TH:i:s'),
-            'end' => $event->getDateFin()->format('Y-m-d\TH:i:s'),
+            'start' => $event->getDateDebut()?->format('Y-m-d\TH:i:s'),
+            'end' => $event->getDateFin()?->format('Y-m-d\TH:i:s'),
             'description' => $event->getDescription(),
             'lieu' => $event->getLieu(),
             'type' => $event->getTypeEvenement(),

@@ -4,6 +4,7 @@ namespace App\Controller\Employe;
 
 use App\Entity\AffectationProjet;
 use App\Entity\Projet;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,11 +65,14 @@ class ProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('take_projet_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('take_projet_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
 
         $existing = $em->getRepository(AffectationProjet::class)->findOneBy([
             'User'   => $user,

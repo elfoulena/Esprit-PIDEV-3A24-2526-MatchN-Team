@@ -89,7 +89,7 @@ class CompetenceController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('delete_competence_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete_competence_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 

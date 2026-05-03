@@ -67,7 +67,7 @@ class ProjetControllerNotificationTest extends TestCase
             '/freelancer/projets'
         );
 
-        self::assertTrue(true);
+        self::expectNotToPerformAssertions();
     }
 
     /**

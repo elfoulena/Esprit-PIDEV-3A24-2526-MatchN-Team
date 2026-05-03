@@ -30,7 +30,7 @@ class NotificationController extends AbstractController
             throw $this->createAccessDeniedException('Acces refuse.');
         }
 
-        if (!$this->isCsrfTokenValid('mark_notification_' . $notification->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('mark_notification_' . $notification->getId(), $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException('Token CSRF invalide.');
         }
 
@@ -45,7 +45,7 @@ class NotificationController extends AbstractController
     #[Route('/read-all', name: 'app_notification_mark_all_read', methods: ['POST'])]
     public function markAllRead(Request $request, NotificationRepository $notificationRepository): RedirectResponse
     {
-        if (!$this->isCsrfTokenValid('mark_all_notifications', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('mark_all_notifications', $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException('Token CSRF invalide.');
         }
 

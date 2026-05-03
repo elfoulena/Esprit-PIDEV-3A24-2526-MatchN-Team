@@ -72,18 +72,18 @@ class TeamChatController extends AbstractController
             return $this->json(['error' => 'Équipe non trouvée'], 404);
         }
         
-        $lastId = $request->query->get('lastId', 0);
+        $lastId = $request->query->getInt('lastId', 0);
         $messages = $messageRepo->findRecentMessagesByTeam($equipe, $lastId);
         
-        $formattedMessages = array_map(function($message) {
+        $formattedMessages = array_map(function (Message $message): array {
             return [
                 'id' => $message->getIdMessage(),
                 'sender_id' => $message->getIdExpediteur(),
                 'sender_name' => $message->getNomExpediteur(),
                 'content' => $message->getContenu(),
-                'time' => $message->getDateEnvoi()->format('H:i'),
-                'date' => $message->getDateEnvoi()->format('d/m/Y'),
-                'full_date' => $message->getDateEnvoi()->format('Y-m-d H:i:s')
+                'time' => $message->getDateEnvoi()?->format('H:i'),
+                'date' => $message->getDateEnvoi()?->format('d/m/Y'),
+                'full_date' => $message->getDateEnvoi()?->format('Y-m-d H:i:s')
             ];
         }, $messages);
         
@@ -114,15 +114,16 @@ class TeamChatController extends AbstractController
             return $this->json(['error' => 'Équipe non trouvée'], 404);
         }
         
-        $data = json_decode($request->getContent(), true);
-        $content = trim($data['content'] ?? '');
+        $decoded = json_decode($request->getContent(), true);
+        $data = is_array($decoded) ? $decoded : [];
+        $content = isset($data['content']) && is_string($data['content']) ? trim($data['content']) : '';
         
         if (empty($content)) {
             return $this->json(['error' => 'Le message ne peut pas être vide'], 400);
         }
         
         $message = new Message();
-        $message->setIdExpediteur($user->getId());
+        $message->setIdExpediteur($user->getId() ?? 0);
         $message->setNomExpediteur($user->getPrenom() . ' ' . $user->getNom());
         $message->setContenu($content);
         $message->setEquipe($equipe);

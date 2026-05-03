@@ -115,40 +115,40 @@ class Projet
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $budget_total = null;
-    public function getBudget_total(): ?float
+    public function getBudget_total(): ?string
     {
         return $this->budget_total;
     }
 
-    public function setBudget_total(?float $budget_total): self
+    public function setBudget_total(?string $budget_total): self
     {
         $this->budget_total = $budget_total;
         return $this;
     }
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
-    private ?float $budget_interne = null;
+    private ?string $budget_interne = null;
 
-    public function getBudget_interne(): ?float
+    public function getBudget_interne(): ?string
     {
         return $this->budget_interne;
     }
 
-    public function setBudget_interne(?float $budget_interne): self
+    public function setBudget_interne(?string $budget_interne): self
     {
         $this->budget_interne = $budget_interne;
         return $this;
     }
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
-    private ?float $budget_freelance = null;
+    private ?string $budget_freelance = null;
 
-    public function getBudget_freelance(): ?float
+    public function getBudget_freelance(): ?string
     {
         return $this->budget_freelance;
     }
 
-    public function setBudget_freelance(?float $budget_freelance): self
+    public function setBudget_freelance(?string $budget_freelance): self
     {
         $this->budget_freelance = $budget_freelance;
         return $this;
@@ -172,6 +172,7 @@ class Projet
     public function isVisibleFreelancer(): bool { return $this->visibleFreelancer; }
     public function setVisibleFreelancer(bool $v): self { $this->visibleFreelancer = $v; return $this; }
 
+    /** @var Collection<int, AffectationProjet> */
     #[ORM\OneToMany(targetEntity: AffectationProjet::class, mappedBy: 'projet')]
     private Collection $affectationProjets;
 
@@ -180,9 +181,6 @@ class Projet
      */
     public function getAffectationProjets(): Collection
     {
-        if (!$this->affectationProjets instanceof Collection) {
-            $this->affectationProjets = new ArrayCollection();
-        }
         return $this->affectationProjets;
     }
 
@@ -200,6 +198,7 @@ class Projet
         return $this;
     }
 
+    /** @var Collection<int, DemandeParticipation> */
     #[ORM\OneToMany(targetEntity: DemandeParticipation::class, mappedBy: 'projet')]
     private Collection $demandeParticipations;
 
@@ -208,9 +207,6 @@ class Projet
      */
     public function getDemandeParticipations(): Collection
     {
-        if (!$this->demandeParticipations instanceof Collection) {
-            $this->demandeParticipations = new ArrayCollection();
-        }
         return $this->demandeParticipations;
     }
 
@@ -242,6 +238,7 @@ class Projet
         return $this;
     }
 
+    /** @var Collection<int, Competence> */
     #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'projets')]
     #[ORM\JoinTable(name: 'projet_competence',
         joinColumns: [new ORM\JoinColumn(name: 'projet_id', referencedColumnName: 'id_projet')],
@@ -261,9 +258,6 @@ class Projet
      */
     public function getCompetences(): Collection
     {
-        if (!$this->competences instanceof Collection) {
-            $this->competences = new ArrayCollection();
-        }
         return $this->competences;
     }
 
@@ -286,36 +280,36 @@ class Projet
         return $this->id_projet;
     }
 
-    public function getDateDebut(): ?\DateTime
+    public function getDateDebut(): ?\DateTimeInterface
     {
         return $this->date_debut;
     }
 
-    public function setDateDebut(?\DateTime $date_debut): static
+    public function setDateDebut(?\DateTimeInterface $date_debut): static
     {
         $this->date_debut = $date_debut;
 
         return $this;
     }
 
-    public function getDateFin(): ?\DateTime
+    public function getDateFin(): ?\DateTimeInterface
     {
         return $this->date_fin;
     }
 
-    public function setDateFin(?\DateTime $date_fin): static
+    public function setDateFin(?\DateTimeInterface $date_fin): static
     {
         $this->date_fin = $date_fin;
 
         return $this;
     }
 
-    public function getDateLivraison(): ?\DateTime
+    public function getDateLivraison(): ?\DateTimeInterface
     {
         return $this->date_livraison;
     }
 
-    public function setDateLivraison(?\DateTime $date_livraison): static
+    public function setDateLivraison(?\DateTimeInterface $date_livraison): static
     {
         $this->date_livraison = $date_livraison;
 

@@ -10,7 +10,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/p/scan')]
 class PresenceScanController extends AbstractController
@@ -23,43 +22,50 @@ class PresenceScanController extends AbstractController
         GoogleSheetsService $sheetsService,
         LoggerInterface $logger
     ): Response {
-        $logger->info('Début du scan pour le jeton: ' . $jeton);
-        
+        $logger->info('Debut du scan pour le jeton: ' . $jeton);
+
         $repo = $em->getRepository(ParticipationEvenement::class);
         $participation = $repo->findOneBy(['jeton' => $jeton]);
-        $logger->info('Recherche de participation terminée.');
+        $logger->info('Recherche de participation terminee.');
 
-        if (!$participation) {
-            $logger->warning('Participation non trouvée pour le jeton: ' . $jeton);
+        if (!$participation instanceof ParticipationEvenement) {
+            $logger->warning('Participation non trouvee pour le jeton: ' . $jeton);
+
             return $this->render('admin/evenement/scan_result.html.twig', [
                 'status' => 'error',
-                'message' => 'Billet invalide ou introuvable.'
+                'message' => 'Billet invalide ou introuvable.',
             ]);
         }
 
         $evenement = $participation->getEvenement();
         $employe = $participation->getUtilisateur();
-        $logger->info('Employé trouvé: ' . $employe->getEmail());
+        if (!$employe || !$evenement) {
+            $logger->warning('Participation incomplete pour le jeton: ' . $jeton);
 
-        if ($participation->isPresence()) {
-            $logger->info('Billet déjà scanné auparavant.');
             return $this->render('admin/evenement/scan_result.html.twig', [
-                'status' => 'warning',
-                'message' => 'Ce billet a déjà été scanné !',
-                'employe' => $employe,
-                'evenement' => $evenement
+                'status' => 'error',
+                'message' => 'Les informations de participation sont incompletes.',
             ]);
         }
 
-        // Marquer la présence en BDD (Priorité absolue)
-        $logger->info('Mise à jour BDD (flush)...');
+        $logger->info('Employe trouve: ' . $employe->getEmail());
+
+        if ($participation->isPresence()) {
+            $logger->info('Billet deja scanne auparavant.');
+
+            return $this->render('admin/evenement/scan_result.html.twig', [
+                'status' => 'warning',
+                'message' => 'Ce billet a deja ete scanne !',
+                'employe' => $employe,
+                'evenement' => $evenement,
+            ]);
+        }
+
+        $logger->info('Mise a jour BDD (flush)...');
         $participation->setPresence(true);
         $em->flush();
-        $logger->info('BDD mise à jour avec succès.');
+        $logger->info('BDD mise a jour avec succes.');
 
-        // Les appels externes suivants sont secondaires et ne doivent pas bloquer l'utilisateur
-        
-        // 1. Envoyer l'email (Transport: Mailjet)
         try {
             $logger->info('Step: Mailer Start');
             $mailerService->sendPresenceConfirmation($participation);
@@ -68,17 +74,16 @@ class PresenceScanController extends AbstractController
             $logger->error('Step: Mailer Failed - ' . $e->getMessage());
         }
 
-        // 2. Ajouter dans Google Sheets (Timeout réduit de 2s géré dans le service)
         try {
             $logger->info('Step: Sheets Start');
             $success = $sheetsService->appendParticipationInfo(
-                $employe->getNom(),
-                $employe->getPrenom(),
-                $employe->getEmail(),
-                $evenement->getTitre(),
+                $employe->getNom() ?? '',
+                $employe->getPrenom() ?? '',
+                $employe->getEmail() ?? '',
+                $evenement->getTitre() ?? '',
                 new \DateTime()
             );
-            
+
             if ($success) {
                 $logger->info('Step: Sheets End - Success: YES');
             } else {
@@ -90,9 +95,9 @@ class PresenceScanController extends AbstractController
 
         return $this->render('admin/evenement/scan_result.html.twig', [
             'status' => 'success',
-            'message' => 'Présence validée avec succès !',
+            'message' => 'Presence validee avec succes !',
             'employe' => $employe,
-            'evenement' => $evenement
+            'evenement' => $evenement,
         ]);
     }
 }

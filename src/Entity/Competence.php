@@ -71,6 +71,7 @@ class Competence
         return $this;
     }
 
+    /** @var Collection<int, Projet> */
     #[ORM\ManyToMany(targetEntity: Projet::class, mappedBy: 'competences')]
     private Collection $projets;
 
@@ -84,9 +85,6 @@ class Competence
      */
     public function getProjets(): Collection
     {
-        if (!$this->projets instanceof Collection) {
-            $this->projets = new ArrayCollection();
-        }
         return $this->projets;
     }
 

@@ -47,7 +47,7 @@ class AdminTeamRequestController extends AbstractController
         // Find the team request
         $teamRequest = $requestRepo->find($id);
         
-        if (!$teamRequest) {
+        if (!$teamRequest instanceof TeamRequest) {
             $this->addFlash('error', 'Demande non trouvée.');
             return $this->redirectToRoute('admin_team_requests_index');
         }
@@ -58,13 +58,17 @@ class AdminTeamRequestController extends AbstractController
         }
         
         // Verify CSRF token
-        if (!$this->isCsrfTokenValid('approve_request_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('approve_request_' . $id, $request->request->getString('_token'))) {
             $this->addFlash('error', 'Token invalide.');
             return $this->redirectToRoute('admin_team_requests_index');
         }
         
         $team = $teamRequest->getTeam();
         $employee = $teamRequest->getEmployee();
+        if (!$team || !$employee) {
+            $this->addFlash('error', 'La demande est incomplète.');
+            return $this->redirectToRoute('admin_team_requests_index');
+        }
         
         // Check if team is full
         if ($team->getNbMembresActuel() >= $team->getNbMembresMax()) {
@@ -109,8 +113,8 @@ class AdminTeamRequestController extends AbstractController
                 $teamRequest->setProcessedByUser($adminUser);
             }
             
-            $adminNotes = $request->request->get('admin_notes');
-            if ($adminNotes) {
+            $adminNotes = trim($request->request->getString('admin_notes'));
+            if ($adminNotes !== '') {
                 $teamRequest->setAdminNotes($adminNotes);
             }
             
@@ -142,7 +146,7 @@ class AdminTeamRequestController extends AbstractController
         // Find the team request
         $teamRequest = $requestRepo->find($id);
         
-        if (!$teamRequest) {
+        if (!$teamRequest instanceof TeamRequest) {
             $this->addFlash('error', 'Demande non trouvée.');
             return $this->redirectToRoute('admin_team_requests_index');
         }
@@ -153,14 +157,14 @@ class AdminTeamRequestController extends AbstractController
         }
         
         // Verify CSRF token
-        if (!$this->isCsrfTokenValid('reject_request_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('reject_request_' . $id, $request->request->getString('_token'))) {
             $this->addFlash('error', 'Token invalide.');
             return $this->redirectToRoute('admin_team_requests_index');
         }
         
         try {
             // Get rejection reason
-            $reason = $request->request->get('rejection_reason');
+            $reason = trim($request->request->getString('rejection_reason'));
             
             // Update request status
             $teamRequest->setStatus('rejected');
@@ -169,7 +173,7 @@ class AdminTeamRequestController extends AbstractController
             if ($adminUser && $adminUser instanceof User) {
                 $teamRequest->setProcessedByUser($adminUser);
             }
-            $teamRequest->setAdminNotes($reason ?? 'Demande rejetée par l\'administrateur');
+            $teamRequest->setAdminNotes($reason !== '' ? $reason : 'Demande rejetée par l\'administrateur');
             
             $em->flush();
             

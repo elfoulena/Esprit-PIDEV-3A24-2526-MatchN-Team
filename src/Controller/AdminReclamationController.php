@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Reclamation;
 use App\Entity\ReponseReclamation;
 use App\Entity\MessageDiscussion;
+use App\Entity\User;
 use App\Repository\ReclamationRepository;
 use App\Repository\DiscussionRepository;
 use App\Service\PrioriteReclamationService;
@@ -63,7 +64,7 @@ class AdminReclamationController extends AbstractController
             $chatMessagesData[$d->getIdDiscussion()] = array_map(fn($m) => [
                 'role'    => $m->getRoleExpediteur(),
                 'contenu' => $m->getContenu(),
-                'date'    => $m->getDateEnvoi()->format('d/m H:i'),
+                'date'    => $m->getDateEnvoi()?->format('d/m H:i') ?? '',
             ], $msgs);
         }
 
@@ -85,7 +86,7 @@ class AdminReclamationController extends AbstractController
         EntityManagerInterface $em
     ): Response {
         $contenu       = trim((string) $request->request->get('contenu', ''));
-        $nouveauStatut = $request->request->get('statut');
+        $nouveauStatut = trim($request->request->getString('statut'));
 
         if ($contenu === '') {
             $this->addFlash('error', 'La réponse ne peut pas être vide.');
@@ -103,7 +104,7 @@ class AdminReclamationController extends AbstractController
 
         $em->persist($reponse);
 
-        if ($nouveauStatut) {
+        if ($nouveauStatut !== '') {
             $reclamation->setStatut($nouveauStatut);
         }
 
@@ -125,11 +126,16 @@ class AdminReclamationController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $contenu = trim($request->request->get('contenu', ''));
+        $contenu = trim($request->request->getString('contenu'));
         if (!empty($contenu)) {
+            $admin = $this->getUser();
+            if (!$admin instanceof User || $admin->getId() === null) {
+                throw $this->createAccessDeniedException();
+            }
+
             $message = new MessageDiscussion();
             $message->setDiscussion($discussion);
-            $message->setIdExpediteur($this->getUser()->getId());
+            $message->setIdExpediteur($admin->getId());
             $message->setRoleExpediteur('admin');
             $message->setContenu($contenu);
             $message->setDateEnvoi(new \DateTime());
@@ -157,8 +163,8 @@ class AdminReclamationController extends AbstractController
     #[Route('/ai/ameliorer', name: 'admin_reclamation_ai_ameliorer', methods: ['POST'])]
     public function ameliorer(Request $request, GroqService $groq): Response
     {
-        $texte    = trim($request->request->get('texte', ''));
-        $contexte = trim($request->request->get('contexte', ''));
+        $texte = trim($request->request->getString('texte'));
+        $contexte = trim($request->request->getString('contexte'));
 
         if (empty($texte)) {
             return $this->json(['error' => 'Texte vide'], 400);
@@ -175,8 +181,8 @@ class AdminReclamationController extends AbstractController
     #[Route('/ai/traduire', name: 'admin_reclamation_ai_traduire', methods: ['POST'])]
     public function traduire(Request $request, GroqService $groq): Response
     {
-        $texte  = trim($request->request->get('texte', ''));
-        $langue = $request->request->get('langue', 'en');
+        $texte = trim($request->request->getString('texte'));
+        $langue = trim($request->request->getString('langue')) ?: 'en';
 
         if (empty($texte)) {
             return $this->json(['error' => 'Texte vide'], 400);

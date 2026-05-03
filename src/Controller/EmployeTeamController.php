@@ -29,7 +29,7 @@ class EmployeTeamController extends AbstractController
         
         $membre = $membreRepo->findOneBy(['user' => $user, 'statutMembre' => 'Actif']);
         
-        if (!$membre) {
+        if (!$membre instanceof MembreEquipe) {
             $this->addFlash('info', 'Vous n\'êtes actuellement membre d\'aucune équipe.');
             return $this->redirectToRoute('employe_available_teams');
         }
@@ -61,11 +61,15 @@ class EmployeTeamController extends AbstractController
         
         // Get pending requests
         $pendingRequests = $requestRepo->findPendingByEmployee($user);
-        $pendingTeamIds = array_map(fn($req) => $req->getTeam()->getIdEquipe(), $pendingRequests);
+        $pendingTeamIds = array_map(
+            static fn(TeamRequest $teamRequest): ?int => $teamRequest->getTeam()?->getIdEquipe(),
+            $pendingRequests
+        );
+        $pendingTeamIds = array_values(array_filter($pendingTeamIds, static fn(?int $id): bool => $id !== null));
         
         // Get all active teams
-        $search = $request->query->get('search', '');
-        $departement = $request->query->get('departement', '');
+        $search = trim($request->query->getString('search'));
+        $departement = trim($request->query->getString('departement'));
         
         $qb = $equipeRepo->createQueryBuilder('e');
         $qb->where('e.statut = :statut')
@@ -143,8 +147,8 @@ class EmployeTeamController extends AbstractController
         }
         
         if ($request->isMethod('POST')) {
-            $message = $request->request->get('message');
-            $requestedRole = $request->request->get('requestedRole', 'Membre');
+            $message = trim($request->request->getString('message'));
+            $requestedRole = trim($request->request->getString('requestedRole')) ?: 'Membre';
             
             $teamRequest = new TeamRequest();
             $teamRequest->setEmployee($user);
@@ -190,7 +194,11 @@ class EmployeTeamController extends AbstractController
         
         $teamRequest = $requestRepo->find($id);
         
-        if (!$teamRequest || $teamRequest->getEmployee()->getId() !== $user->getId()) {
+        if (
+            !$teamRequest instanceof TeamRequest
+            || !$teamRequest->getEmployee()
+            || $teamRequest->getEmployee()->getId() !== $user->getId()
+        ) {
             throw $this->createNotFoundException('Demande non trouvée.');
         }
         
@@ -199,7 +207,7 @@ class EmployeTeamController extends AbstractController
             return $this->redirectToRoute('employe_my_requests');
         }
         
-        if ($this->isCsrfTokenValid('cancel_request_' . $id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('cancel_request_' . $id, $request->request->getString('_token'))) {
             $em->remove($teamRequest);
             $em->flush();
             $this->addFlash('success', 'Votre demande a été annulée.');

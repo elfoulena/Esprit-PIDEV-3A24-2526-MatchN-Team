@@ -140,8 +140,8 @@ class TeamChatController extends AbstractController
                 'sender_id' => $message->getIdExpediteur(),
                 'sender_name' => $message->getNomExpediteur(),
                 'content' => $message->getContenu(),
-                'time' => $message->getDateEnvoi()->format('H:i'),
-                'date' => $message->getDateEnvoi()->format('d/m/Y')
+                'time' => $message->getDateEnvoi()?->format('H:i'),
+                'date' => $message->getDateEnvoi()?->format('d/m/Y')
             ]
         ]);
     }

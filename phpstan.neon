@@ -31,16 +31,6 @@ parameters:
         - src/Controller/EvenementController.php
         - src/Controller/Employe/EvenementController.php
 
-        # ===== Repositories =====
-        - src/Repository/AffectationProjetRepository.php
-        - src/Repository/EvaluationPartTimeRepository.php
-        - src/Repository/EquipeRepository.php
-        - src/Repository/EvenementRepository.php
-
-        # ===== Forms =====
-        - src/Form/AffectationProjetType.php
-        - src/Form/EvaluationPartTimeType.php
-
         # ===== Services =====
         - src/Service/WhatsAppService.php
         - src/Service/GitHubRepositoryService.php

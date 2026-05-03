@@ -3,11 +3,10 @@
 namespace App\Security;
 
 use App\Entity\User;
-use App\Enum\Role;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use League\OAuth2\Client\Provider\GoogleUser;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
@@ -19,57 +18,62 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class GoogleAuthenticator extends OAuth2Authenticator
 {
+    private ClientRegistry $clientRegistry;
+    private EntityManagerInterface $entityManager;
+    private RouterInterface $router;
+
     public function __construct(
-        private ClientRegistry $clientRegistry,
-        private EntityManagerInterface $em,
-        private RouterInterface $router,
-    ) {}
+        ClientRegistry $clientRegistry,
+        EntityManagerInterface $entityManager,
+        RouterInterface $router
+    ) {
+        $this->clientRegistry = $clientRegistry;
+        $this->entityManager = $entityManager;
+        $this->router = $router;
+    }
 
     public function supports(Request $request): ?bool
     {
-        return $request->attributes->get('_route') === 'connect_google_check';
+        return $request->getPathInfo() === '/connect/google/check';
     }
 
     public function authenticate(Request $request): Passport
     {
-        $client      = $this->clientRegistry->getClient('google');
+        $client = $this->clientRegistry->getClient('google');
         $accessToken = $this->fetchAccessToken($client);
 
-        return new SelfValidatingPassport(
-            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client) {
-                $googleUser = $client->fetchUserFromToken($accessToken);
+        /** @var GoogleUser $googleUser */
+        $googleUser = $client->fetchUserFromToken($accessToken);
+        
+        $email = $googleUser->getEmail();
+        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-                $email = $googleUser->getEmail();
+        if ($existingUser) {
+            $user = $existingUser;
+        } else {
+            $user = new User();
+            $user->setEmail($email);
+            $user->setNom($googleUser->getLastName() ?? '');
+            $user->setPrenom($googleUser->getFirstName() ?? '');
+            $user->setVerified(true);
+            $this->entityManager->persist($user);
+        }
 
-                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        $this->entityManager->flush();
 
-                if (!$user) {
-                    $user = new User();
-                    $user->setEmail($email);
-                    $user->setNom($googleUser->getLastName() ?? 'Inconnu');
-                    $user->setPrenom($googleUser->getFirstName() ?? '');
-                    $user->setRole(Role::FREELANCER);
-                    $user->setPassword('');
-                    $user->setVerified(true);
-                    $user->setActif(true);
-
-                    $this->em->persist($user);
-                    $this->em->flush();
-                }
-
-                return $user;
-            })
-        );
+        return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier()));
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return new RedirectResponse($this->router->generate('home'));
+        return new Response('', Response::HTTP_FOUND, ['Location' => $this->router->generate('dashboard')]);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $request->getSession()->set('google_auth_error', $exception->getMessage());
-        return new RedirectResponse($this->router->generate('app_login'));
+        return new Response(
+            $exception->getMessage(),
+            Response::HTTP_UNAUTHORIZED
+        );
     }
 }

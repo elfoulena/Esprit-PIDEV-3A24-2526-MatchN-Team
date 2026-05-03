@@ -157,12 +157,12 @@ public function setBlockedUntil(?\DateTimeInterface $blockedUntil): self
 
     public function getUserIdentifier(): string
     {
-        return $this->email;
+        return $this->email ?? '';
     }
 
     public function getPassword(): string
     {
-        return $this->password;
+        return $this->password ?? '';
     }
 
     public function setPassword(string $password): static
@@ -307,7 +307,7 @@ public function setBlockedUntil(?\DateTimeInterface $blockedUntil): self
 
     public function getGoogleAuthenticatorUsername(): string
     {
-        return $this->email;
+        return $this->email ?? '';
     }
 
     public function getGoogleAuthenticatorSecret(): ?string

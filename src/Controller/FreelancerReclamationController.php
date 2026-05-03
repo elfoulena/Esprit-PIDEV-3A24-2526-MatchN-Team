@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Entity\Discussion;
 use App\Entity\MessageDiscussion;
 use App\Entity\Reclamation;
+use App\Entity\User;
 use App\Repository\DiscussionRepository;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseReclamationRepository;
@@ -23,11 +24,13 @@ class FreelancerReclamationController extends AbstractController
         DiscussionRepository $discussionRepo,
         Request $request
     ): Response {
-        $userId = $this->getUser() ? $this->getUser()->getId() : 1;
-        $search = $request->query->get('search');
-        $filtre = $request->query->get('reponse');
+        /** @var User $user */
+        $user = $this->getUser();
+        $userId = $user ? $user->getId() : 1;
+        $search = $request->query->get('search', '');
+        $filtre = $request->query->get('reponse', '');
 
-        $reclamations = $repo->findByUserWithFilters($userId, null, $search);
+        $reclamations = $repo->findByUserWithFilters($userId ?? 1, null, $search ?: null);
 
         $reponses = [];
         foreach ($reclamations as $r) {
@@ -72,8 +75,10 @@ class FreelancerReclamationController extends AbstractController
     #[Route('/nouvelle', name: 'freelancer_reclamation_new', methods: ['POST'])]
     public function nouvelle(Request $request, EntityManagerInterface $em): Response
     {
-        $userId  = $this->getUser()->getId();
-        $message = trim($request->request->get('message', ''));
+        /** @var User $user */
+        $user = $this->getUser();
+        $userId = $user?->getId() ?? 1;
+        $message = trim((string) $request->request->get('message', ''));
 
         if (empty($message)) {
             $this->addFlash('error', 'Le message ne peut pas être vide.');
@@ -104,8 +109,10 @@ class FreelancerReclamationController extends AbstractController
         EntityManagerInterface $em,
         DiscussionRepository $discussionRepo
     ): Response {
-        $userId  = $this->getUser()->getId();
-        $contenu = trim($request->request->get('contenu', ''));
+        /** @var User $user */
+        $user = $this->getUser();
+        $userId = $user?->getId() ?? 1;
+        $contenu = trim((string) $request->request->get('contenu', ''));
 
         if (empty($contenu)) {
             $this->addFlash('error', 'Message vide.');
@@ -115,7 +122,7 @@ class FreelancerReclamationController extends AbstractController
         $discussion = $discussionRepo->findOneBy(['id_freelancer' => $userId]);
         if (!$discussion) {
             $discussion = new Discussion();
-            $discussion->setIdFreelancer($userId);
+            $discussion->setIdFreelancer($userId ?? 1);
             $discussion->setTitre('Discussion avec admin');
             $discussion->setDateCreation(new \DateTime());
             $em->persist($discussion);
@@ -124,7 +131,7 @@ class FreelancerReclamationController extends AbstractController
 
         $message = new MessageDiscussion();
         $message->setDiscussion($discussion);
-        $message->setIdExpediteur($userId);
+        $message->setIdExpediteur($userId ?? 1);
         $message->setRoleExpediteur('freelancer');
         $message->setContenu($contenu);
         $message->setDateEnvoi(new \DateTime());
@@ -143,7 +150,7 @@ class FreelancerReclamationController extends AbstractController
             return $this->redirectToRoute('freelancer_reclamation_index');
         }
 
-        $message = trim($request->request->get('message', ''));
+        $message = trim((string) $request->request->get('message', ''));
         if (!empty($message)) {
             $reclamation->setMessage($message);
             $em->flush();

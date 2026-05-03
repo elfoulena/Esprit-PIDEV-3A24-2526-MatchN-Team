@@ -14,6 +14,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\Positive;
 
+/**
+ * @extends AbstractType<mixed>
+ */
 class CreateEmployeType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

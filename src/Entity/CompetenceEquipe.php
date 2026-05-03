@@ -173,12 +173,12 @@ class CompetenceEquipe
         return $this;
     }
 
-    public function getNiveauMoyen(): ?string
+    public function getNiveauMoyen(): ?float
     {
         return $this->niveau_moyen;
     }
 
-    public function setNiveauMoyen(?string $niveau_moyen): static
+    public function setNiveauMoyen(?float $niveau_moyen): self
     {
         $this->niveau_moyen = $niveau_moyen;
 
@@ -197,7 +197,7 @@ class CompetenceEquipe
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
@@ -209,7 +209,7 @@ class CompetenceEquipe
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }

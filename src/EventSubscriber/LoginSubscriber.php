@@ -3,6 +3,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\LoginHistory;
+use App\Entity\User;
 use App\Service\GeoLocationService;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,7 +29,8 @@ class LoginSubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
-        $user    = $event->getUser();
+        /** @var User $user */
+        $user = $event->getUser();
         $request = $event->getRequest();
         $ip      = $request->getClientIp();
         $country = ($ip === '127.0.0.1' || $ip === '::1')

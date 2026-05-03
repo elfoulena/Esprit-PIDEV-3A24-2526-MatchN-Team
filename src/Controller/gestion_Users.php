@@ -182,7 +182,9 @@ class gestion_Users extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete_' . $user->getId(), $request->getPayload()->getString('_token'))) {
-            if ($user->getId() === $this->getUser()?->getId()) {
+            /** @var User|null $currentUser */
+            $currentUser = $this->getUser();
+            if ($user->getId() === ($currentUser ? $currentUser->getId() : null)) {
                 $this->addFlash('error', 'Vous ne pouvez pas supprimer votre propre compte.');
                 return $this->redirectToRoute('admin_user_index');
             }

@@ -70,6 +70,7 @@ class Discussion
         return $this;
     }
 
+    /** @var Collection<int, MessageDiscussion> */
     #[ORM\OneToMany(targetEntity: MessageDiscussion::class, mappedBy: 'discussion')]
     private Collection $messageDiscussions;
 
@@ -83,23 +84,20 @@ class Discussion
      */
     public function getMessageDiscussions(): Collection
     {
-        if (!$this->messageDiscussions instanceof Collection) {
-            $this->messageDiscussions = new ArrayCollection();
-        }
         return $this->messageDiscussions;
     }
 
     public function addMessageDiscussion(MessageDiscussion $messageDiscussion): self
     {
-        if (!$this->getMessageDiscussions()->contains($messageDiscussion)) {
-            $this->getMessageDiscussions()->add($messageDiscussion);
+        if (!$this->messageDiscussions->contains($messageDiscussion)) {
+            $this->messageDiscussions->add($messageDiscussion);
         }
         return $this;
     }
 
     public function removeMessageDiscussion(MessageDiscussion $messageDiscussion): self
     {
-        $this->getMessageDiscussions()->removeElement($messageDiscussion);
+        $this->messageDiscussions->removeElement($messageDiscussion);
         return $this;
     }
 
@@ -120,12 +118,12 @@ class Discussion
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTime
+    public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->date_creation;
     }
 
-    public function setDateCreation(\DateTime $date_creation): static
+    public function setDateCreation(\DateTimeInterface $date_creation): static
     {
         $this->date_creation = $date_creation;
 

@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\Reclamation;
+use App\Entity\User;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseReclamationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,11 +21,13 @@ public function index(
     ReponseReclamationRepository $reponseRepo,
     Request $request
 ): Response {
-    $userId  = $this->getUser() ? $this->getUser()->getId() : 1;
-    $search  = $request->query->get('search');
-    $filtre  = $request->query->get('reponse'); // 'avec', 'sans', ou ''
+    /** @var User $user */
+    $user = $this->getUser();
+    $userId = $user ? $user->getId() : 1;
+    $search = $request->query->get('search', '');
+    $filtre = $request->query->get('reponse', '');
 
-    $reclamations = $repo->findByUserWithFilters($userId, null, $search);
+    $reclamations = $repo->findByUserWithFilters($userId ?? 1, null, $search ?: null);
 
     // Récupérer les réponses pour chaque réclamation
     $reponses = [];
@@ -55,15 +58,17 @@ public function index(
         'reponses'     => $reponses,
         'stats'        => $stats,
         'search'       => $search,
-        'filtre'       => $filtre, // ✅ ajouté
+        'filtre'       => $filtre,
     ]);
 }
 
     #[Route('/nouvelle', name: 'employe_reclamation_new', methods: ['POST'])]
     public function nouvelle(Request $request, EntityManagerInterface $em): Response
     {
-        $userId = $this->getUser()->getId(); // ✅ comme dans index()
-        $message = trim($request->request->get('message', ''));
+        /** @var User $user */
+        $user = $this->getUser();
+        $userId = $user?->getId() ?? 1;
+        $message = trim((string) $request->request->get('message', ''));
 
         if (empty($message)) {
             $this->addFlash('error', 'Le message ne peut pas être vide.');
@@ -97,7 +102,7 @@ public function index(
             return $this->redirectToRoute('employe_reclamation_index');
         }
 
-        $message = trim($request->request->get('message', ''));
+        $message = trim((string) $request->request->get('message', ''));
         if (!empty($message)) {
             $reclamation->setMessage($message);
             $em->flush();

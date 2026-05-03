@@ -160,6 +160,8 @@ class MembreEquipeController extends AbstractController
             $members = $membreRepo->findBy(['idMembre' => $memberIds]);
         }
 
+        /** @var MembreEquipe[] $members */
+
         if (empty($members)) {
             return $this->json(['error' => 'Aucun membre à notifier'], 400);
         }

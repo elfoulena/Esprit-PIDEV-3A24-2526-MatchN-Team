@@ -98,12 +98,12 @@ class RepoAccess
         return $this;
     }
 
-    public function getInvitedAt(): ?\DateTime
+    public function getInvitedAt(): ?\DateTimeInterface
     {
         return $this->invited_at;
     }
 
-    public function setInvitedAt(\DateTime $invited_at): static
+    public function setInvitedAt(\DateTimeInterface $invited_at): static
     {
         $this->invited_at = $invited_at;
 

@@ -73,7 +73,7 @@ class ProjetController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('postuler_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('postuler_' . $id, $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
@@ -90,8 +90,8 @@ class ProjetController extends AbstractController
             return $this->redirectToRoute('freelancer_projets_index');
         }
 
-        $message = trim($request->request->get('message', ''));
-        $github  = trim($request->request->get('github', ''));
+        $message = trim((string) $request->request->get('message', ''));
+        $github  = trim((string) $request->request->get('github', ''));
 
         if ($message === '') {
             $this->addFlash('error', 'Le message de motivation est obligatoire.');
@@ -108,7 +108,7 @@ class ProjetController extends AbstractController
 
         $demande = new DemandeParticipation();
         $demande->setProjet($projet);
-        $demande->setEmailFreelancer($user->getEmail());
+        $demande->setEmailFreelancer($user->getEmail() ?? '');
         $demande->setNomFreelancer($user->getNom() . ' ' . $user->getPrenom());
         $demande->setMessage($message);
         $demande->setGithub($github);

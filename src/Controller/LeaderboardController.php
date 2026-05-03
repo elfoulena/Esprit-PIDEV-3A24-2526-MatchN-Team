@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\AffectationProjetRepository;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,10 +29,12 @@ class LeaderboardController extends AbstractController
     {
         $repo->updateExpiredAffectations();
 
+        /** @var User|null $user */
+        $user = $this->getUser();
         return $this->render('leaderboard/index.html.twig', [
             'leaderboard' => $repo->getLeaderboardData(),
             'layout' => 'freelancer',
-            'currentUserId' => $this->getUser()?->getId(),
+            'currentUserId' => $user ? $user->getId() : null,
         ]);
     }
 }

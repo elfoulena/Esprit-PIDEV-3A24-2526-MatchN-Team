@@ -157,7 +157,7 @@ class CommitHistory
         return $this;
     }
 
-    public function getDateCommit(): ?\DateTime
+    public function getDateCommit(): ?\DateTimeInterface
     {
         return $this->date_commit;
     }

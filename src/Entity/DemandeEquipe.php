@@ -135,24 +135,24 @@ class DemandeEquipe
         return $this->id_demande;
     }
 
-    public function getDateDemande(): ?\DateTime
+    public function getDateDemande(): ?\DateTimeInterface
     {
         return $this->date_demande;
     }
 
-    public function setDateDemande(?\DateTime $date_demande): static
+    public function setDateDemande(?\DateTimeInterface $date_demande): static
     {
         $this->date_demande = $date_demande;
 
         return $this;
     }
 
-    public function getDateTraitement(): ?\DateTime
+    public function getDateTraitement(): ?\DateTimeInterface
     {
         return $this->date_traitement;
     }
 
-    public function setDateTraitement(?\DateTime $date_traitement): static
+    public function setDateTraitement(?\DateTimeInterface $date_traitement): static
     {
         $this->date_traitement = $date_traitement;
 

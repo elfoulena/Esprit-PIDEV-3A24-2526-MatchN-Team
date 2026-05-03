@@ -129,12 +129,12 @@ class MessageDiscussion
         return $this;
     }
 
-    public function getDateEnvoi(): ?\DateTime
+    public function getDateEnvoi(): ?\DateTimeInterface
     {
         return $this->date_envoi;
     }
 
-    public function setDateEnvoi(\DateTime $date_envoi): static
+    public function setDateEnvoi(\DateTimeInterface $date_envoi): static
     {
         $this->date_envoi = $date_envoi;
 

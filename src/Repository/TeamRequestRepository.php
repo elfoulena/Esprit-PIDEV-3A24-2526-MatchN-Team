@@ -3,11 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\TeamRequest;
-use App\Entity\User;
-use App\Entity\Equipe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<TeamRequest>
+ */
 class TeamRequestRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -15,44 +16,52 @@ class TeamRequestRepository extends ServiceEntityRepository
         parent::__construct($registry, TeamRequest::class);
     }
 
-    public function findPendingByTeam(Equipe $team): array
+    /**
+     * @return array<int, TeamRequest>
+     */
+    public function findPendingByTeam(int $teamId): array
     {
-        return $this->createQueryBuilder('tr')
-            ->andWhere('tr.team = :team')
-            ->andWhere('tr.status = :status')
-            ->setParameter('team', $team)
-            ->setParameter('status', 'pending')
-            ->orderBy('tr.createdAt', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findPendingByEmployee(User $employee): array
-    {
-        return $this->createQueryBuilder('tr')
-            ->andWhere('tr.employee = :employee')
-            ->andWhere('tr.status = :status')
-            ->setParameter('employee', $employee)
+        return $this->createQueryBuilder('t')
+            ->where('t.team = :teamId')
+            ->andWhere('t.status = :status')
+            ->setParameter('teamId', $teamId)
             ->setParameter('status', 'pending')
             ->getQuery()
             ->getResult();
     }
 
-    public function findRequestsByEmployee(User $employee): array
+    /**
+     * @return array<int, TeamRequest>
+     */
+    public function findPendingByEmployee(int $employeeId): array
     {
-        return $this->createQueryBuilder('tr')
-            ->andWhere('tr.employee = :employee')
-            ->setParameter('employee', $employee)
-            ->orderBy('tr.createdAt', 'DESC')
+        return $this->createQueryBuilder('t')
+            ->where('t.employee = :employeeId')
+            ->andWhere('t.status = :status')
+            ->setParameter('employeeId', $employeeId)
+            ->setParameter('status', 'pending')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return array<int, TeamRequest>
+     */
+    public function findRequestsByEmployee(int $employeeId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.employee = :employeeId')
+            ->setParameter('employeeId', $employeeId)
+            ->orderBy('t.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
 
     public function countPendingRequests(): int
     {
-        return $this->createQueryBuilder('tr')
-            ->select('COUNT(tr.id)')
-            ->andWhere('tr.status = :status')
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->where('t.status = :status')
             ->setParameter('status', 'pending')
             ->getQuery()
             ->getSingleScalarResult();

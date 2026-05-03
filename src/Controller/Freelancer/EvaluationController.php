@@ -143,7 +143,7 @@ class EvaluationController extends AbstractController
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        $filename = 'report_' . strtolower($user->getNom()) . '_' . date('Y-m-d') . '.pdf';
+        $filename = 'report_' . strtolower($user->getNom() ?? '') . '_' . date('Y-m-d') . '.pdf';
 
         return new Response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',

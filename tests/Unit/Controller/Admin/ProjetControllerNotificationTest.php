@@ -45,7 +45,7 @@ class ProjetControllerNotificationTest extends TestCase
             );
             self::assertSame('/employe/projets', $notification->getLien());
             self::assertFalse($notification->isRead());
-            self::assertNotNull($notification->getCreatedAt());
+            self::assertInstanceOf(\DateTimeImmutable::class, $notification->getCreatedAt());
         }
     }
 

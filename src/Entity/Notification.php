@@ -32,7 +32,7 @@ class Notification
     private bool $isRead = false;
 
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     public function __construct()
     {
@@ -104,7 +104,7 @@ class Notification
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }

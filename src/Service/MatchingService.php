@@ -26,7 +26,7 @@ class MatchingService
         // 1. Get project required competence names (uppercase for comparison)
         $requiredSkills = [];
         foreach ($projet->getCompetences() as $comp) {
-            $requiredSkills[] = mb_strtoupper(trim($comp->getNomCompetence() ?? ''));
+            $requiredSkills[] = mb_strtoupper(trim($comp->getNomCompetence()));
         }
 
         // 2. Fetch all active freelancers with their competences
@@ -115,8 +115,8 @@ class MatchingService
             $recommendations[$i]['aiExplanation'] = $this->geminiService->generateMatchExplanation(
                 ($r['prenom'] ?? '') . ' ' . ($r['nom'] ?? ''),
                 $r['freelancerSkills'] ?? ['Aucune'],
-                $projet->getTitre() ?? '',
-                array_values(array_filter($requiredSkillNames, fn($skill) => $skill !== null))
+                $projet->getTitre(),
+                $requiredSkillNames
             );
         }
 

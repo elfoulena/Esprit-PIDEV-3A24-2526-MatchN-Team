@@ -107,7 +107,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     private Collection $competences;
 
     /** @var Collection<int, ParticipationEvenement> */
-    #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(
+        targetEntity: ParticipationEvenement::class,
+        mappedBy: 'utilisateur',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
     private Collection $participations;
 
 

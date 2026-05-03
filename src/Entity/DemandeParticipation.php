@@ -30,7 +30,7 @@ class DemandeParticipation
     }
 
     #[ORM\ManyToOne(targetEntity: Projet::class, inversedBy: 'demandeParticipations')]
-    #[ORM\JoinColumn(name: 'id_projet', referencedColumnName: 'id_projet')]
+    #[ORM\JoinColumn(name: 'id_projet', referencedColumnName: 'id_projet', nullable: false, onDelete: 'CASCADE')]
     private ?Projet $projet = null;
 
     public function getProjet(): ?Projet

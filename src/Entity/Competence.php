@@ -30,9 +30,9 @@ class Competence
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $nom_competence = null;
+    private string $nom_competence = '';
 
-    public function getNom_competence(): ?string
+    public function getNom_competence(): string
     {
         return $this->nom_competence;
     }
@@ -44,9 +44,9 @@ class Competence
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $type = null;
+    private string $type = '';
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -107,7 +107,7 @@ class Competence
         return $this->id_competence;
     }
 
-    public function getNomCompetence(): ?string
+    public function getNomCompetence(): string
     {
         return $this->nom_competence;
     }

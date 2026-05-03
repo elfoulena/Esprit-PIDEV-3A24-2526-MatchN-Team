@@ -3,15 +3,18 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\Role;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use League\OAuth2\Client\Provider\GoogleUser;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
@@ -21,15 +24,18 @@ class GoogleAuthenticator extends OAuth2Authenticator
     private ClientRegistry $clientRegistry;
     private EntityManagerInterface $entityManager;
     private RouterInterface $router;
+    private UserPasswordHasherInterface $passwordHasher;
 
     public function __construct(
         ClientRegistry $clientRegistry,
         EntityManagerInterface $entityManager,
-        RouterInterface $router
+        RouterInterface $router,
+        UserPasswordHasherInterface $passwordHasher
     ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->router = $router;
+        $this->passwordHasher = $passwordHasher;
     }
 
     public function supports(Request $request): ?bool
@@ -55,6 +61,8 @@ class GoogleAuthenticator extends OAuth2Authenticator
             $user->setEmail($email ?? '');
             $user->setNom($googleUser->getLastName() ?? '');
             $user->setPrenom($googleUser->getFirstName() ?? '');
+            $user->setPassword($this->passwordHasher->hashPassword($user, bin2hex(random_bytes(32))));
+            $user->setRole(Role::FREELANCER);
             $user->setVerified(true);
             $this->entityManager->persist($user);
         }
@@ -66,7 +74,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return new Response('', Response::HTTP_FOUND, ['Location' => $this->router->generate('dashboard')]);
+        return new RedirectResponse($this->router->generate($this->getDashboardRoute($token)));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
@@ -75,5 +83,17 @@ class GoogleAuthenticator extends OAuth2Authenticator
             $exception->getMessage(),
             Response::HTTP_UNAUTHORIZED
         );
+    }
+
+    private function getDashboardRoute(TokenInterface $token): string
+    {
+        $roles = $token->getRoleNames();
+
+        return match (true) {
+            \in_array('ROLE_ADMIN', $roles, true) => 'admin_dashboard',
+            \in_array('ROLE_EMPLOYE', $roles, true) => 'employe_dashboard',
+            \in_array('ROLE_FREELANCER', $roles, true) => 'freelancer_dashboard',
+            default => 'home',
+        };
     }
 }

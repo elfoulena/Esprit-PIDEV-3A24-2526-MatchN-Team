@@ -78,7 +78,7 @@ class GitHubRepositoryService
 
     private function buildRepositoryName(Projet $projet): string
     {
-        $titre = $projet->getTitre() ?? 'projet';
+        $titre = $projet->getTitre();
         $slug = strtolower((string) $this->slugger->slug($titre));
         $slug = trim($slug, '-');
 

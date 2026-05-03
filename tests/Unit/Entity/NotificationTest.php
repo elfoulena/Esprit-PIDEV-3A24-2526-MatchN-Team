@@ -36,7 +36,7 @@ class NotificationTest extends TestCase
         $notification = new Notification();
         $after = new \DateTimeImmutable('+1 second');
 
-        self::assertNotNull($notification->getCreatedAt());
+        self::assertInstanceOf(\DateTimeImmutable::class, $notification->getCreatedAt());
         self::assertGreaterThanOrEqual($before->getTimestamp(), $notification->getCreatedAt()->getTimestamp());
         self::assertLessThanOrEqual($after->getTimestamp(), $notification->getCreatedAt()->getTimestamp());
         self::assertFalse($notification->isRead());

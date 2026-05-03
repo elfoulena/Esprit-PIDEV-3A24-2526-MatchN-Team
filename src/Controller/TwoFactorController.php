@@ -49,7 +49,7 @@ class TwoFactorController extends AbstractController
                 $em->flush();
 
                 $this->addFlash('success', '2FA activé !');
-                return $this->redirectToRoute('dashboard');
+                return $this->redirectToRoute($this->getDashboardRouteForUser($user));
             }
 
             $this->addFlash('error', 'Code invalide');
@@ -74,6 +74,18 @@ class TwoFactorController extends AbstractController
         $user->setTotpSecret(null);
         $em->flush();
 
-        return $this->redirectToRoute('dashboard');
+        return $this->redirectToRoute($this->getDashboardRouteForUser($user));
+    }
+
+    private function getDashboardRouteForUser(User $user): string
+    {
+        $roles = $user->getRoles();
+
+        return match (true) {
+            \in_array('ROLE_ADMIN', $roles, true) => 'admin_dashboard',
+            \in_array('ROLE_EMPLOYE', $roles, true) => 'employe_dashboard',
+            \in_array('ROLE_FREELANCER', $roles, true) => 'freelancer_dashboard',
+            default => 'home',
+        };
     }
 }

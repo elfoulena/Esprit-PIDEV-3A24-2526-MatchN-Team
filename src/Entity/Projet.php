@@ -30,9 +30,9 @@ class Projet
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $titre = null;
+    private string $titre = '';
 
-    public function getTitre(): ?string
+    public function getTitre(): string
     {
         return $this->titre;
     }
@@ -199,7 +199,12 @@ class Projet
     }
 
     /** @var Collection<int, DemandeParticipation> */
-    #[ORM\OneToMany(targetEntity: DemandeParticipation::class, mappedBy: 'projet')]
+    #[ORM\OneToMany(
+        targetEntity: DemandeParticipation::class,
+        mappedBy: 'projet',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
     private Collection $demandeParticipations;
 
     /**
@@ -214,13 +219,18 @@ class Projet
     {
         if (!$this->getDemandeParticipations()->contains($demandeParticipation)) {
             $this->getDemandeParticipations()->add($demandeParticipation);
+            $demandeParticipation->setProjet($this);
         }
         return $this;
     }
 
     public function removeDemandeParticipation(DemandeParticipation $demandeParticipation): self
     {
-        $this->getDemandeParticipations()->removeElement($demandeParticipation);
+        if ($this->getDemandeParticipations()->removeElement($demandeParticipation)) {
+            if ($demandeParticipation->getProjet() === $this) {
+                $demandeParticipation->setProjet(null);
+            }
+        }
         return $this;
     }
 

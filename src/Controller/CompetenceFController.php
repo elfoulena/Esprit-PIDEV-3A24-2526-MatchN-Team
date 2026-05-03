@@ -33,7 +33,7 @@ public function index(Request $request): Response
     if ($form->isSubmitted() && $form->isValid()) {
         if (empty(trim((string) $competence->getDescription()))) {
             $competence->setDescription(
-                $this->gemini->genererDescriptionCompetence($competence->getNom())
+                $this->gemini->genererDescriptionCompetence($competence->getNom() ?? '')
             );
         }
         $this->em->persist($competence);
@@ -59,7 +59,7 @@ public function index(Request $request): Response
         if ($form->isSubmitted() && $form->isValid()) {
             if (empty(trim((string) $competence->getDescription()))) {
                 $competence->setDescription(
-                    $this->gemini->genererDescriptionCompetence($competence->getNom())
+                    $this->gemini->genererDescriptionCompetence($competence->getNom() ?? '')
                 );
             }
 
@@ -97,11 +97,11 @@ public function edit(Request $request, CompetenceF $competence): Response
 
         if ($nomAChange) {
             $competence->setDescription(
-                $this->gemini->genererDescriptionCompetence($competence->getNom())
+                $this->gemini->genererDescriptionCompetence($competence->getNom() ?? '')
             );
         } elseif (empty(trim((string) $competence->getDescription()))) {
             $competence->setDescription(
-                $this->gemini->genererDescriptionCompetence($competence->getNom())
+                $this->gemini->genererDescriptionCompetence($competence->getNom() ?? '')
             );
         }
 

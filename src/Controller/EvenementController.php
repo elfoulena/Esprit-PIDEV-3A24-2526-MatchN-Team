@@ -20,7 +20,8 @@ final class EvenementController extends AbstractController
     #[Route(name: 'app_evenement_index', methods: ['GET'])]
     public function index(EvenementRepository $evenementRepository, Request $request): Response
     {
-        $q = $request->query->get('q');
+        $qParam = $request->query->get('q');
+        $q = is_string($qParam) ? $qParam : null;
         $archived = $request->query->getBoolean('archived', false);
         
         return $this->render('evenement/index.html.twig', [

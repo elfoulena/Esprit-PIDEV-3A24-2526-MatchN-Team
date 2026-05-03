@@ -1,9 +1,0 @@
-parameters:
-    level: 2
-    paths:
-        - src/Entity/Projet.php
-        - src/Entity/Notification.php
-        - src/Controller/Admin/ProjetController.php
-        - src/Service/GitHubRepositoryService.php
-        - tests/Unit
-

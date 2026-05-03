@@ -29,7 +29,6 @@ config/google_service_account.json
 ###< friendsofphp/php-cs-fixer ###
 
 ###> phpstan/phpstan ###
-/phpstan.neon
 /phpstan.neon.dist
 /phpstan.neon.local
 ###< phpstan/phpstan ###
@@ -95,3 +94,5 @@ composer.phar
 /*.sqlite
 /*.db
 ###< Database ###
+.claude/
+.claude/settings.local.json

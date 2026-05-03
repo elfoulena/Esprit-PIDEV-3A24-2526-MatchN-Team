@@ -20,6 +20,9 @@ class Evenement
     #[ORM\Column(type: 'integer')]
     private ?int $id_evenement = null;
 
+    /**
+     * @var Collection<int, ParticipationEvenement>
+     */
     #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'evenement', orphanRemoval: true)]
     private Collection $participations;
 
@@ -255,48 +258,48 @@ class Evenement
         return $this;
     }
 
-    public function getDateDebut(): ?\DateTime
+    public function getDateDebut(): ?\DateTimeInterface
     {
         return $this->date_debut;
     }
 
-    public function setDateDebut(\DateTime $date_debut): static
+    public function setDateDebut(\DateTimeInterface $date_debut): static
     {
         $this->date_debut = $date_debut;
 
         return $this;
     }
 
-    public function getDateFin(): ?\DateTime
+    public function getDateFin(): ?\DateTimeInterface
     {
         return $this->date_fin;
     }
 
-    public function setDateFin(\DateTime $date_fin): static
+    public function setDateFin(\DateTimeInterface $date_fin): static
     {
         $this->date_fin = $date_fin;
 
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTime
+    public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->date_creation;
     }
 
-    public function setDateCreation(?\DateTime $date_creation): static
+    public function setDateCreation(?\DateTimeInterface $date_creation): static
     {
         $this->date_creation = $date_creation;
 
         return $this;
     }
 
-    public function getDateDeadline(): ?\DateTime
+    public function getDateDeadline(): ?\DateTimeInterface
     {
         return $this->date_deadline;
     }
 
-    public function setDateDeadline(\DateTime $date_deadline): static
+    public function setDateDeadline(\DateTimeInterface $date_deadline): static
     {
         $this->date_deadline = $date_deadline;
 

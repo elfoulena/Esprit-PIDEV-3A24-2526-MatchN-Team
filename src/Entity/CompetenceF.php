@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CompetenceFRepository;
 use Doctrine\Common\Collections\ArrayCollection;  
 use Doctrine\Common\Collections\Collection;
+use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -25,6 +26,7 @@ class CompetenceF
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
+    /** @var Collection<int, User> */
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'competences')]
     private Collection $freelancers;
 
@@ -41,5 +43,6 @@ class CompetenceF
         $this->freelancers = new ArrayCollection();
     }
 
+    /** @return Collection<int, User> */
     public function getFreelancers(): Collection { return $this->freelancers; }
 }

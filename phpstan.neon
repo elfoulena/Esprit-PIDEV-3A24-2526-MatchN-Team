@@ -1,0 +1,66 @@
+includes:
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+
+parameters:
+    level: 8
+
+    paths:
+        # Global project scan
+        - bin/
+        - config/
+        - public/
+        - src/
+        - tests/Unit/
+
+        # ===== Entities =====
+        - src/Entity/AffectationProjet.php
+        - src/Entity/EvaluationPartTime.php
+        - src/Entity/Equipe.php
+        - src/Entity/MembreEquipe.php
+        - src/Entity/Projet.php
+        - src/Entity/Notification.php
+        - src/Entity/Evenement.php
+        - src/Entity/ParticipationEvenement.php
+
+        # ===== Controllers =====
+        - src/Controller/AffectationProjetController.php
+        - src/Controller/EvaluationPartTimeController.php
+        - src/Controller/EquipeController.php
+        - src/Controller/Admin/ProjetController.php
+        - src/Controller/EvenementController.php
+        - src/Controller/Employe/EvenementController.php
+
+        # ===== Repositories =====
+        - src/Repository/AffectationProjetRepository.php
+        - src/Repository/EvaluationPartTimeRepository.php
+        - src/Repository/EquipeRepository.php
+        - src/Repository/EvenementRepository.php
+
+        # ===== Forms =====
+        - src/Form/AffectationProjetType.php
+        - src/Form/EvaluationPartTimeType.php
+
+        # ===== Services =====
+        - src/Service/WhatsAppService.php
+        - src/Service/GitHubRepositoryService.php
+        - src/Service/EvenementManager.php
+        - src/Service/TicketPdfService.php
+        - src/Service/PresenceMailerService.php
+
+        # ===== Tests =====
+        - tests/Unit/Entity/AffectationProjetTest.php
+        - tests/Unit/Entity/EvaluationPartTimeTest.php
+        - tests/Entity/EvenementTest.php
+        - tests/Service/EvenementManagerTest.php
+        - tests/Service/TicketPdfServiceTest.php
+        - tests/Service/PresenceMailerServiceTest.php
+
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        -
+            identifier: property.unusedType
+            paths:
+                - src/Entity/Equipe.php
+                - src/Entity/MembreEquipe.php

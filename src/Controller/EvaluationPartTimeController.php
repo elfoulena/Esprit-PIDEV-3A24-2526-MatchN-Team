@@ -44,7 +44,8 @@ class EvaluationPartTimeController extends AbstractController
                 ]);
             }
 
-            if ($repo->existePourAffectation($affectation->getId())) {
+            $affectationId = $affectation->getId();
+            if ($affectationId !== null && $repo->existePourAffectation($affectationId)) {
                 $this->addFlash('error', 'Une évaluation existe déjà pour cette affectation.');
                 return $this->render('evaluation/new.html.twig', [
                     'form' => $form,
@@ -96,7 +97,7 @@ class EvaluationPartTimeController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if ($this->isCsrfTokenValid('delete' . $id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $id, (string) $request->request->get('_token'))) {
             $em->remove($evaluation);
             $em->flush();
             $this->addFlash('success', 'Évaluation supprimée.');

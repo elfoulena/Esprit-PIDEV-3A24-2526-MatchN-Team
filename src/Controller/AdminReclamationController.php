@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Reclamation;
@@ -39,7 +40,9 @@ class AdminReclamationController extends AbstractController
         }, $reclamations);
 
         if ($tri === 'priorite') {
-            usort($reclamationsAvecPriorite, fn($a, $b)
+            usort(
+                $reclamationsAvecPriorite,
+                fn($a, $b)
                 => $b['priorite']['score'] <=> $a['priorite']['score']
             );
         }
@@ -149,41 +152,41 @@ class AdminReclamationController extends AbstractController
         $this->addFlash('success', 'Réclamation supprimée.');
         return $this->redirectToRoute('admin_reclamation_index');
     }
-// Ajouter avant la dernière } du fichier
+    // Ajouter avant la dernière } du fichier
 
-#[Route('/ai/ameliorer', name: 'admin_reclamation_ai_ameliorer', methods: ['POST'])]
-public function ameliorer(Request $request, GroqService $groq): Response
-{
-    $texte    = trim($request->request->get('texte', ''));
-    $contexte = trim($request->request->get('contexte', ''));
+    #[Route('/ai/ameliorer', name: 'admin_reclamation_ai_ameliorer', methods: ['POST'])]
+    public function ameliorer(Request $request, GroqService $groq): Response
+    {
+        $texte    = trim($request->request->get('texte', ''));
+        $contexte = trim($request->request->get('contexte', ''));
 
-    if (empty($texte)) {
-        return $this->json(['error' => 'Texte vide'], 400);
+        if (empty($texte)) {
+            return $this->json(['error' => 'Texte vide'], 400);
+        }
+
+        try {
+            $resultat = $groq->ameliorer($texte, $contexte);
+            return $this->json(['result' => $resultat]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    try {
-        $resultat = $groq->ameliorer($texte, $contexte);
-        return $this->json(['result' => $resultat]);
-    } catch (\Exception $e) {
-        return $this->json(['error' => $e->getMessage()], 500);
-    }
-}
+    #[Route('/ai/traduire', name: 'admin_reclamation_ai_traduire', methods: ['POST'])]
+    public function traduire(Request $request, GroqService $groq): Response
+    {
+        $texte  = trim($request->request->get('texte', ''));
+        $langue = $request->request->get('langue', 'en');
 
-#[Route('/ai/traduire', name: 'admin_reclamation_ai_traduire', methods: ['POST'])]
-public function traduire(Request $request, GroqService $groq): Response
-{
-    $texte  = trim($request->request->get('texte', ''));
-    $langue = $request->request->get('langue', 'en');
+        if (empty($texte)) {
+            return $this->json(['error' => 'Texte vide'], 400);
+        }
 
-    if (empty($texte)) {
-        return $this->json(['error' => 'Texte vide'], 400);
+        try {
+            $resultat = $groq->traduire($texte, $langue);
+            return $this->json(['result' => $resultat]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
     }
-
-    try {
-        $resultat = $groq->traduire($texte, $langue);
-        return $this->json(['result' => $resultat]);
-    } catch (\Exception $e) {
-        return $this->json(['error' => $e->getMessage()], 500);
-    }
-}    
 }

@@ -21,13 +21,16 @@ class EvenementController extends AbstractController
     public function index(EvenementRepository $evenementRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException();
+        }
 
-        $q = $request->query->get('q', '');
-        $type = $request->query->get('type', 'ALL');
-        $sort = $request->query->get('sort', 'date_asc');
-        $filter = $request->query->get('filter', 'ALL');
+        $q = (string) $request->query->get('q', '');
+        $type = (string) $request->query->get('type', 'ALL');
+        $sort = (string) $request->query->get('sort', 'date_asc');
+        $filter = (string) $request->query->get('filter', 'ALL');
 
-        $evenements = $evenementRepository->findByEmployeFilters($q, $type, $sort, $filter, $user->getId());
+        $evenements = $evenementRepository->findByEmployeFilters($q, $type, $sort, $filter, (int) $user->getId());
 
         $participatingIds = [];
         $qb = $entityManager->createQueryBuilder();
@@ -57,13 +60,16 @@ class EvenementController extends AbstractController
     public function search(EvenementRepository $evenementRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException();
+        }
 
-        $q = $request->query->get('q', '');
-        $type = $request->query->get('type', 'ALL');
-        $sort = $request->query->get('sort', 'date_asc');
-        $filter = $request->query->get('filter', 'ALL');
+        $q = (string) $request->query->get('q', '');
+        $type = (string) $request->query->get('type', 'ALL');
+        $sort = (string) $request->query->get('sort', 'date_asc');
+        $filter = (string) $request->query->get('filter', 'ALL');
 
-        $evenements = $evenementRepository->findByEmployeFilters($q, $type, $sort, $filter, $user->getId());
+        $evenements = $evenementRepository->findByEmployeFilters($q, $type, $sort, $filter, (int) $user->getId());
 
         $qb = $entityManager->createQueryBuilder();
         $participatingIdsRaw = $qb->select('e.id_evenement, p.jeton')
@@ -91,6 +97,9 @@ class EvenementController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException();
+        }
         $evenement = $evenementRepository->find($id_evenement);
 
         if (!$evenement) {

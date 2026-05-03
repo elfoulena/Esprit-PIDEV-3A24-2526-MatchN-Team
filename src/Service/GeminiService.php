@@ -10,7 +10,8 @@ class GeminiService
     private const API_URL  = 'https://api.groq.com/openai/v1/chat/completions';
     private const MODEL    = 'llama-3.1-8b-instant';
 
-   
+    private const API_KEY  = ' ';
+
     public function __construct(private readonly HttpClientInterface $httpClient) {}
 
     public function genererDescriptionCompetence(string $nomCompetence): string
@@ -346,7 +347,7 @@ PY;
             'budgetFreelance' => $budgetFreelance,
             'visibleEmploye' => $this->parseOuiNon($visibleEmployeRaw),
             'visibleFreelancer' => $this->parseOuiNon($visibleFreelancerRaw),
-        ], static fn ($v): bool => $v !== null && $v !== '');
+        ], static fn($v): bool => $v !== null && $v !== '');
     }
 
     private function normalizeForSearch(string $text): string
@@ -447,7 +448,7 @@ PY;
             'budgetTotal' => $budgets['budgetTotal'] ?? null,
             'budgetInterne' => $budgets['budgetInterne'] ?? null,
             'budgetFreelance' => $budgets['budgetFreelance'] ?? null,
-        ], static fn ($v): bool => $v !== null && $v !== '');
+        ], static fn($v): bool => $v !== null && $v !== '');
     }
 
     private function extractDates(string $text): array

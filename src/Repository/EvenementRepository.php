@@ -18,6 +18,7 @@ class EvenementRepository extends ServiceEntityRepository
 
     /**
      * General filters for front-office/visitors
+     * @return array<int, Evenement>
      */
     public function findByFilters(?string $q, ?string $type, ?string $sort): array
     {
@@ -54,6 +55,9 @@ class EvenementRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return array<int, Evenement>
+     */
     public function findByEmployeFilters(?string $q, ?string $type, ?string $sort, string $filter, int $userId): array
     {
         $qb = $this->createQueryBuilder('e');
@@ -103,6 +107,9 @@ class EvenementRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return array<int, Evenement>
+     */
     public function findBySearch(?string $q, bool $includeArchived = false): array
     {
         $qb = $this->createQueryBuilder('e');
@@ -119,6 +126,9 @@ class EvenementRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getStatisticsForAI(): array
     {
         $qb = $this->createQueryBuilder('e');

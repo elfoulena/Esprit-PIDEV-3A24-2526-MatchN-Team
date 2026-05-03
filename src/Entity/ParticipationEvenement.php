@@ -119,12 +119,12 @@ class ParticipationEvenement
         return $this->id_participation;
     }
 
-    public function getDateInscription(): ?\DateTime
+    public function getDateInscription(): ?\DateTimeInterface
     {
         return $this->date_inscription;
     }
 
-    public function setDateInscription(?\DateTime $date_inscription): static
+    public function setDateInscription(?\DateTimeInterface $date_inscription): static
     {
         $this->date_inscription = $date_inscription;
 

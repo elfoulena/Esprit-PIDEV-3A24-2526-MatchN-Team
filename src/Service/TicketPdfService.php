@@ -14,13 +14,11 @@ use Twig\Environment;
 
 class TicketPdfService
 {
-    private UrlGeneratorInterface $router;
     private Environment $twig;
     private string $scanBaseUrl;
 
-    public function __construct(UrlGeneratorInterface $router, Environment $twig, string $scanBaseUrl)
+    public function __construct(Environment $twig, string $scanBaseUrl)
     {
-        $this->router = $router;
         $this->twig = $twig;
         $this->scanBaseUrl = $scanBaseUrl;
     }

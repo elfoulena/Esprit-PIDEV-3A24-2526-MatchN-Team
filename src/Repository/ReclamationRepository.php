@@ -5,6 +5,9 @@ use App\Entity\Reclamation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<Reclamation>
+ */
 class ReclamationRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -12,6 +15,7 @@ class ReclamationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reclamation::class);
     }
 
+    /** @return array<int, Reclamation> */
     public function findWithFilters(?string $statut, ?string $search): array
     {
         $qb = $this->createQueryBuilder('r');
@@ -24,6 +28,7 @@ class ReclamationRepository extends ServiceEntityRepository
         return $qb->orderBy('r.dateCreation', 'DESC')->getQuery()->getResult();
     }
 
+    /** @return array<int, Reclamation> */
     public function findByUserWithFilters(int $userId, ?string $statut, ?string $search): array
     {
         $qb = $this->createQueryBuilder('r')

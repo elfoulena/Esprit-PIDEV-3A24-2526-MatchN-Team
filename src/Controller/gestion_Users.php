@@ -99,7 +99,7 @@ class gestion_Users extends AbstractController
 
             try {
                 $this->mailer->sendEmployeeCredentials(
-                    $employe->getEmail(),
+                    $employe->getEmail() ?? '',
                     $employe->getNom() . ' ' . $employe->getPrenom(),
                     $plainPassword
                 );

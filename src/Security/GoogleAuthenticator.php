@@ -52,7 +52,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
             $user = $existingUser;
         } else {
             $user = new User();
-            $user->setEmail($email);
+            $user->setEmail($email ?? '');
             $user->setNom($googleUser->getLastName() ?? '');
             $user->setPrenom($googleUser->getFirstName() ?? '');
             $user->setVerified(true);

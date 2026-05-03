@@ -7,6 +7,9 @@ use App\Entity\Equipe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<Message>
+ */
 class MessageRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -14,6 +17,7 @@ class MessageRepository extends ServiceEntityRepository
         parent::__construct($registry, Message::class);
     }
 
+    /** @return array<int, Message> */
     public function findMessagesByTeam(Equipe $equipe, int $limit = 50): array
     {
         return $this->createQueryBuilder('m')
@@ -27,6 +31,7 @@ class MessageRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return array<int, Message> */
     public function findRecentMessagesByTeam(Equipe $equipe, int $lastMessageId = null): array
     {
         $qb = $this->createQueryBuilder('m')

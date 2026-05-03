@@ -2,7 +2,6 @@
 namespace App\Controller;
 
 use App\Entity\Reclamation;
-use App\Entity\User;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseReclamationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,13 +20,14 @@ public function index(
     ReponseReclamationRepository $reponseRepo,
     Request $request
 ): Response {
-    /** @var User $user */
-    $user = $this->getUser();
-    $userId = $user ? $user->getId() : 1;
-    $search = $request->query->get('search', '');
-    $filtre = $request->query->get('reponse', '');
+    /** @var \App\Entity\User|null $user */
+    $user   = $this->getUser();
+    $userId = $user ? $user->getId() : 1; // ✅
 
-    $reclamations = $repo->findByUserWithFilters($userId ?? 1, null, $search ?: null);
+    $search = $request->query->get('search');
+    $filtre = $request->query->get('reponse'); // 'avec', 'sans', ou ''
+
+    $reclamations = $repo->findByUserWithFilters($userId ?? 1, null, $search);
 
     // Récupérer les réponses pour chaque réclamation
     $reponses = [];
@@ -58,28 +58,29 @@ public function index(
         'reponses'     => $reponses,
         'stats'        => $stats,
         'search'       => $search,
-        'filtre'       => $filtre,
+        'filtre'       => $filtre, // ✅ ajouté
     ]);
 }
 
     #[Route('/nouvelle', name: 'employe_reclamation_new', methods: ['POST'])]
     public function nouvelle(Request $request, EntityManagerInterface $em): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        $userId = $user?->getId() ?? 1;
-        $message = trim((string) $request->request->get('message', ''));
+{
+    /** @var \App\Entity\User $user */
+    $user   = $this->getUser();
+    $userId = $user->getId(); // ✅
 
-        if (empty($message)) {
-            $this->addFlash('error', 'Le message ne peut pas être vide.');
-            return $this->redirectToRoute('employe_reclamation_index');
-        }
+    $message = trim((string) $request->request->get('message', ''));
 
-        // Filtre mot interdit
-        if (str_contains(strtolower($message), 'khayeb')) {
-            $this->addFlash('error', '❌ Votre message contient un mot interdit.');
-            return $this->redirectToRoute('employe_reclamation_index');
-        }
+    if (empty($message)) {
+        $this->addFlash('error', 'Le message ne peut pas être vide.');
+        return $this->redirectToRoute('employe_reclamation_index');
+    }
+
+    // Filtre mot interdit
+    if (str_contains(strtolower($message), 'khayeb')) {
+        $this->addFlash('error', '❌ Votre message contient un mot interdit.');
+        return $this->redirectToRoute('employe_reclamation_index');
+    }
 
         $reclamation = new Reclamation();
         $reclamation->setMessage($message);

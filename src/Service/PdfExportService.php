@@ -26,6 +26,10 @@ class PdfExportService
         $this->dompdf = new Dompdf($options);
     }
 
+    /**
+     * @param mixed $equipe
+     * @param array<string, mixed> $extraData
+     */
     public function generateEquipePdf($equipe, string $template, array $extraData = []): Response
     {
         $html = $this->twig->render($template, array_merge([
@@ -52,6 +56,10 @@ class PdfExportService
         );
     }
 
+    /**
+     * @param array<int, mixed> $equipes
+     * @param array<string, mixed> $extraData
+     */
     public function generateEquipeListPdf(array $equipes, string $template, array $extraData = []): Response
     {
         $html = $this->twig->render($template, array_merge([

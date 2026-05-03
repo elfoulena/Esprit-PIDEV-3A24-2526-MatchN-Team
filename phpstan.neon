@@ -22,6 +22,8 @@ parameters:
         - src/Entity/Notification.php
         - src/Entity/Evenement.php
         - src/Entity/ParticipationEvenement.php
+        - src/Entity/Reclamation.php
+        - src/Entity/ReponseReclamation.php
 
         # ===== Controllers =====
         - src/Controller/AffectationProjetController.php
@@ -30,6 +32,9 @@ parameters:
         - src/Controller/Admin/ProjetController.php
         - src/Controller/EvenementController.php
         - src/Controller/Employe/EvenementController.php
+        - src/Controller/AdminReclamationController.php
+        - src/Controller/EmployeReclamationController.php
+        - src/Controller/FreelancerReclamationController.php
 
         # ===== Services =====
         - src/Service/WhatsAppService.php
@@ -37,6 +42,8 @@ parameters:
         - src/Service/EvenementManager.php
         - src/Service/TicketPdfService.php
         - src/Service/PresenceMailerService.php
+        - src/Service/PrioriteReclamationService.php
+        - src/Service/GroqService.php
 
         # ===== Tests =====
         - tests/Unit/Entity/AffectationProjetTest.php
@@ -45,6 +52,8 @@ parameters:
         - tests/Service/EvenementManagerTest.php
         - tests/Service/TicketPdfServiceTest.php
         - tests/Service/PresenceMailerServiceTest.php
+        - tests/Unit/Entity/ReclamationTest.php
+        - tests/Unit/Entity/ReponseReclamationTest.php
 
     reportUnmatchedIgnoredErrors: false
 

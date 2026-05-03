@@ -144,6 +144,9 @@ public function sendEquipeReportPdf(string $to, string $nomEquipe, string $pdfCo
     /**
      * Envoie un email avec pièce jointe à plusieurs destinataires
      */
+    /**
+     * @param array<int, string> $recipients
+     */
     public function sendBulkEquipeReport(array $recipients, string $nomEquipe, string $pdfContent, string $adminName = ''): void
     {
         $email = (new Email())

@@ -10,7 +10,6 @@ class GeminiService
     private const API_URL  = 'https://api.groq.com/openai/v1/chat/completions';
     private const MODEL    = 'llama-3.1-8b-instant';
 
-    private const API_KEY  = ' ';
 
     public function __construct(private readonly HttpClientInterface $httpClient) {}
 
@@ -39,6 +38,10 @@ class GeminiService
         }
     }
 
+    /**
+     * @param array<int, string> $freelancerSkills
+     * @param array<int, string> $requiredSkills
+     */
     public function generateMatchExplanation(
         string $nomComplet,
         array $freelancerSkills,
@@ -76,6 +79,7 @@ class GeminiService
         }
     }
 
+    /** @return array<string, mixed> */
     public function extractProjectDataFromText(string $text): array
     {
         $text = trim($text);
@@ -152,6 +156,7 @@ PROMPT;
         }
     }
 
+    /** @return array<string, mixed> */
     public function extractProjectDataFromPdfPath(string $pdfPath): array
     {
         $text = $this->extractTextFromPdf($pdfPath);
@@ -272,7 +277,7 @@ PY;
         $value = str_replace(["\\n", "\\r", "\\t", "\\b", "\\f"], ["\n", "\r", "\t", "\b", "\f"], $value);
         $value = preg_replace('/\\\\([()\\\\])/', '$1', $value) ?? $value;
         $value = preg_replace_callback('/\\\\([0-7]{1,3})/', static function (array $m): string {
-            return chr(octdec($m[1]));
+            return chr((int) octdec($m[1]));
         }, $value) ?? $value;
 
         return $value;
@@ -284,18 +289,23 @@ PY;
             $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252, ASCII');
         }
 
+        // Fix for iconv parameter type
         $fixed = @iconv('UTF-8', 'UTF-8//IGNORE', $text);
-        if (is_string($fixed) && $fixed !== '') {
+        if ($fixed !== false) {
             $text = $fixed;
         }
 
-        $text = preg_replace('/[^\P{C}\n\t]/u', ' ', $text) ?? $text;
-        $text = preg_replace('/[ \t]{2,}/', ' ', $text) ?? $text;
-        $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
+        $result1 = preg_replace('/[^\P{C}\n\t]/u', ' ', $text);
+        $text = $result1 !== null ? $result1 : $text;
+        $result2 = preg_replace('/[ \t]{2,}/', ' ', $text);
+        $text = $result2 !== null ? $result2 : $text;
+        $result3 = preg_replace('/\n{3,}/', "\n\n", $text);
+        $text = $result3 !== null ? $result3 : $text;
 
-        return trim($text);
+        return trim($text ?? '');
     }
 
+    /** @return array<string, mixed> */
     private function extractProjectDataByLabels(string $text): array
     {
         $searchText = $this->normalizeForSearch($text);
@@ -358,9 +368,15 @@ PY;
         }
 
         $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $normalized);
-        if (is_string($ascii) && $ascii !== '') {
+        if ($ascii !== false && $ascii !== '') {
             $normalized = $ascii;
         }
+
+        // Fix for mb_strtolower parameter type
+        $result = preg_replace_callback('/[\x80-\xFF]/', function (array $matches): string {
+            return chr(ord($matches[0]));
+        }, $normalized);
+        $normalized = $result !== null ? $result : '';
 
         return mb_strtolower($normalized);
     }
@@ -417,6 +433,7 @@ PY;
         };
     }
 
+    /** @return array<string, mixed> */
     private function buildFallbackProjectDataFromText(string $text): array
     {
         $lines = preg_split('/\R+/', $text) ?: [];
@@ -451,6 +468,7 @@ PY;
         ], static fn($v): bool => $v !== null && $v !== '');
     }
 
+    /** @return array<string, mixed> */
     private function extractDates(string $text): array
     {
         $res = [];
@@ -483,6 +501,7 @@ PY;
         return null;
     }
 
+    /** @return array<string, mixed> */
     private function extractBudgets(string $text): array
     {
         $res = [];

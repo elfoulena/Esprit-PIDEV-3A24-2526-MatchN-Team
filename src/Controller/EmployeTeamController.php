@@ -60,7 +60,7 @@ class EmployeTeamController extends AbstractController
         }
         
         // Get pending requests
-        $pendingRequests = $requestRepo->findPendingByEmployee($user);
+        $pendingRequests = $requestRepo->findPendingByEmployee($user->getId() ?? 0);
         $pendingTeamIds = array_map(
             static fn(TeamRequest $teamRequest): ?int => $teamRequest->getTeam()?->getIdEquipe(),
             $pendingRequests
@@ -175,7 +175,7 @@ class EmployeTeamController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         
-        $requests = $requestRepo->findRequestsByEmployee($user);
+        $requests = $requestRepo->findRequestsByEmployee($user->getId() ?? 0);
         
         return $this->render('employe/my_requests.html.twig', [
             'requests' => $requests,

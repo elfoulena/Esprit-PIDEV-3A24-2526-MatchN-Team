@@ -198,7 +198,7 @@ class AdminTeamRequestController extends AbstractController
             throw $this->createNotFoundException('Équipe non trouvée.');
         }
         
-        $pendingRequests = $requestRepo->findPendingByTeam($team);
+        $pendingRequests = $requestRepo->findPendingByTeam($team->getIdEquipe() ?? 0);
         
         return $this->render('admin/team_requests/by_team.html.twig', [
             'team' => $team,

@@ -19,13 +19,14 @@ class MatchingService
 
     /**
      * Returns ranked freelancer recommendations for a given project.
+     * @return array<int, array<string, mixed>>
      */
     public function getRecommendations(Projet $projet): array
     {
         // 1. Get project required competence names (uppercase for comparison)
         $requiredSkills = [];
         foreach ($projet->getCompetences() as $comp) {
-            $requiredSkills[] = mb_strtoupper(trim($comp->getNomCompetence()));
+            $requiredSkills[] = mb_strtoupper(trim($comp->getNomCompetence() ?? ''));
         }
 
         // 2. Fetch all active freelancers with their competences
@@ -112,10 +113,10 @@ class MatchingService
         for ($i = 0; $i < min(3, count($recommendations)); $i++) {
             $r = $recommendations[$i];
             $recommendations[$i]['aiExplanation'] = $this->geminiService->generateMatchExplanation(
-                $r['prenom'] . ' ' . $r['nom'],
-                $r['freelancerSkills'] ?: ['Aucune'],
-                $projet->getTitre(),
-                $requiredSkillNames ?: ['Non spécifiées']
+                ($r['prenom'] ?? '') . ' ' . ($r['nom'] ?? ''),
+                $r['freelancerSkills'] ?? ['Aucune'],
+                $projet->getTitre() ?? '',
+                array_values(array_filter($requiredSkillNames, fn($skill) => $skill !== null))
             );
         }
 

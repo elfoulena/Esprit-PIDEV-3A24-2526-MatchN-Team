@@ -13,13 +13,13 @@ class ReponseReclamation
     #[ORM\Column(name: 'id_reponse')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'id_user', nullable: true)]   // ← corrigé
+    #[ORM\Column(name: 'id_user', nullable: true)]
     private ?int $utilisateurId = null;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: 'text', nullable: true)]                          // ✅
     private ?string $message = null;
 
-    #[ORM\Column(name: 'date_reponse', type: 'datetime')]
+    #[ORM\Column(name: 'date_reponse', type: 'datetime', nullable: true)] // ✅
     private ?\DateTimeInterface $dateReponse = null;
 
     #[ORM\ManyToOne(targetEntity: Reclamation::class, inversedBy: 'reponses')]

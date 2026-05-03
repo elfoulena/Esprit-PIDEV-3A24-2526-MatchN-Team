@@ -35,11 +35,11 @@ class LoginSubscriber implements EventSubscriberInterface
         $ip      = $request->getClientIp();
         $country = ($ip === '127.0.0.1' || $ip === '::1')
             ? 'LOCAL'
-            : $this->geoService->getCountry($ip);
+            : $this->geoService->getCountry($ip ?? '');
 
         // 1. Enregistrer la connexion
         $history = new LoginHistory();
-        $history->setIp($ip);
+        $history->setIp($ip ?? '');
         $history->setCountry($country);
         $history->setUser($user);
         $this->em->persist($history);
@@ -73,10 +73,10 @@ class LoginSubscriber implements EventSubscriberInterface
         $this->em->flush();
 
         $this->mailer->sendSecurityAlertEmail(
-            $user->getEmail(),
-            $user->getNom(),
-            $ip,
-            $country
+            $user->getEmail() ?? '',
+            $user->getNom() ?? '',
+            $ip ?? '',
+            $country ?? ''
         );
         $response = new RedirectResponse(
                 $this->router->generate('app_logout')

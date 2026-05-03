@@ -40,6 +40,9 @@ class PrioriteReclamationService
         return strtr($texte, $map);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function calculer(string $message): array
     {
         $texte = $this->normaliser($message);

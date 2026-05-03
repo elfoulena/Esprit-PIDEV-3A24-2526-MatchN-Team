@@ -13,6 +13,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 
+/**
+ * @template T of User
+ * @extends AbstractType<T>
+ */
 class FreelancerProfileType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

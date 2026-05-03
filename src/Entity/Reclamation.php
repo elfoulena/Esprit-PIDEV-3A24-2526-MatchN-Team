@@ -15,27 +15,30 @@ class Reclamation
     #[ORM\Column(name: 'id_reclamation')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'id_user', nullable: true)]   // ← corrigé
+    #[ORM\Column(name: 'id_user', nullable: true)]
     private ?int $utilisateurId = null;
 
-    #[ORM\Column(name: 'type_user', length: 255)]    // ← corrigé
+    #[ORM\Column(name: 'type_user', length: 255, nullable: true)] // ✅
     private ?string $type = null;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: 'text', nullable: true)]                   // ✅
     private ?string $message = null;
 
-    #[ORM\Column(name: 'date_creation', type: 'datetime')]
+    #[ORM\Column(name: 'date_creation', type: 'datetime', nullable: true)] // ✅
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $statut = 'nouveau';
 
+    /**
+     * @var Collection<int, ReponseReclamation>                   // ✅
+     */
     #[ORM\OneToMany(mappedBy: 'reclamation', targetEntity: ReponseReclamation::class)]
     private Collection $reponses;
 
     public function __construct()
     {
-        $this->reponses = new ArrayCollection();
+        $this->reponses     = new ArrayCollection();
         $this->dateCreation = new \DateTime();
     }
 
@@ -50,5 +53,6 @@ class Reclamation
     public function setDateCreation(\DateTimeInterface $date): self { $this->dateCreation = $date; return $this; }
     public function getStatut(): ?string { return $this->statut; }
     public function setStatut(string $statut): self { $this->statut = $statut; return $this; }
+    /** @return Collection<int, ReponseReclamation> */
     public function getReponses(): Collection { return $this->reponses; }
 }

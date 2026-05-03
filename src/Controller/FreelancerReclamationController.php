@@ -4,7 +4,6 @@ namespace App\Controller;
 use App\Entity\Discussion;
 use App\Entity\MessageDiscussion;
 use App\Entity\Reclamation;
-use App\Entity\User;
 use App\Repository\DiscussionRepository;
 use App\Repository\ReclamationRepository;
 use App\Repository\ReponseReclamationRepository;
@@ -24,13 +23,13 @@ class FreelancerReclamationController extends AbstractController
         DiscussionRepository $discussionRepo,
         Request $request
     ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
+        /** @var \App\Entity\User|null $user */
+        $user   = $this->getUser();
         $userId = $user ? $user->getId() : 1;
-        $search = $request->query->get('search', '');
-        $filtre = $request->query->get('reponse', '');
+        $search = $request->query->get('search');
+        $filtre = $request->query->get('reponse');
 
-        $reclamations = $repo->findByUserWithFilters($userId ?? 1, null, $search ?: null);
+        $reclamations = $repo->findByUserWithFilters($userId ?? 1, null, $search);
 
         $reponses = [];
         foreach ($reclamations as $r) {
@@ -54,8 +53,7 @@ class FreelancerReclamationController extends AbstractController
             'ferme'    => count($repo->findBy(['utilisateurId' => $userId, 'statut' => 'fermé'])),
         ];
 
-        // Chat
-        $discussion = $discussionRepo->findOneBy(['id_freelancer' => $userId]);
+        $discussion   = $discussionRepo->findOneBy(['id_freelancer' => $userId]);
         $chatMessages = [];
         if ($discussion) {
             $chatMessages = $discussion->getMessageDiscussions()->toArray();
@@ -75,9 +73,9 @@ class FreelancerReclamationController extends AbstractController
     #[Route('/nouvelle', name: 'freelancer_reclamation_new', methods: ['POST'])]
     public function nouvelle(Request $request, EntityManagerInterface $em): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
-        $userId = $user?->getId() ?? 1;
+        /** @var \App\Entity\User $user */
+        $user    = $this->getUser();
+        $userId  = $user->getId();
         $message = trim((string) $request->request->get('message', ''));
 
         if (empty($message)) {
@@ -109,9 +107,9 @@ class FreelancerReclamationController extends AbstractController
         EntityManagerInterface $em,
         DiscussionRepository $discussionRepo
     ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-        $userId = $user?->getId() ?? 1;
+        /** @var \App\Entity\User $user */
+        $user    = $this->getUser();
+        $userId  = $user->getId();
         $contenu = trim((string) $request->request->get('contenu', ''));
 
         if (empty($contenu)) {
@@ -122,7 +120,7 @@ class FreelancerReclamationController extends AbstractController
         $discussion = $discussionRepo->findOneBy(['id_freelancer' => $userId]);
         if (!$discussion) {
             $discussion = new Discussion();
-            $discussion->setIdFreelancer($userId ?? 1);
+            $discussion->setIdFreelancer($userId ?? 0);
             $discussion->setTitre('Discussion avec admin');
             $discussion->setDateCreation(new \DateTime());
             $em->persist($discussion);
@@ -131,7 +129,7 @@ class FreelancerReclamationController extends AbstractController
 
         $message = new MessageDiscussion();
         $message->setDiscussion($discussion);
-        $message->setIdExpediteur($userId ?? 1);
+        $message->setIdExpediteur($userId ?? 0);
         $message->setRoleExpediteur('freelancer');
         $message->setContenu($contenu);
         $message->setDateEnvoi(new \DateTime());

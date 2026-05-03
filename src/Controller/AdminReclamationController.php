@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Reclamation;
 use App\Entity\ReponseReclamation;
 use App\Entity\MessageDiscussion;
-use App\Entity\User;
 use App\Repository\ReclamationRepository;
 use App\Repository\DiscussionRepository;
 use App\Service\PrioriteReclamationService;
@@ -36,7 +35,7 @@ class AdminReclamationController extends AbstractController
         $reclamationsAvecPriorite = array_map(function ($r) use ($prioriteService) {
             return [
                 'reclamation' => $r,
-                'priorite'    => $prioriteService->calculer($r->getMessage()),
+                'priorite'    => $prioriteService->calculer($r->getMessage() ?? ''),
             ];
         }, $reclamations);
 
@@ -86,7 +85,7 @@ class AdminReclamationController extends AbstractController
         EntityManagerInterface $em
     ): Response {
         $contenu       = trim((string) $request->request->get('contenu', ''));
-        $nouveauStatut = trim($request->request->getString('statut'));
+        $nouveauStatut = $request->request->get('statut');
 
         if ($contenu === '') {
             $this->addFlash('error', 'La réponse ne peut pas être vide.');
@@ -104,7 +103,7 @@ class AdminReclamationController extends AbstractController
 
         $em->persist($reponse);
 
-        if ($nouveauStatut !== '') {
+        if ($nouveauStatut && is_string($nouveauStatut)) {
             $reclamation->setStatut($nouveauStatut);
         }
 
@@ -126,24 +125,21 @@ class AdminReclamationController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $contenu = trim($request->request->getString('contenu'));
-        if (!empty($contenu)) {
-            $admin = $this->getUser();
-            if (!$admin instanceof User || $admin->getId() === null) {
-                throw $this->createAccessDeniedException();
-            }
+        $contenu = trim((string) $request->request->get('contenu', ''));
+if (!empty($contenu)) {
+    /** @var \App\Entity\User $user */
+    $user = $this->getUser();
 
-            $message = new MessageDiscussion();
-            $message->setDiscussion($discussion);
-            $message->setIdExpediteur($admin->getId());
-            $message->setRoleExpediteur('admin');
-            $message->setContenu($contenu);
-            $message->setDateEnvoi(new \DateTime());
+    $message = new MessageDiscussion();
+    $message->setDiscussion($discussion);
+    $message->setIdExpediteur($user->getId() ?? 0); 
+    $message->setRoleExpediteur('admin');
+    $message->setContenu($contenu);
+    $message->setDateEnvoi(new \DateTime());
 
-            $em->persist($message);
-            $em->flush();
-        }
-
+    $em->persist($message);
+    $em->flush();
+}
         return $this->redirectToRoute('admin_reclamation_index');
     }
 
@@ -163,8 +159,8 @@ class AdminReclamationController extends AbstractController
     #[Route('/ai/ameliorer', name: 'admin_reclamation_ai_ameliorer', methods: ['POST'])]
     public function ameliorer(Request $request, GroqService $groq): Response
     {
-        $texte = trim($request->request->getString('texte'));
-        $contexte = trim($request->request->getString('contexte'));
+        $texte    = trim((string) $request->request->get('texte', ''));
+        $contexte = trim((string) $request->request->get('contexte', ''));
 
         if (empty($texte)) {
             return $this->json(['error' => 'Texte vide'], 400);
@@ -181,8 +177,8 @@ class AdminReclamationController extends AbstractController
     #[Route('/ai/traduire', name: 'admin_reclamation_ai_traduire', methods: ['POST'])]
     public function traduire(Request $request, GroqService $groq): Response
     {
-        $texte = trim($request->request->getString('texte'));
-        $langue = trim($request->request->getString('langue')) ?: 'en';
+        $texte  = trim((string) $request->request->get('texte', ''));
+        $langue = (string) $request->request->get('langue', 'en');
 
         if (empty($texte)) {
             return $this->json(['error' => 'Texte vide'], 400);

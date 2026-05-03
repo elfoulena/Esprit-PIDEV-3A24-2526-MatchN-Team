@@ -15,7 +15,7 @@ use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
 #[ORM\Entity]
 #[ORM\Table(name: "utilisateur")]
 #[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -103,10 +103,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             new ORM\JoinColumn(name: 'competence_id', referencedColumnName: 'id')
         ]
     )]
-    private Collection $competences;
+    /** @var Collection<int, CompetenceF> */
+    private \Doctrine\Common\Collections\Collection $competences;
 
     #[ORM\OneToMany(targetEntity: ParticipationEvenement::class, mappedBy: 'utilisateur', orphanRemoval: true)]
-    private Collection $participations;
+    /** @var Collection<int, ParticipationEvenement> */
+    private \Doctrine\Common\Collections\Collection $participations;
 
 
     #[ORM\Column(type: "datetime", nullable: true)]
@@ -284,6 +286,7 @@ public function setBlockedUntil(?\DateTimeInterface $blockedUntil): self
         return $this;
     }
 
+    /** @return Collection<int, CompetenceF> */
     public function getCompetences(): Collection { return $this->competences; }
 
     public function addCompetence(CompetenceF $competence): static

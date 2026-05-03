@@ -32,19 +32,16 @@ class AITeamAnalyticsService
 
     /**
      * Calculate advanced team statistics with AI predictions
+     * @return array<string, mixed>
      */
     public function getTeamAdvancedStats(Equipe $equipe): array
     {
         $members = $equipe->getMembres();
         
         // Convert PersistentCollection to array if needed
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
+        $membersArray = $members instanceof Collection ? $members->toArray() : (is_array($members) ? $members : []);
         
-        $totalMembers = count($members);
+        $totalMembers = count($membersArray);
         
         // If team has no members, return default values
         if ($totalMembers === 0) {
@@ -52,7 +49,7 @@ class AITeamAnalyticsService
         }
         
         // Member engagement score
-        $engagementScore = $this->calculateEngagementScore($members);
+        $engagementScore = $this->calculateEngagementScore($membersArray);
         
         // Team performance prediction
         $performancePrediction = $this->predictTeamPerformance($equipe);
@@ -61,19 +58,19 @@ class AITeamAnalyticsService
         $optimizationSuggestions = $this->getOptimizationSuggestions($equipe);
         
         // Member compatibility matrix
-        $compatibilityMatrix = $this->calculateCompatibilityMatrix($members);
+        $compatibilityMatrix = $this->calculateCompatibilityMatrix($membersArray);
         
         // Skill gap analysis
-        $skillGapAnalysis = $this->analyzeSkillGaps($members);
+        $skillGapAnalysis = $this->analyzeSkillGaps($membersArray);
         
         // Budget efficiency score
         $budgetEfficiency = $this->calculateBudgetEfficiency($equipe);
         
         // Team health score
-        $teamHealthScore = $this->calculateTeamHealthScore($equipe, $members);
+        $teamHealthScore = $this->calculateTeamHealthScore($equipe, $membersArray);
         
         // Predictive turnover risk
-        $turnoverRisk = $this->predictTurnoverRisk($members);
+        $turnoverRisk = $this->predictTurnoverRisk($membersArray);
         
         // Project success probability
         $successProbability = $this->calculateSuccessProbability($equipe);
@@ -84,15 +81,33 @@ class AITeamAnalyticsService
         // Growth potential calculation
         $growthPotential = $this->calculateGrowthPotential($equipe);
         
+        // Average participation rate
+        $avgParticipation = $this->calculateAverageParticipation($membersArray);
+        
+        // Team diversity score
+        $diversityScore = $this->calculateDiversityScore($membersArray);
+        
+        // Team strengths identification
+        $strengths = $this->identifyTeamStrengths($membersArray);
+        
+        // Team weaknesses identification
+        $weaknesses = $this->identifyTeamWeaknesses($membersArray);
+        
+        // Member contribution data
+        $memberContributionData = $this->getMemberContributionData($membersArray);
+        
+        // Skill distribution
+        $skillDistribution = $this->getSkillDistribution($membersArray);
+        
         return [
             'team_metrics' => [
                 'total_members' => $totalMembers,
                 'member_turnover_rate' => $this->calculateTurnoverRate($equipe),
-                'average_participation_rate' => $this->calculateAverageParticipation($members),
+                'average_participation_rate' => $avgParticipation,
                 'engagement_score' => $engagementScore,
                 'team_health_score' => $teamHealthScore,
                 'budget_efficiency' => $budgetEfficiency,
-                'diversity_score' => $this->calculateDiversityScore($members),
+                'diversity_score' => $diversityScore,
                 'productivity_index' => $this->calculateProductivityIndex($equipe),
             ],
             'ai_predictions' => [
@@ -107,13 +122,13 @@ class AITeamAnalyticsService
                 'compatibility_matrix' => $compatibilityMatrix,
                 'activity_patterns' => $activityPatterns,
                 'recommendations' => $this->generateRecommendations($equipe, $optimizationSuggestions, $skillGapAnalysis),
-                'strengths' => $this->identifyTeamStrengths($members),
-                'weaknesses' => $this->identifyTeamWeaknesses($members),
+                'strengths' => $this->identifyTeamStrengths($membersArray),
+                'weaknesses' => $this->identifyTeamWeaknesses($membersArray),
                 'opportunities' => $this->identifyOpportunities($equipe),
             ],
             'visualization_data' => [
-                'member_contribution_chart' => $this->getMemberContributionData($members),
-                'skill_distribution' => $this->getSkillDistribution($members),
+                'member_contribution_chart' => $this->getMemberContributionData($membersArray),
+                'skill_distribution' => $this->getSkillDistribution($membersArray),
                 'timeline_metrics' => $this->getTimelineMetrics($equipe),
                 'heatmap_data' => $this->getActivityHeatmap($equipe),
             ]
@@ -122,6 +137,7 @@ class AITeamAnalyticsService
 
     /**
      * Get default stats for empty team
+     * @return array<string, mixed>
      */
     private function getEmptyTeamStats(Equipe $equipe): array
     {
@@ -220,11 +236,12 @@ class AITeamAnalyticsService
         
         // Engagement factor (highly engaged teams grow faster)
         $engagementScore = $this->calculateEngagementScore($members);
-        $engagementFactor = $engagementScore / 100;
+        $engagementValue = is_array($engagementScore) ? ($engagementScore['score'] ?? 0) : $engagementScore;
+        $engagementFactor = $engagementValue / 100;
         
         // Budget factor (more budget = more growth resources)
         $budget = floatval($equipe->getBudget() ?? 0);
-        $budgetPerMember = $currentSize > 0 ? $budget / $currentSize : 0;
+        $budgetPerMember = $budget / max(1, $currentSize);
         $budgetFactor = min(1, $budgetPerMember / 10000); // Cap at 10k per member
         
         // Skill diversity factor (diverse skills = better growth)
@@ -240,57 +257,20 @@ class AITeamAnalyticsService
             $diversityFactor * 0.15
         ) * 100;
         
-        return round(min(100, max(0, $potential)), 2);
+        return round($potential, 2);
     }
 
-    private function calculateEngagementScore(array $members): float
-    {
-        $memberCount = count($members);
-        if ($memberCount === 0) return 0;
-        
-        $totalScore = 0;
-        foreach ($members as $member) {
-            $score = 0;
-            // Participation rate contributes 40%
-            $score += floatval($member->getTauxParticipation()) * 0.4;
-            
-            // Activity recency (based on updated_at)
-            $updatedAt = $member->getUpdatedAt();
-            $daysSinceUpdate = $updatedAt ? (new \DateTime())->diff($updatedAt)->days : 30;
-            $recencyScore = max(0, 100 - ($daysSinceUpdate * 2));
-            $score += $recencyScore * 0.3;
-            
-            // Role responsibility (higher for leaders)
-            $roleWeight = $this->getRoleWeight($member->getRoleEquipe());
-            $score += $roleWeight * 30;
-            
-            $totalScore += $score;
-        }
-        
-        return round($totalScore / $memberCount, 2);
-    }
-
-    private function getRoleWeight(string $role): float
-    {
-        return match($role) {
-            'Chef' => 1.0,
-            'Chef adjoint' => 0.8,
-            'Lead' => 0.7,
-            'Senior' => 0.6,
-            default => 0.4
-        };
-    }
-
+    /**
+     * Predict team performance using AI
+     * @param Equipe $equipe
+     * @return array<string, mixed>
+     */
     private function predictTeamPerformance(Equipe $equipe): array
     {
-        $members = $equipe->getMembres();
-        if ($members instanceof Collection) {
-            $members = $members->toArray();
-        } elseif (!is_array($members)) {
-            $members = [];
-        }
         
-        $teamSize = count($members);
+        $members = $equipe->getMembres();
+        $membersArray = $members instanceof Collection ? $members->toArray() : (is_array($members) ? $members : []);
+        $teamSize = count($membersArray);
         
         // If team is empty, return default values
         if ($teamSize === 0) {
@@ -307,7 +287,7 @@ class AITeamAnalyticsService
             ];
         }
         
-        $avgParticipation = $this->calculateAverageParticipation($members);
+        $avgParticipation = $this->calculateAverageParticipation($membersArray);
         $optimalSize = $equipe->getNbMembresMax();
         $sizeFactor = $optimalSize > 0 ? $teamSize / $optimalSize : 1;
         
@@ -315,7 +295,7 @@ class AITeamAnalyticsService
         $basePerformance = 70;
         $participationBoost = $avgParticipation * 0.3;
         $sizePenalty = max(0, abs(1 - $sizeFactor) * 15);
-        $experienceFactor = min(20, $this->calculateTeamExperience($members) / 30);
+        $experienceFactor = min(20, $this->calculateTeamExperience($membersArray) / 30);
         
         $predictedScore = $basePerformance + $participationBoost + $experienceFactor - $sizePenalty;
         $predictedScore = min(100, max(0, $predictedScore));
@@ -331,6 +311,51 @@ class AITeamAnalyticsService
         ];
     }
 
+    /**
+     * Calculate engagement score for team members
+     * @param array<int, MembreEquipe> $members
+     * @return array<string, mixed>
+     */
+    private function calculateEngagementScore(array $members): array
+    {
+        if (empty($members)) {
+            return ['score' => 0, 'level' => 'none'];
+        }
+        
+        $totalParticipation = 0;
+        $activeCount = 0;
+        
+        foreach ($members as $member) {
+            $participation = floatval($member->getTauxParticipation());
+            $totalParticipation += $participation;
+            if ($participation > 50) {
+                $activeCount++;
+            }
+        }
+        
+        $avgParticipation = $totalParticipation / count($members);
+        $activeRatio = $activeCount / count($members);
+        
+        $score = ($avgParticipation * 0.7 + $activeRatio * 100 * 0.3);
+        
+        $level = 'low';
+        if ($score >= 80) {
+            $level = 'high';
+        } elseif ($score >= 60) {
+            $level = 'medium';
+        }
+        
+        return [
+            'score' => round($score, 2),
+            'level' => $level,
+            'avg_participation' => round($avgParticipation, 2),
+            'active_ratio' => round($activeRatio, 2)
+        ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function getOptimizationSuggestions(Equipe $equipe): array
     {
         $suggestions = [];
@@ -404,6 +429,10 @@ class AITeamAnalyticsService
         return $suggestions;
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<int, array<string, mixed>>
+     */
     private function calculateCompatibilityMatrix(array $members): array
     {
         $memberCount = count($members);
@@ -418,8 +447,8 @@ class AITeamAnalyticsService
             for ($j = $i + 1; $j < $memberCount; $j++) {
                 $compatibility = $this->calculatePairCompatibility($members[$i], $members[$j]);
                 $matrix[] = [
-                    'member1' => $members[$i]->getUser()->getNom() . ' ' . $members[$i]->getUser()->getPrenom(),
-                    'member2' => $members[$j]->getUser()->getNom() . ' ' . $members[$j]->getUser()->getPrenom(),
+                    'member1' => ($members[$i]->getUser() ? $members[$i]->getUser()->getNom() . ' ' . $members[$i]->getUser()->getPrenom() : 'Unknown User'),
+                    'member2' => ($members[$j]->getUser() ? $members[$j]->getUser()->getNom() . ' ' . $members[$j]->getUser()->getPrenom() : 'Unknown User'),
                     'score' => $compatibility['score'],
                     'strengths' => $compatibility['strengths'],
                     'improvement_areas' => $compatibility['improvement_areas']
@@ -434,6 +463,9 @@ class AITeamAnalyticsService
         return array_slice($matrix, 0, 10);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function calculatePairCompatibility(MembreEquipe $member1, MembreEquipe $member2): array
     {
         $score = 0;
@@ -456,7 +488,7 @@ class AITeamAnalyticsService
         // Role compatibility
         $role1 = $member1->getRoleEquipe();
         $role2 = $member2->getRoleEquipe();
-        $roleCompatibility = $this->getRoleCompatibility($role1, $role2);
+        $roleCompatibility = $this->getRoleCompatibility($role1 ?? '', $role2 ?? '');
         $score += $roleCompatibility['score'] * 0.4;
         if (!empty($roleCompatibility['strengths'])) {
             $strengths = array_merge($strengths, $roleCompatibility['strengths']);
@@ -466,7 +498,7 @@ class AITeamAnalyticsService
         $tenure1 = $member1->getDateAffectation();
         $tenure2 = $member2->getDateAffectation();
         if ($tenure1 && $tenure2) {
-            $tenureDiff = abs($tenure1->diff($tenure2)->days);
+            $tenureDiff = abs((int) $tenure1->diff($tenure2)->days);
             $tenureScore = max(0, 100 - ($tenureDiff / 30));
             $score += $tenureScore * 0.3;
             
@@ -482,6 +514,9 @@ class AITeamAnalyticsService
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getRoleCompatibility(string $role1, string $role2): array
     {
         $compatibilityMatrix = [
@@ -504,6 +539,10 @@ class AITeamAnalyticsService
         return ['score' => $score, 'strengths' => $strengths];
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<string, mixed>
+     */
     private function analyzeSkillGaps(array $members): array
     {
         $memberCount = count($members);
@@ -584,13 +623,19 @@ class AITeamAnalyticsService
         return round(($efficiency * $budgetImpact) / 100, 2);
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     */
     private function calculateTeamHealthScore(Equipe $equipe, array $members): float
     {
         $memberCount = count($members);
         if ($memberCount === 0) return 0;
         
+        $engagementScore = $this->calculateEngagementScore($members);
+        $engagementValue = is_array($engagementScore) ? ($engagementScore['score'] ?? 0) : $engagementScore;
+        
         $scores = [
-            'engagement' => $this->calculateEngagementScore($members),
+            'engagement' => $engagementValue,
             'stability' => 100 - $this->calculateTurnoverRate($equipe),
             'participation' => $this->calculateAverageParticipation($members),
             'diversity' => $this->calculateDiversityScore($members),
@@ -607,6 +652,10 @@ class AITeamAnalyticsService
         return round($totalScore, 2);
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<string, mixed>
+     */
     private function predictTurnoverRisk(array $members): array
     {
         $memberCount = count($members);
@@ -643,9 +692,9 @@ class AITeamAnalyticsService
             
             if ($risk > 50) {
                 $risks[] = [
-                    'member' => $member->getUser()->getNom() . ' ' . $member->getUser()->getPrenom(),
+                    'member' => ($member->getUser() ? $member->getUser()->getNom() . ' ' . $member->getUser()->getPrenom() : 'Unknown User'),
                     'risk_score' => $risk,
-                    'risk_level' => $risk > 70 ? 'high' : 'medium',
+                    'risk_level' => $risk > 55 ? 'high' : 'medium',
                     'factors' => $this->getRiskFactors($member, $risk)
                 ];
             }
@@ -660,6 +709,9 @@ class AITeamAnalyticsService
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function getRiskFactors(MembreEquipe $member, float $risk): array
     {
         $factors = [];
@@ -693,9 +745,12 @@ class AITeamAnalyticsService
         
         if ($memberCount === 0) return 0;
         
+        $engagementScore = $this->calculateEngagementScore($members);
+        $engagementValue = is_array($engagementScore) ? ($engagementScore['score'] ?? 0) : $engagementScore;
+        
         $factors = [
             'size_factor' => min(1, $memberCount / max(1, $equipe->getNbMembresMax())),
-            'engagement_factor' => $this->calculateEngagementScore($members) / 100,
+            'engagement_factor' => $engagementValue / 100,
             'skill_factor' => $this->analyzeSkillGaps($members)['overall_coverage'] / 100,
             'stability_factor' => (100 - $this->calculateTurnoverRate($equipe)) / 100
         ];
@@ -710,6 +765,9 @@ class AITeamAnalyticsService
         return round($probability * 100, 2);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function analyzeActivityPatterns(Equipe $equipe): array
     {
         // Simulate activity patterns based on member data
@@ -738,12 +796,16 @@ class AITeamAnalyticsService
         
         return [
             'peak_hours' => $peakHours,
-            'most_active_hour' => $peakHours[0] ?? null,
+            'most_active_hour' => $peakHours[0],
             'activity_distribution' => $patterns,
             'recommended_meeting_times' => $this->getRecommendedMeetingTimes($patterns)
         ];
     }
 
+    /**
+     * @param array<int, int> $activityPatterns
+     * @return array<int, string>
+     */
     private function getRecommendedMeetingTimes(array $activityPatterns): array
     {
         $recommended = [];
@@ -767,6 +829,9 @@ class AITeamAnalyticsService
         return $currentCount > 0 ? rand(5, 20) : 0;
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     */
     private function calculateAverageParticipation(array $members): float
     {
         $memberCount = count($members);
@@ -779,6 +844,9 @@ class AITeamAnalyticsService
         return round($total / $memberCount, 2);
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     */
     private function calculateDiversityScore(array $members): float
     {
         $memberCount = count($members);
@@ -812,6 +880,9 @@ class AITeamAnalyticsService
         return round(($avgParticipation * 0.6 + $sizeEfficiency * 100 * 0.4), 2);
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     */
     private function calculateTeamExperience(array $members): float
     {
         $memberCount = count($members);
@@ -846,6 +917,9 @@ class AITeamAnalyticsService
         return $currentScore > 70 ? 'upward' : ($currentScore > 50 ? 'stable' : 'downward');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function calculateExpectedImprovement(Equipe $equipe): array
     {
         $members = $equipe->getMembres();
@@ -874,6 +948,9 @@ class AITeamAnalyticsService
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getBenchmarkComparison(float $score): array
     {
         if ($score >= 80) {
@@ -887,6 +964,10 @@ class AITeamAnalyticsService
         }
     }
 
+    /**
+     * @param array<string, int> $skillDistribution
+     * @return array<string, mixed>|null
+     */
     private function detectSkillImbalance(array $skillDistribution): ?array
     {
         if (empty($skillDistribution)) return null;
@@ -907,6 +988,10 @@ class AITeamAnalyticsService
         return null;
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<string, int>
+     */
     private function getSkillDistribution(array $members): array
     {
         $skills = [];
@@ -927,6 +1012,11 @@ class AITeamAnalyticsService
         return $skills;
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $optimizations
+     * @param array<string, mixed> $skillGaps
+     * @return array<int, array<string, mixed>>
+     */
     private function generateRecommendations(Equipe $equipe, array $optimizations, array $skillGaps): array
     {
         $members = $equipe->getMembres();
@@ -987,6 +1077,10 @@ class AITeamAnalyticsService
         return $recommendations;
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<int, string>
+     */
     private function identifyTeamStrengths(array $members): array
     {
         $memberCount = count($members);
@@ -1013,6 +1107,10 @@ class AITeamAnalyticsService
         return $strengths;
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<int, string>
+     */
     private function identifyTeamWeaknesses(array $members): array
     {
         $memberCount = count($members);
@@ -1038,6 +1136,9 @@ class AITeamAnalyticsService
         return $weaknesses;
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function identifyOpportunities(Equipe $equipe): array
     {
         $opportunities = [];
@@ -1060,8 +1161,8 @@ class AITeamAnalyticsService
         }
         
         $budget = floatval($equipe->getBudget() ?? 0);
-        if ($budget > 0 && $currentSize > 0) {
-            $budgetPerMember = $budget / $currentSize;
+        if ($budget > 0) {
+            $budgetPerMember = $budget / max(1, $currentSize);
             if ($budgetPerMember > 5000) {
                 $opportunities[] = 'Budget important disponible par membre';
             }
@@ -1074,12 +1175,16 @@ class AITeamAnalyticsService
         return $opportunities;
     }
 
+    /**
+     * @param array<int, MembreEquipe> $members
+     * @return array<int, array<string, mixed>>
+     */
     private function getMemberContributionData(array $members): array
     {
         $data = [];
         foreach ($members as $member) {
             $data[] = [
-                'name' => $member->getUser()->getNom() . ' ' . $member->getUser()->getPrenom(),
+                'name' => ($member->getUser() ? $member->getUser()->getNom() . ' ' . $member->getUser()->getPrenom() : 'Unknown User'),
                 'participation' => floatval($member->getTauxParticipation()),
                 'role' => $member->getRoleEquipe()
             ];
@@ -1087,6 +1192,9 @@ class AITeamAnalyticsService
         return $data;
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     private function getTimelineMetrics(Equipe $equipe): array
     {
         $members = $equipe->getMembres();
@@ -1115,6 +1223,9 @@ class AITeamAnalyticsService
         return $timeline;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getActivityHeatmap(Equipe $equipe): array
     {
         $heatmap = [];
